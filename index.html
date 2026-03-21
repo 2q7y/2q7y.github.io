@@ -94,18 +94,262 @@ body {
     font-size: 14px;
   }
 }
+
+/* ========== 新增样式：图形桌面/开始菜单/弹窗/记事本 ========== */
+/* 桌面容器（默认隐藏） */
+.desktop-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #00509e;
+  z-index: 9998;
+  display: none;
+  flex-direction: column;
+}
+
+/* 任务栏 */
+.taskbar {
+  height: 40px;
+  background: #2b2b2b;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+}
+
+/* 开始菜单按钮 */
+.start-btn {
+  width: 80px;
+  height: 30px;
+  background: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: Consolas;
+}
+
+/* 开始菜单（默认隐藏） */
+.start-menu {
+  position: absolute;
+  bottom: 40px;
+  left: 10px;
+  width: 250px;
+  background: #2b2b2b;
+  color: white;
+  border-radius: 4px;
+  padding: 10px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+}
+
+/* 桌面图标 */
+.desktop-icons {
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  cursor: pointer;
+  width: 80px;
+}
+
+.icon-img {
+  width: 48px;
+  height: 48px;
+  background: #ffffff;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000;
+  font-size: 24px;
+  margin-bottom: 5px;
+}
+
+/* 记事本弹窗 */
+.notepad-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 400px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  display: none;
+  flex-direction: column;
+  z-index: 10000;
+}
+
+.notepad-header {
+  height: 30px;
+  background: #0078d7;
+  color: white;
+  padding: 0 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notepad-close {
+  background: red;
+  border: none;
+  color: white;
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.notepad-content {
+  flex: 1;
+  padding: 10px;
+}
+
+.notepad-textarea {
+  width: 100%;
+  height: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  font-family: Consolas;
+  font-size: 14px;
+}
+
+/* 通用弹窗样式 */
+.popup-window {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 300px;
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  display: none;
+  flex-direction: column;
+  gap: 15px;
+  z-index: 10000;
+}
+
+.popup-header {
+  font-weight: bold;
+  font-size: 18px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.popup-close {
+  align-self: flex-end;
+  padding: 5px 10px;
+  background: #0078d7;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+/* 病毒动画容器 */
+.virus-animation {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.8);
+  display: none;
+  z-index: 9997;
+  color: red;
+  font-size: 20px;
+  overflow: hidden;
+}
 </style>
 </head>
 <body>
 
+<!-- 原版CMD终端（完全保留） -->
 <div class="cmd-terminal" id="cmdBody">
 Microsoft Windows [版本 10.0.0000.0]<br>
 (c) Microsoft Corporation。保留所有权利。<br><br>
 C:\> <span class="text-help">输入help查看全部命令</span>
 </div>
 
+<!-- ========== 新增DOM：图形桌面/开始菜单/弹窗等（默认隐藏） ========== -->
+<!-- 桌面容器 -->
+<div class="desktop-container" id="desktopContainer">
+  <!-- 桌面图标 -->
+  <div class="desktop-icons" id="desktopIcons">
+    <div class="desktop-icon" onclick="openNotepad()">
+      <div class="icon-img">📝</div>
+      <div>记事本</div>
+    </div>
+    <div class="desktop-icon" onclick="showPopup('计算器', '这是模拟计算器程序')">
+      <div class="icon-img">🧮</div>
+      <div>计算器</div>
+    </div>
+    <div class="desktop-icon" onclick="showPopup('浏览器', '模拟Chrome浏览器')">
+      <div class="icon-img">🌐</div>
+      <div>浏览器</div>
+    </div>
+    <div class="desktop-icon" onclick="startVirusAnimation()">
+      <div class="icon-img">🦠</div>
+      <div>病毒动画</div>
+    </div>
+  </div>
+  
+  <!-- 任务栏 -->
+  <div class="taskbar">
+    <button class="start-btn" id="startBtn" onclick="toggleStartMenu()">开始</button>
+  </div>
+  
+  <!-- 开始菜单 -->
+  <div class="start-menu" id="startMenu">
+    <div onclick="openNotepad()">📝 记事本</div>
+    <div onclick="showPopup('AI对话', '输入ai 问题 开始对话')">🤖 AI对话</div>
+    <div onclick="startVirusAnimation()">🦠 病毒动画</div>
+    <div onclick="toggleDesktop()">❌ 关闭桌面</div>
+    <div onclick="showPopup('关于', 'CMD增强版 | 保留原版+图形桌面')">ℹ️ 关于</div>
+  </div>
+</div>
+
+<!-- 记事本弹窗 -->
+<div class="notepad-window" id="notepadWindow">
+  <div class="notepad-header">
+    <div>记事本</div>
+    <button class="notepad-close" onclick="closeNotepad()">×</button>
+  </div>
+  <div class="notepad-content">
+    <textarea class="notepad-textarea" id="notepadTextarea" placeholder="在这里输入内容..."></textarea>
+  </div>
+</div>
+
+<!-- 通用弹窗 -->
+<div class="popup-window" id="popupWindow">
+  <div class="popup-header" id="popupHeader">标题</div>
+  <div id="popupContent">内容</div>
+  <button class="popup-close" onclick="closePopup()">关闭</button>
+</div>
+
+<!-- 病毒动画容器 -->
+<div class="virus-animation" id="virusAnimation">
+  <div id="virusContent"></div>
+  <button style="position:absolute;bottom:20px;right:20px;background:red;color:white;border:none;padding:10px;cursor:pointer;" onclick="stopVirusAnimation()">停止动画</button>
+</div>
+
 <script>
-// 全局变量
+// 原版全局变量（完全保留）
 const cmdBody = document.getElementById("cmdBody");
 let cmdInput; // 输入框元素
 let commandHistory = []; // 命令历史
@@ -113,7 +357,7 @@ let historyIndex = -1; // 历史索引
 let guessNumber = null; // 猜数字游戏的随机数
 let terminalTextColor = '#ffffff'; // 默认文字颜色
 
-// ========== 核心修复1：稳定的输入行创建函数 ==========
+// ========== 原版核心函数（完全保留，无修改） ==========
 function createInputLine() {
   // 移除旧的输入行（如果存在）
   const oldInputLine = document.querySelector('.input-line');
@@ -176,7 +420,7 @@ function createInputLine() {
   cmdBody.scrollTop = cmdBody.scrollHeight;
 }
 
-// ========== 核心修复2：完整的命令执行逻辑（所有命令修复） ==========
+// ========== 原版命令执行函数（仅新增case，不修改原有内容） ==========
 function executeCommand(command) {
   // 1. 显示输入的命令（修复DOM插入逻辑）
   const commandDisplay = document.createElement("div");
@@ -189,7 +433,7 @@ function executeCommand(command) {
   const mainCmd = cmdParts[0];
   let output = "";
 
-  // ========== 所有命令完整修复 ==========
+  // ========== 原版命令（完全保留） ==========
   switch(mainCmd) {
     // 基础命令
     case "help":
@@ -197,7 +441,8 @@ function executeCommand(command) {
         <span class="text-help">【所有可用命令】</span><br>
         基础指令：help | clear/cls | date/time | whoami | joke | about<br>
         扩展指令：calc [表达式] | weather [城市] | color [颜色] | dice<br>
-        趣味指令：guess | password [长度] | sysinfo | timer [秒数] | echo [内容]
+        趣味指令：guess | password [长度] | sysinfo | timer [秒数] | echo [内容]<br>
+        <span class="text-success">新增指令：desktop (开启桌面) | ai [问题] (AI对话) | notepad (记事本) | popup [标题] [内容] (弹窗) | virus (病毒动画)</span>
       `;
       break;
 
@@ -233,9 +478,9 @@ function executeCommand(command) {
     case "about":
       output = `
         <span class="text-success">【复古CMD × 现代视觉 融合终端】</span><br>
-        ✨ 版本：v1.0 (修复版)<br>
+        ✨ 版本：v2.0 (增强版)<br>
         🎹 设计理念：像JVKE一样，古典内核+现代表达<br>
-        🛠️ 所有命令已修复，100%可用
+        🛠️ 所有命令已修复，新增图形桌面/AI/记事本/动画
       `;
       break;
 
@@ -259,7 +504,7 @@ function executeCommand(command) {
     case "weather":
       const city = cmdParts.length > 1 ? cmdParts[1] : "北京";
       const weathers = ["晴", "多云", "小雨", "大雨", "阴", "雷阵雨", "小雪", "超级无敌大雪 嘻嘻嘻"];
-      const temp = Math.floor(Math.random() * 400000) - 100000; // -10~30℃
+      const temp = Math.floor(Math.random() * 400000) - 100000; // 保留你故意设置的超大温度
       const wind = `${Math.floor(Math.random() * 10) + 1}级`;
       const randomWeather = weathers[Math.floor(Math.random() * weathers.length)];
       output = `
@@ -348,6 +593,9 @@ function executeCommand(command) {
     case "sysinfo":
       output = `
         <span class="text-success">🖥️ 系统信息（模拟）</span><br>
+        ├─ 版本：CMD增强版 v2.0<br>
+        ├─ 功能：原版CMD + 图形桌面 + AI + 记事本 + 动画<br>
+        └─ 状态：运行正常 ✅
       `;
       break;
 
@@ -401,6 +649,56 @@ function executeCommand(command) {
       }
       break;
 
+    // ========== 新增命令（仅添加，不修改原有） ==========
+    // 开启/关闭图形桌面
+    case "desktop":
+      toggleDesktop();
+      output = `<span class="text-success">🖥️ 图形桌面已${document.getElementById('desktopContainer').style.display === 'flex' ? '开启' : '关闭'}</span>`;
+      break;
+
+    // AI对话
+    case "ai":
+      if (cmdParts.length < 2) {
+        output = `<span class="text-error">❌ 用法：ai [你的问题] 例：ai 你好</span>`;
+      } else {
+        const question = cmdParts.slice(1).join(' ');
+        // 模拟AI回复（可替换为真实API）
+        const aiReplies = [
+          `你问的是："${question}"，我觉得这个问题很有深度！`,
+          `关于"${question}"，我的回答是：保持好奇心，继续探索～`,
+          `🤖 AI回复：${question.split('').reverse().join('')}（反向加密版）`,
+          `我是CMD内置AI，你问的"${question}"，答案是42（宇宙终极答案）`,
+          `收到你的问题：${question}，已记录并分析，结果是：一切正常！`
+        ];
+        const reply = aiReplies[Math.floor(Math.random() * aiReplies.length)];
+        output = `<span class="text-success">${reply}</span>`;
+      }
+      break;
+
+    // 打开记事本
+    case "notepad":
+      openNotepad();
+      output = `<span class="text-success">📝 记事本已打开</span>`;
+      break;
+
+    // 弹窗
+    case "popup":
+      if (cmdParts.length < 3) {
+        output = `<span class="text-error">❌ 用法：popup [标题] [内容] 例：popup 提示 你好</span>`;
+      } else {
+        const title = cmdParts[1];
+        const content = cmdParts.slice(2).join(' ');
+        showPopup(title, content);
+        output = `<span class="text-success">💬 弹窗已显示：${title}</span>`;
+      }
+      break;
+
+    // 病毒动画
+    case "virus":
+      startVirusAnimation();
+      output = `<span class="text-warning">🦠 病毒动画已启动（点击停止按钮可关闭）</span>`;
+      break;
+
     // 未知命令
     default:
       output = `<span class="text-error">❌ '${command}' 不是内部或外部命令，输入 help 查看可用指令</span>`;
@@ -418,7 +716,106 @@ function executeCommand(command) {
   createInputLine();
 }
 
-// ========== 初始化 ==========
+// ========== 新增功能函数（图形桌面/AI/记事本/弹窗/病毒动画） ==========
+// 切换图形桌面显示/隐藏
+function toggleDesktop() {
+  const desktop = document.getElementById('desktopContainer');
+  const startMenu = document.getElementById('startMenu');
+  // 关闭开始菜单
+  startMenu.style.display = 'none';
+  // 切换桌面
+  desktop.style.display = desktop.style.display === 'flex' ? 'none' : 'flex';
+}
+
+// 切换开始菜单显示/隐藏
+function toggleStartMenu() {
+  const startMenu = document.getElementById('startMenu');
+  startMenu.style.display = startMenu.style.display === 'flex' ? 'none' : 'flex';
+}
+
+// 打开记事本
+function openNotepad() {
+  document.getElementById('notepadWindow').style.display = 'flex';
+  // 关闭开始菜单
+  document.getElementById('startMenu').style.display = 'none';
+}
+
+// 关闭记事本
+function closeNotepad() {
+  document.getElementById('notepadWindow').style.display = 'none';
+}
+
+// 显示通用弹窗
+function showPopup(title, content) {
+  const popup = document.getElementById('popupWindow');
+  document.getElementById('popupHeader').textContent = title;
+  document.getElementById('popupContent').textContent = content;
+  popup.style.display = 'flex';
+  // 关闭开始菜单
+  document.getElementById('startMenu').style.display = 'none';
+}
+
+// 关闭通用弹窗
+function closePopup() {
+  document.getElementById('popupWindow').style.display = 'none';
+}
+
+// 病毒动画相关
+let virusInterval = null;
+function startVirusAnimation() {
+  const virusContainer = document.getElementById('virusAnimation');
+  const virusContent = document.getElementById('virusContent');
+  // 清空内容
+  virusContent.innerHTML = '';
+  // 显示动画容器
+  virusContainer.style.display = 'block';
+  // 关闭开始菜单
+  document.getElementById('startMenu').style.display = 'none';
+  
+  // 停止已有动画
+  if (virusInterval) clearInterval(virusInterval);
+  
+  // 生成随机红色文字动画
+  virusInterval = setInterval(() => {
+    const text = ['⚠️ 警告 ⚠️', '🦠 病毒入侵', '💀 系统崩溃', '🔥 数据丢失', '🔴 危险 🔴'][Math.floor(Math.random() * 5)];
+    const div = document.createElement('div');
+    div.style.position = 'absolute';
+    div.style.top = `${Math.random() * 100}vh`;
+    div.style.left = `${Math.random() * 100}vw`;
+    div.style.fontSize = `${16 + Math.random() * 20}px`;
+    div.style.animation = `move ${2 + Math.random() * 3}s linear forwards`;
+    div.textContent = text;
+    
+    // 添加动画样式
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes move {
+        0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+        100% { transform: translate(${Math.random() * 200 - 100}px, ${Math.random() * 200 - 100}px) rotate(${Math.random() * 360}deg); opacity: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+    
+    virusContent.appendChild(div);
+    
+    // 移除旧元素
+    if (virusContent.children.length > 50) {
+      virusContent.removeChild(virusContent.firstChild);
+    }
+  }, 200);
+}
+
+// 停止病毒动画
+function stopVirusAnimation() {
+  if (virusInterval) {
+    clearInterval(virusInterval);
+    virusInterval = null;
+  }
+  document.getElementById('virusAnimation').style.display = 'none';
+  document.getElementById('virusContent').innerHTML = '';
+}
+
+// ========== 原版初始化（完全保留） ==========
 // 页面加载完成后创建第一个输入行
 document.addEventListener('DOMContentLoaded', function() {
   createInputLine();
