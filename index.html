@@ -136,6 +136,10 @@
             color: #00ff99;
         }
 
+        .warning-text {
+            color: #ffcc00;
+        }
+
         /* 响应式适配 */
         @media (max-width: 768px) {
             .terminal {
@@ -157,7 +161,7 @@
             <div class="terminal-dot dot-red"></div>
             <div class="terminal-dot dot-yellow"></div>
             <div class="terminal-dot dot-green"></div>
-            <div class="terminal-title">趣味终端模拟器 (fun-terminal v1.0)</div>
+            <div class="terminal-title">趣味终端模拟器 (fun-terminal v2.0)</div>
         </div>
 
         <!-- 终端内容区域 -->
@@ -175,6 +179,7 @@
         // 获取DOM元素
         const terminalOutput = document.getElementById('terminalOutput');
         let commandInput; // 动态创建的输入框
+        let terminalColor = '#00ff99'; // 默认终端文字颜色
 
         // 命令历史记录
         let commandHistory = [];
@@ -190,6 +195,9 @@
             `;
             terminalOutput.appendChild(inputLine);
             commandInput = document.getElementById('commandInput');
+            // 更新输入框文字颜色
+            commandInput.style.color = terminalColor;
+            commandInput.style.caretColor = terminalColor;
             commandInput.focus();
 
             // 绑定输入事件
@@ -240,23 +248,38 @@
             terminalOutput.appendChild(commandLine);
 
             // 命令处理逻辑
-            const cmd = command.toLowerCase();
+            const cmdParts = command.toLowerCase().split(' ');
+            const cmd = cmdParts[0];
             let output = '';
 
             switch (cmd) {
                 case 'help':
                     output = `
-                        <span class="help-text">可用命令：</span><br>
+                        <span class="help-text">📚 可用命令（v2.0）：</span><br>
+                        基础命令：<br>
                         help      - 查看帮助信息<br>
                         clear     - 清空终端<br>
                         date      - 查看当前时间<br>
                         whoami    - 查看当前用户<br>
                         joke      - 讲一个冷笑话<br>
                         about     - 关于本终端<br>
-                        echo [内容] - 输出指定内容
+                        echo [内容] - 输出指定内容<br>
+                        <br>
+                        扩展命令：<br>
+                        calc [表达式] - 简易计算器（例：calc 10+20*3）<br>
+                        weather [城市] - 模拟查询天气（例：weather 北京）<br>
+                        color [颜色]   - 切换终端文字颜色（red/blue/yellow/purple/green）<br>
+                        dice           - 掷骰子（1-6随机数）<br>
+                        guess          - 猜数字小游戏（1-100）<br>
+                        password [长度] - 生成随机密码（默认12位）<br>
+                        sysinfo        - 查看系统信息（模拟）<br>
+                        timer [秒数]   - 简易倒计时器（例：timer 5）<br>
+                        cls            - 清空终端（clear别名）<br>
+                        time           - 查看当前时间（date别名）
                     `;
                     break;
                 case 'clear':
+                case 'cls': // 别名
                     terminalOutput.innerHTML = '';
                     const welcomeText = document.createElement('div');
                     welcomeText.className = 'welcome-text';
@@ -265,53 +288,214 @@
                         输入 <span class="help-text">help</span> 查看可用命令<br>
                         ──────────────────────────────
                     `;
+                    // 更新欢迎文字颜色
+                    welcomeText.style.color = terminalColor;
                     terminalOutput.appendChild(welcomeText);
                     break;
                 case 'date':
-                    output = `<span class="success-text">当前时间：${new Date().toLocaleString()}</span>`;
+                case 'time': // 别名
+                    output = `<span class="success-text">📅 当前时间：${new Date().toLocaleString()}</span>`;
                     break;
                 case 'whoami':
-                    output = `<span class="success-text">当前用户：趣味终端游客 (user@fun-terminal)</span>`;
+                    output = `<span class="success-text">👤 当前用户：趣味终端游客 (user@fun-terminal)</span>`;
                     break;
                 case 'joke':
                     const jokes = [
                         "为什么程序员总是分不清万圣节和圣诞节？因为 Oct 31 = Dec 25",
                         "一个字节走进酒吧，酒保问：你喝点啥？字节说：来杯啤酒，我撑得不行了（8位撑满）",
                         "程序员的女朋友说：你能不能别总把什么都归类？程序员：你让我分个类先...",
-                        "问：为什么鸟儿不喜欢用C++？答：因为它们怕遇到析构函数（destructor）"
+                        "问：为什么鸟儿不喜欢用C++？答：因为它们怕遇到析构函数（destructor）",
+                        "前端工程师为什么总找不到对象？因为他们只会写单例模式",
+                        "服务器为什么会感冒？因为它穿了太多层（layer）",
+                        "为什么数据库管理员不喜欢社交？因为他们习惯了事务隔离"
                     ];
                     const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-                    output = `<span class="success-text">${randomJoke}</span>`;
+                    output = `<span class="success-text">😂 ${randomJoke}</span>`;
                     break;
                 case 'about':
                     output = `
-                        <span class="success-text">趣味终端模拟器 v1.0</span><br>
-                        基于HTML/CSS/JavaScript开发<br>
-                        一个好玩又酷炫的前端终端模拟工具
+                        <span class="success-text">🔖 趣味终端模拟器 v2.0</span><br>
+                        🚀 基于HTML/CSS/JavaScript开发<br>
+                        💻 一个好玩又酷炫的前端终端模拟工具<br>
+                        📌 新增10+趣味命令，体验更丰富
                     `;
+                    break;
+                case 'calc':
+                    if (cmdParts.length < 2) {
+                        output = `<span class="error-text">❌ 用法：calc [表达式] 例：calc 10+20*3</span>`;
+                    } else {
+                        try {
+                            // 简单表达式计算（注意：eval有安全风险，仅用于演示）
+                            const expression = cmdParts.slice(1).join(' ');
+                            const result = eval(expression);
+                            output = `<span class="success-text">🧮 计算结果：${expression} = ${result}</span>`;
+                        } catch (e) {
+                            output = `<span class="error-text">❌ 计算错误：${e.message}</span>`;
+                        }
+                    }
+                    break;
+                case 'weather':
+                    const city = cmdParts.length > 1 ? cmdParts[1] : '北京';
+                    const weathers = ['晴', '多云', '小雨', '大雨', '阴', '雷阵雨', '小雪', '雾'];
+                    const temps = Math.floor(Math.random() * 40) - 10; // -10 ~ 30度
+                    const wind = `${Math.floor(Math.random() * 10) + 1}级`;
+                    const randomWeather = weathers[Math.floor(Math.random() * weathers.length)];
+                    output = `
+                        <span class="success-text">🌤️ ${city} 天气信息</span><br>
+                        <span class="success-text">├─ 天气：${randomWeather}</span><br>
+                        <span class="success-text">├─ 温度：${temps}℃</span><br>
+                        <span class="success-text">└─ 风力：${wind}</span>
+                    `;
+                    break;
+                case 'color':
+                    const colorMap = {
+                        'red': '#ff4444',
+                        'blue': '#4488ff',
+                        'yellow': '#ffcc00',
+                        'purple': '#cc66ff',
+                        'green': '#00ff99',
+                        'orange': '#ff9933',
+                        'pink': '#ff66cc'
+                    };
+                    if (cmdParts.length < 2) {
+                        output = `<span class="warning-text">⚠️ 可用颜色：${Object.keys(colorMap).join('/')}</span>`;
+                    } else {
+                        const color = cmdParts[1];
+                        if (colorMap[color]) {
+                            terminalColor = colorMap[color];
+                            terminalOutput.style.color = terminalColor;
+                            // 更新所有success-text的颜色
+                            document.querySelectorAll('.success-text').forEach(el => {
+                                el.style.color = terminalColor;
+                            });
+                            output = `<span style="color: ${terminalColor}">🎨 终端颜色已切换为：${color}</span>`;
+                        } else {
+                            output = `<span class="error-text">❌ 无效颜色！可用：${Object.keys(colorMap).join('/')}</span>`;
+                        }
+                    }
+                    break;
+                case 'dice':
+                    const diceNum = Math.floor(Math.random() * 6) + 1;
+                    output = `<span class="success-text">🎲 掷骰子结果：${diceNum}</span>`;
+                    break;
+                case 'guess':
+                    const randomNum = Math.floor(Math.random() * 100) + 1;
+                    output = `
+                        <span class="success-text">🎮 猜数字小游戏开始！</span><br>
+                        <span class="warning-text">💡 我已经生成了1-100之间的随机数，输入 guess [数字] 来猜</span><br>
+                        <span class="warning-text">📌 例：guess 50</span>
+                    `;
+                    // 存储随机数到全局（简化版）
+                    window.guessNumber = randomNum;
+                    break;
+                case 'password':
+                    const length = cmdParts.length > 1 ? parseInt(cmdParts[1]) : 12;
+                    if (isNaN(length) || length < 6 || length > 32) {
+                        output = `<span class="error-text">❌ 密码长度必须是6-32之间的数字</span>`;
+                    } else {
+                        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
+                        let password = '';
+                        for (let i = 0; i < length; i++) {
+                            password += chars.charAt(Math.floor(Math.random() * chars.length));
+                        }
+                        output = `<span class="success-text">🔑 生成的随机密码：${password}</span>`;
+                    }
+                    break;
+                case 'sysinfo':
+                    output = `
+                        <span class="success-text">🖥️ 系统信息（模拟）</span><br>
+                        <span class="success-text">├─ 系统：FunOS v2.0</span><br>
+                        <span class="success-text">├─ CPU：Intel i9-13900K (模拟)</span><br>
+                        <span class="success-text">├─ 内存：16GB DDR5 (使用率：${Math.floor(Math.random() * 80) + 10}%)</span><br>
+                        <span class="success-text">├─ 磁盘：512GB SSD (剩余：${Math.floor(Math.random() * 400) + 50}GB)</span><br>
+                        <span class="success-text">└─ 运行时间：${Math.floor(Math.random() * 100)}天${Math.floor(Math.random() * 24)}小时</span>
+                    `;
+                    break;
+                case 'timer':
+                    if (cmdParts.length < 2) {
+                        output = `<span class="error-text">❌ 用法：timer [秒数] 例：timer 5</span>`;
+                    } else {
+                        const seconds = parseInt(cmdParts[1]);
+                        if (isNaN(seconds) || seconds < 1 || seconds > 60) {
+                            output = `<span class="error-text">❌ 秒数必须是1-60之间的数字</span>`;
+                        } else {
+                            output = `<span class="success-text">⏰ 倒计时${seconds}秒开始！</span>`;
+                            terminalOutput.appendChild(document.createElement('div').innerHTML = output);
+                            
+                            // 倒计时逻辑
+                            let count = seconds;
+                            const countdownInterval = setInterval(() => {
+                                count--;
+                                if (count > 0) {
+                                    const countLine = document.createElement('div');
+                                    countLine.innerHTML = `<span class="warning-text">⌛ 剩余 ${count} 秒</span>`;
+                                    terminalOutput.appendChild(countLine);
+                                } else {
+                                    clearInterval(countdownInterval);
+                                    const endLine = document.createElement('div');
+                                    endLine.innerHTML = `<span class="success-text">🎉 倒计时结束！</span>`;
+                                    terminalOutput.appendChild(endLine);
+                                    // 重新创建输入行
+                                    terminalOutput.removeChild(document.querySelector('.input-line'));
+                                    initInputLine();
+                                    terminalOutput.scrollTop = terminalOutput.scrollHeight;
+                                }
+                            }, 1000);
+                            
+                            // 阻止默认的输入行重建
+                            return;
+                        }
+                    }
                     break;
                 default:
                     // 处理echo命令
                     if (cmd.startsWith('echo ')) {
                         const echoContent = command.substring(5);
-                        output = `<span class="success-text">${echoContent}</span>`;
-                    } else {
-                        output = `<span class="error-text">错误：未知命令 '${command}'，输入 help 查看可用命令</span>`;
+                        output = `<span class="success-text">📢 ${echoContent}</span>`;
+                    }
+                    // 处理猜数字
+                    else if (cmd.startsWith('guess ')) {
+                        if (!window.guessNumber) {
+                            output = `<span class="error-text">❌ 请先输入 guess 开始游戏</span>`;
+                        } else {
+                            const guessNum = parseInt(cmdParts[1]);
+                            if (isNaN(guessNum)) {
+                                output = `<span class="error-text">❌ 请输入有效的数字（1-100）</span>`;
+                            } else if (guessNum < 1 || guessNum > 100) {
+                                output = `<span class="warning-text">⚠️ 数字必须在1-100之间</span>`;
+                            } else if (guessNum < window.guessNumber) {
+                                output = `<span class="warning-text">⬆️ 猜小了！再试试更大的数字</span>`;
+                            } else if (guessNum > window.guessNumber) {
+                                output = `<span class="warning-text">⬇️ 猜大了！再试试更小的数字</span>`;
+                            } else {
+                                output = `<span class="success-text">🎉 恭喜！猜对了！数字就是 ${window.guessNumber}</span>`;
+                                delete window.guessNumber; // 重置游戏
+                            }
+                        }
+                    }
+                    else {
+                        output = `<span class="error-text">❌ 错误：未知命令 '${command}'，输入 help 查看可用命令</span>`;
                     }
                     break;
             }
 
             // 显示命令输出（clear命令除外）
-            if (cmd !== 'clear' && output) {
+            if (cmd !== 'clear' && cmd !== 'cls' && output) {
                 const outputLine = document.createElement('div');
                 outputLine.innerHTML = output;
+                // 适配颜色切换
+                if (outputLine.querySelector('.success-text')) {
+                    outputLine.querySelector('.success-text').style.color = terminalColor;
+                }
                 terminalOutput.appendChild(outputLine);
             }
 
             // 重新创建输入行并滚动到底部
-            terminalOutput.removeChild(document.querySelector('.input-line'));
-            initInputLine();
-            terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            if (cmd !== 'timer' || (cmd === 'timer' && cmdParts.length < 2)) {
+                terminalOutput.removeChild(document.querySelector('.input-line'));
+                initInputLine();
+                terminalOutput.scrollTop = terminalOutput.scrollHeight;
+            }
         }
 
         // 初始化终端
