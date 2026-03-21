@@ -143,6 +143,12 @@
             display: none;
         }
 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+
         /* 响应式设计 */
         @media (max-width: 600px) {
             .container {
@@ -177,6 +183,10 @@
             <button id="search-btn">查询</button>
         </div>
 
+        <div class="loading" id="loading">
+            正在查询，请稍候...
+        </div>
+
         <div class="error-message" id="error-message">
             抱歉，未找到该单词的释义，请检查拼写或尝试其他单词。
         </div>
@@ -197,77 +207,21 @@
         const searchBtn = document.getElementById('search-btn');
         const resultArea = document.getElementById('result-area');
         const errorMessage = document.getElementById('error-message');
+        const loading = document.getElementById('loading');
         const wordDisplay = document.getElementById('word-display');
         const phoneticDisplay = document.getElementById('phonetic-display');
         const pronounceBtn = document.getElementById('pronounce-btn');
         const meaningsContainer = document.getElementById('meanings-container');
 
-        // 示例词典数据（实际项目中可替换为API调用）
-        const dictionaryData = {
-            "apple": {
-                phonetic: "/ˈæpl/",
-                meanings: [
-                    {
-                        partOfSpeech: "n. (名词)",
-                        definition: "苹果",
-                        example: "I eat an apple every day. (我每天吃一个苹果。)"
-                    },
-                    {
-                        partOfSpeech: "n. (名词)",
-                        definition: "苹果树",
-                        example: "There is an apple tree in my yard. (我的院子里有一棵苹果树。)"
-                    }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/apple--_us_1.mp3"
-            },
-            "computer": {
-                phonetic: "/kəmˈpjuːtər/",
-                meanings: [
-                    {
-                        partOfSpeech: "n. (名词)",
-                        definition: "计算机，电脑",
-                        example: "I use a computer to work from home. (我用电脑在家工作。)"
-                    }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/computer--_us_1.mp3"
-            },
-            "programming": {
-                phonetic: "/ˈproʊɡræmɪŋ/",
-                meanings: [
-                    {
-                        partOfSpeech: "n. (名词)",
-                        definition: "编程，程序设计",
-                        example: "Programming is my favorite hobby. (编程是我最喜欢的爱好。)"
-                    },
-                    {
-                        partOfSpeech: "v. (动词)",
-                        definition: "编写程序（program的现在分词）",
-                        example: "He is programming a new software. (他正在编写一个新软件。)"
-                    }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/programming--_us_1.mp3"
-            },
-            "happy": {
-                phonetic: "/ˈhæpi/",
-                meanings: [
-                    {
-                        partOfSpeech: "adj. (形容词)",
-                        definition: "快乐的，幸福的",
-                        example: "She is very happy today. (她今天非常开心。)"
-                    }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/happy--_us_1.mp3"
-            }
-        };
-
-        // 搜索单词函数
-        function searchWord() {
+        // 调用有道词典API查询单词
+        async function searchWord() {
             const word = wordInput.value.trim().toLowerCase();
             
             // 清空之前的结果
             meaningsContainer.innerHTML = '';
             resultArea.style.display = 'none';
             errorMessage.style.display = 'none';
+            loading.style.display = 'none';
 
             // 验证输入
             if (!word) {
@@ -275,47 +229,80 @@
                 return;
             }
 
-            // 查找单词
-            if (dictionaryData[word]) {
-                displayResult(dictionaryData[word], word);
-            } else {
+            // 显示加载状态
+            loading.style.display = 'block';
+
+            try {
+                // 调用免费词典API（无需密钥）
+                const response = await fetch(`https://dict.youdao.com/jsonapi?q=${encodeURIComponent(word)}`);
+                const data = await response.json();
+
+                // 解析API返回数据
+                if (data.ec && data.ec.entry && data.ec.entry.length > 0) {
+                    displayResult(data, word);
+                } else {
+                    errorMessage.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('查询失败:', error);
+                errorMessage.textContent = '网络错误，请稍后重试！';
                 errorMessage.style.display = 'block';
+            } finally {
+                // 隐藏加载状态
+                loading.style.display = 'none';
             }
         }
 
         // 显示查询结果
         function displayResult(data, word) {
-            // 显示单词和音标
+            // 显示单词
             wordDisplay.textContent = word;
-            phoneticDisplay.textContent = data.phonetic;
+            
+            // 显示音标（优先美式音标）
+            const phonetic = data.ec && data.ec.phoen ? data.ec.phoen : '';
+            phoneticDisplay.textContent = phonetic ? `/${phonetic}/` : '暂无音标';
+            
+            // 存储发音URL（使用有道发音接口）
+            pronounceBtn.dataset.audio = `https://dict.youdao.com/dictvoice?audio=${encodeURIComponent(word)}&type=2`;
             
             // 显示释义
-            data.meanings.forEach(meaning => {
-                const meaningItem = document.createElement('div');
-                meaningItem.className = 'meaning-item';
-                
-                const partOfSpeech = document.createElement('div');
-                partOfSpeech.className = 'part-of-speech';
-                partOfSpeech.textContent = meaning.partOfSpeech;
-                
-                const definition = document.createElement('div');
-                definition.className = 'definition';
-                definition.textContent = meaning.definition;
-                
-                const example = document.createElement('div');
-                example.className = 'example';
-                example.textContent = meaning.example;
-                
-                meaningItem.appendChild(partOfSpeech);
-                meaningItem.appendChild(definition);
-                meaningItem.appendChild(example);
-                
-                meaningsContainer.appendChild(meaningItem);
+            const entries = data.ec.entry || [];
+            entries.forEach(entry => {
+                const explains = entry.explain || [];
+                explains.forEach(explain => {
+                    const meaningItem = document.createElement('div');
+                    meaningItem.className = 'meaning-item';
+                    
+                    // 词性
+                    const partOfSpeech = document.createElement('div');
+                    partOfSpeech.className = 'part-of-speech';
+                    partOfSpeech.textContent = explain.part || '未知词性';
+                    
+                    // 释义
+                    const definition = document.createElement('div');
+                    definition.className = 'definition';
+                    definition.textContent = explain.tran || '';
+                    
+                    // 示例（如果有）
+                    const example = document.createElement('div');
+                    example.className = 'example';
+                    if (explain.sent && explain.sent.length > 0) {
+                        const sent = explain.sent[0];
+                        example.textContent = sent.orig ? `${sent.orig} —— ${sent.trans}` : '';
+                    } else {
+                        example.textContent = '';
+                    }
+                    
+                    meaningItem.appendChild(partOfSpeech);
+                    meaningItem.appendChild(definition);
+                    if (example.textContent) {
+                        meaningItem.appendChild(example);
+                    }
+                    
+                    meaningsContainer.appendChild(meaningItem);
+                });
             });
 
-            // 存储音频URL供发音按钮使用
-            pronounceBtn.dataset.audio = data.audio;
-            
             // 显示结果区域
             resultArea.style.display = 'block';
         }
