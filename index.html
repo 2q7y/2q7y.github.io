@@ -3,548 +3,141 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>cmd</title>
+<title>经典 CMD 命令提示符</title>
 <style>
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Consolas","Monaco","Courier New",monospace;
-}
-
-/* 粒子背景容器 - 全屏覆盖 */
-#particle-bg {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1; /* 放在终端下面 */
-  background: #050710; /* 底层背景色 */
 }
 
 body {
+  background: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 100vh;
-  padding: 20px;
+  height: 100vh;
 }
 
-/* 主终端容器 - 毛玻璃+渐变+边框发光 */
-.terminal {
+/* 经典 CMD 窗口 */
+.cmd {
   width: 100%;
-  max-width: 820px;
-  height: 620px;
-  /* 毛玻璃效果 */
-  background: linear-gradient(160deg, rgba(11, 14, 26, 0.85), rgba(21, 26, 48, 0.85));
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  border-radius: 16px;
-  border: 1px solid rgba(136, 255, 204, 0.2);
-  box-shadow: 
-    0 0 40px rgba(0, 255, 200, 0.15),
-    0 0 80px rgba(72, 224, 160, 0.05),
-    inset 0 0 20px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  position: relative;
+  max-width: 800px;
+  height: 520px;
+  background: #000;
+  color: #fff;
+  font-family: Consolas, monospace;
+  font-size: 15px;
+  padding: 16px;
+  overflow-y: auto;
+  border: 2px solid #555;
 }
 
-/* 终端顶部标题栏 - 半透明磨砂 */
-.terminal-header {
-  background: rgba(255,255,255,0.05);
-  padding: 10px 18px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+/* 原生滚动条 */
+.cmd::-webkit-scrollbar {
+  width: 12px;
 }
-.terminal-dot { 
-  width:12px;height:12px;border-radius:50%;
-  box-shadow: 0 0 4px rgba(0,0,0,0.3);
+.cmd::-webkit-scrollbar-track {
+  background: #111;
 }
-.dot-red{background:#ff5f56;}
-.dot-yellow{background:#ffbd2e;}
-.dot-green{background:#27c93f;}
-.terminal-title{
-  color:#aaa;flex:1;text-align:center;font-size:14px;
-  text-shadow: 0 0 8px rgba(0,0,0,0.5);
+.cmd::-webkit-scrollbar-thumb {
+  background: #666;
 }
 
-/* 终端内容区 */
-.terminal-body {
-  flex:1;
-  padding:24px;
-  color:#88ffcc;
-  font-size:16px;
-  line-height:1.6;
-  overflow-y:auto;
-  text-shadow: 0 0 4px rgba(0, 255, 200, 0.1);
-}
-
-/* 极简磨砂滚动条 */
-.terminal-body::-webkit-scrollbar{width:6px;}
-.terminal-body::-webkit-scrollbar-track{background:transparent;}
-.terminal-body::-webkit-scrollbar-thumb{
-  background:rgba(255,255,255,0.15);
-  border-radius:3px;
-  transition: background 0.3s;
-}
-.terminal-body::-webkit-scrollbar-thumb:hover{
-  background:rgba(255,255,255,0.25);
-}
-
-/* 输入行 - 分隔线+间距 */
+/* 输入行 */
 .input-line {
-  display:flex;
-  align-items:center;
-  margin-top:12px;
-  padding-top:8px;
-  border-top:1px dashed rgba(136, 255, 204, 0.1);
+  display: flex;
+  margin-top: 8px;
 }
 
-/* 提示符 - 呼吸闪烁动画 */
 .prompt {
-  color:#48e0a0;
-  margin-right:10px;
-  animation:blink 1.2s infinite ease-in-out;
-  text-shadow: 0 0 6px rgba(72, 224, 160, 0.3);
-}
-@keyframes blink{
-  0%,100%{opacity:1; text-shadow: 0 0 6px rgba(72, 224, 160, 0.3);}
-  50%{opacity:.4; text-shadow: none;}
+  white-space: nowrap;
 }
 
-/* 输入框 */
-#commandInput {
-  background:transparent;
-  border:none;
-  outline:none;
-  color:#88ffcc;
-  caret-color:#48e0a0;
-  flex:1;
-  font-size:16px;
-  text-shadow: 0 0 4px rgba(0, 255, 200, 0.1);
+#cmdInput {
+  background: transparent;
+  border: none;
+  color: #fff;
+  outline: none;
+  flex: 1;
+  font-family: inherit;
+  font-size: inherit;
 }
 
-/* 文字配色层级 - 更柔和的色调 */
-.help-text{color:#ffdd88; text-shadow: 0 0 4px rgba(255, 221, 136, 0.2);}
-.error-text{color:#ff7777; text-shadow: 0 0 4px rgba(255, 119, 119, 0.2);}
-.success-text{color:#88ffcc; text-shadow: 0 0 4px rgba(136, 255, 204, 0.2);}
-.warning-text{color:#ffcc66; text-shadow: 0 0 4px rgba(255, 204, 102, 0.2);}
-
-/* 响应式适配 - 手机端也好看 */
-@media(max-width:768px){
-  .terminal{height:520px;}
-  .terminal-body{font-size:14px;padding:18px;}
-  #commandInput{font-size:14px;}
-}
+/* 文字简单配色 */
+.help { color: #ccc; }
+.err { color: #ff6666; }
+.ok { color: #ffffff; }
 </style>
 </head>
 <body>
-<!-- 粒子背景画布 -->
-<canvas id="particle-bg"></canvas>
 
-<!-- 终端主体 -->
-<div class="terminal">
-  <div class="terminal-header">
-    <div class="terminal-dot dot-red"></div>
-    <div class="terminal-dot dot-yellow"></div>
-    <div class="terminal-dot dot-green"></div>
-    <div class="terminal-title">星际终端 v3.0 | 赛博朋克风</div>
-  </div>
-  <div class="terminal-body" id="terminalOutput">
-    <div class="welcome-text">
-      欢迎使用星际终端 ✨<br>
-      输入 <span class="help-text">help</span> 查看全部命令<br>
-      ────────────────────────
-    </div>
-  </div>
+<div class="cmd" id="cmdBody">
+Microsoft Windows [版本 10.0.0000.0]<br>
+(c) Microsoft Corporation。保留所有权利。<br><br>
+C:\> <span class="help">输入 help 查看命令</span>
 </div>
 
 <script>
-// ====================== 粒子背景核心代码 ======================
-const canvas = document.getElementById('particle-bg');
-const ctx = canvas.getContext('2d');
+const body = document.getElementById("cmdBody");
+let input;
+let history = [], hidx = -1;
 
-// 适配窗口大小
-function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-// 粒子类
-class Particle {
-  constructor() {
-    this.x = Math.random() * canvas.width;
-    this.y = Math.random() * canvas.height;
-    this.size = Math.random() * 1.2 + 0.2; // 粒子大小
-    this.speedX = Math.random() * 0.3 - 0.15; // X方向速度（-0.15 ~ 0.15）
-    this.speedY = Math.random() * 0.3 - 0.15; // Y方向速度
-    this.color = 'rgba(136, 255, 204, ' + (Math.random() * 0.6 + 0.2) + ')'; // 霓虹绿渐变透明度
-  }
-
-  // 更新粒子位置
-  update() {
-    this.x += this.speedX;
-    this.y += this.speedY;
-
-    // 边界回弹
-    if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
-    if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
-  }
-
-  // 绘制粒子
-  draw() {
-    ctx.fillStyle = this.color;
-    ctx.beginPath();
-    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-    ctx.fill();
-  }
-}
-
-// 创建粒子数组
-const particlesArray = [];
-const particleCount = Math.floor((canvas.width * canvas.height) / 15000); // 根据屏幕大小动态生成粒子数量
-
-// 初始化粒子
-function initParticles() {
-  particlesArray.length = 0; // 清空原有粒子
-  for (let i = 0; i < particleCount; i++) {
-    particlesArray.push(new Particle());
-  }
-}
-initParticles();
-window.addEventListener('resize', initParticles); // 窗口变化重新生成粒子
-
-// 绘制和更新粒子
-function animateParticles() {
-  // 半透明背景 - 实现拖影效果
-  ctx.fillStyle = 'rgba(5, 7, 16, 0.05)';
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  // 更新并绘制所有粒子
-  for (let i = 0; i < particlesArray.length; i++) {
-    particlesArray[i].update();
-    particlesArray[i].draw();
-
-    // 粒子之间连线（可选，更炫酷）
-    for (let j = i; j < particlesArray.length; j++) {
-      const dx = particlesArray[i].x - particlesArray[j].x;
-      const dy = particlesArray[i].y - particlesArray[j].y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      // 距离小于80px时绘制连线
-      if (distance < 80) {
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(136, 255, 204, ' + (0.2 - distance/400) + ')';
-        ctx.lineWidth = 0.1;
-        ctx.moveTo(particlesArray[i].x, particlesArray[i].y);
-        ctx.lineTo(particlesArray[j].x, particlesArray[j].y);
-        ctx.stroke();
-      }
+function newLine(){
+  const div = document.createElement("div");
+  div.className = "input-line";
+  div.innerHTML = `<span class="prompt">C:\\></span>
+  <input id="cmdInput" autocomplete="off" spellcheck="false">`;
+  body.appendChild(div);
+  input = document.getElementById("cmdInput");
+  input.focus();
+  input.onkeydown = e => {
+    if(e.key === "Enter"){
+      const txt = input.value.trim();
+      if(txt){ history.push(txt); hidx = history.length; run(txt); }
     }
-  }
-
-  requestAnimationFrame(animateParticles);
-}
-animateParticles();
-
-// ====================== 原有终端命令逻辑（完整保留） ======================
-const terminalOutput = document.getElementById('terminalOutput');
-let commandInput;
-let terminalColor = '#88ffcc';
-let commandHistory = [];
-let historyIndex = -1;
-
-// 初始化输入行
-function initInputLine() {
-  const inputLine = document.createElement('div');
-  inputLine.className = 'input-line';
-  inputLine.innerHTML = `
-    <span class="prompt">user@star-terminal:~$</span>
-    <input type="text" id="commandInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
-  `;
-  terminalOutput.appendChild(inputLine);
-  commandInput = document.getElementById('commandInput');
-  commandInput.style.color = terminalColor;
-  commandInput.style.caretColor = '#48e0a0';
-  commandInput.focus();
-  commandInput.addEventListener('keydown', handleKeyPress);
+    if(e.key === "ArrowUp"){ e.preventDefault(); if(hidx>0) input.value = history[--hidx]; }
+    if(e.key === "ArrowDown"){ e.preventDefault(); if(hidx<history.length-1) input.value = history[++hidx]; else input.value=""; }
+  };
 }
 
-// 键盘事件处理
-function handleKeyPress(e) {
-  if (e.key === 'Enter') {
-    const command = commandInput.value.trim();
-    if (command) {
-      commandHistory.push(command);
-      historyIndex = commandHistory.length;
-      executeCommand(command);
-      commandInput.value = '';
-    }
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    if (historyIndex > 0) {
-      historyIndex--;
-      commandInput.value = commandHistory[historyIndex];
-    }
-  } else if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    if (historyIndex < commandHistory.length - 1) {
-      historyIndex++;
-      commandInput.value = commandHistory[historyIndex];
-    } else {
-      historyIndex = commandHistory.length;
-      commandInput.value = '';
-    }
-  }
-}
+function run(cmd){
+  const show = document.createElement("div");
+  show.textContent = "C:\\> " + cmd;
+  body.appendChild(show);
+  let out = "";
 
-// 命令执行逻辑（完整保留所有扩展命令）
-function executeCommand(command) {
-  const commandLine = document.createElement('div');
-  commandLine.innerHTML = `<span class="prompt">user@star-terminal:~$</span> ${command}`;
-  terminalOutput.appendChild(commandLine);
-
-  const cmdParts = command.toLowerCase().split(' ');
-  const cmd = cmdParts[0];
-  let output = '';
-
-  switch (cmd) {
-    case 'help':
-      output = `
-        <span class="help-text">📚 星际终端命令列表（v3.0）：</span><br>
-        基础命令：<br>
-        help      - 查看帮助信息<br>
-        clear/cls - 清空终端<br>
-        date/time - 查看当前时间<br>
-        whoami    - 查看当前用户<br>
-        joke      - 讲一个冷笑话<br>
-        about     - 关于本终端<br>
-        echo [内容] - 输出指定内容<br>
-        <br>
-        扩展命令：<br>
-        calc [表达式] - 简易计算器（例：calc 10+20*3）<br>
-        weather [城市] - 模拟查询天气（例：weather 北京）<br>
-        color [颜色]   - 切换终端文字颜色（red/blue/yellow/purple/green）<br>
-        dice           - 掷骰子（1-6随机数）<br>
-        guess          - 猜数字小游戏（1-100）<br>
-        password [长度] - 生成随机密码（默认12位）<br>
-        sysinfo        - 查看系统信息（模拟）<br>
-        timer [秒数]   - 简易倒计时器（例：timer 5）
-      `;
+  switch(cmd.toLowerCase()){
+    case "help":
+      out = `常用命令：help clear date whoami joke calc weather color dice password sysinfo timer`;
       break;
-    case 'clear':
-    case 'cls':
-      terminalOutput.innerHTML = '';
-      const welcomeText = document.createElement('div');
-      welcomeText.className = 'welcome-text';
-      welcomeText.innerHTML = `
-        欢迎使用星际终端 ✨<br>
-        输入 <span class="help-text">help</span> 查看全部命令<br>
-        ────────────────────────
-      `;
-      welcomeText.style.color = terminalColor;
-      terminalOutput.appendChild(welcomeText);
+    case "clear":
+      body.innerHTML = ""; newLine(); return;
+    case "date":
+      out = "现在时间：" + new Date().toLocaleString();
       break;
-    case 'date':
-    case 'time':
-      output = `<span class="success-text">📅 当前时间：${new Date().toLocaleString()}</span>`;
+    case "whoami":
+      out = "当前用户：Administrator";
       break;
-    case 'whoami':
-      output = `<span class="success-text">👤 当前用户：星际终端访客 (user@star-terminal)</span>`;
-      break;
-    case 'joke':
-      const jokes = [
-        "为什么程序员总是分不清万圣节和圣诞节？因为 Oct 31 = Dec 25",
-        "一个字节走进酒吧，酒保问：你喝点啥？字节说：来杯啤酒，我撑得不行了（8位撑满）",
-        "程序员的女朋友说：你能不能别总把什么都归类？程序员：你让我分个类先...",
-        "问：为什么鸟儿不喜欢用C++？答：因为它们怕遇到析构函数（destructor）",
-        "前端工程师为什么总找不到对象？因为他们只会写单例模式",
-        "服务器为什么会感冒？因为它穿了太多层（layer）",
-        "为什么数据库管理员不喜欢社交？因为他们习惯了事务隔离"
-      ];
-      const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
-      output = `<span class="success-text">😂 ${randomJoke}</span>`;
-      break;
-    case 'about':
-      output = `
-        <span class="success-text">🔖 星际终端模拟器 v3.0</span><br>
-        🚀 基于HTML/CSS/JavaScript开发<br>
-        💻 赛博朋克风粒子背景终端<br>
-        ✨ 支持10+趣味命令，视觉体验拉满
-      `;
-      break;
-    case 'calc':
-      if (cmdParts.length < 2) {
-        output = `<span class="error-text">❌ 用法：calc [表达式] 例：calc 10+20*3</span>`;
-      } else {
-        try {
-          const expression = cmdParts.slice(1).join(' ');
-          const result = eval(expression);
-          output = `<span class="success-text">🧮 计算结果：${expression} = ${result}</span>`;
-        } catch (e) {
-          output = `<span class="error-text">❌ 计算错误：${e.message}</span>`;
-        }
-      }
-      break;
-    case 'weather':
-      const city = cmdParts.length > 1 ? cmdParts[1] : '北京';
-      const weathers = ['晴', '多云', '小雨', '大雨', '阴', '雷阵雨', '小雪', '雾'];
-      const temps = Math.floor(Math.random() * 40) - 10;
-      const wind = `${Math.floor(Math.random() * 10) + 1}级`;
-      const randomWeather = weathers[Math.floor(Math.random() * weathers.length)];
-      output = `
-        <span class="success-text">🌤️ ${city} 天气信息</span><br>
-        <span class="success-text">├─ 天气：${randomWeather}</span><br>
-        <span class="success-text">├─ 温度：${temps}℃</span><br>
-        <span class="success-text">└─ 风力：${wind}</span>
-      `;
-      break;
-    case 'color':
-      const colorMap = {
-        'red': '#ff7777',
-        'blue': '#77aaff',
-        'yellow': '#ffdd88',
-        'purple': '#cc99ff',
-        'green': '#88ffcc',
-        'orange': '#ff9966',
-        'pink': '#ff99cc'
-      };
-      if (cmdParts.length < 2) {
-        output = `<span class="warning-text">⚠️ 可用颜色：${Object.keys(colorMap).join('/')}</span>`;
-      } else {
-        const color = cmdParts[1];
-        if (colorMap[color]) {
-          terminalColor = colorMap[color];
-          terminalOutput.style.color = terminalColor;
-          document.querySelectorAll('.success-text').forEach(el => {
-            el.style.color = terminalColor;
-          });
-          output = `<span style="color: ${terminalColor}">🎨 终端颜色已切换为：${color}</span>`;
-        } else {
-          output = `<span class="error-text">❌ 无效颜色！可用：${Object.keys(colorMap).join('/')}</span>`;
-        }
-      }
-      break;
-    case 'dice':
-      const diceNum = Math.floor(Math.random() * 6) + 1;
-      output = `<span class="success-text">🎲 掷骰子结果：${diceNum}</span>`;
-      break;
-    case 'guess':
-      const randomNum = Math.floor(Math.random() * 100) + 1;
-      output = `
-        <span class="success-text">🎮 猜数字小游戏开始！</span><br>
-        <span class="warning-text">💡 我已经生成了1-100之间的随机数，输入 guess [数字] 来猜</span><br>
-        <span class="warning-text">📌 例：guess 50</span>
-      `;
-      window.guessNumber = randomNum;
-      break;
-    case 'password':
-      const length = cmdParts.length > 1 ? parseInt(cmdParts[1]) : 12;
-      if (isNaN(length) || length < 6 || length > 32) {
-        output = `<span class="error-text">❌ 密码长度必须是6-32之间的数字</span>`;
-      } else {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+';
-        let password = '';
-        for (let i = 0; i < length; i++) {
-          password += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        output = `<span class="success-text">🔑 生成的随机密码：${password}</span>`;
-      }
-      break;
-    case 'sysinfo':
-      output = `
-        <span class="success-text">🖥️ 星际系统信息（模拟）</span><br>
-        <span class="success-text">├─ 系统：StarOS v3.0</span><br>
-        <span class="success-text">├─ CPU：Quantum i9-9999K (模拟)</span><br>
-        <span class="success-text">├─ 内存：64GB Quantum DDR6 (使用率：${Math.floor(Math.random() * 80) + 10}%)</span><br>
-        <span class="success-text">├─ 磁盘：2TB Star SSD (剩余：${Math.floor(Math.random() * 1800) + 100}GB)</span><br>
-        <span class="success-text">└─ 运行时间：${Math.floor(Math.random() * 100)}天${Math.floor(Math.random() * 24)}小时</span>
-      `;
-      break;
-    case 'timer':
-      if (cmdParts.length < 2) {
-        output = `<span class="error-text">❌ 用法：timer [秒数] 例：timer 5</span>`;
-      } else {
-        const seconds = parseInt(cmdParts[1]);
-        if (isNaN(seconds) || seconds < 1 || seconds > 60) {
-          output = `<span class="error-text">❌ 秒数必须是1-60之间的数字</span>`;
-        } else {
-          output = `<span class="success-text">⏰ 倒计时${seconds}秒开始！</span>`;
-          terminalOutput.appendChild(document.createElement('div').innerHTML = output);
-          
-          let count = seconds;
-          const countdownInterval = setInterval(() => {
-            count--;
-            if (count > 0) {
-              const countLine = document.createElement('div');
-              countLine.innerHTML = `<span class="warning-text">⌛ 剩余 ${count} 秒</span>`;
-              terminalOutput.appendChild(countLine);
-            } else {
-              clearInterval(countdownInterval);
-              const endLine = document.createElement('div');
-              endLine.innerHTML = `<span class="success-text">🎉 倒计时结束！</span>`;
-              terminalOutput.appendChild(endLine);
-              terminalOutput.removeChild(document.querySelector('.input-line'));
-              initInputLine();
-              terminalOutput.scrollTop = terminalOutput.scrollHeight;
-            }
-          }, 1000);
-          return;
-        }
-      }
+    case "joke":
+      out = "为什么CMD从不崩溃？因为它没有GUI，也从不做梦。";
       break;
     default:
-      if (cmd.startsWith('echo ')) {
-        const echoContent = command.substring(5);
-        output = `<span class="success-text">📢 ${echoContent}</span>`;
-      } else if (cmd.startsWith('guess ')) {
-        if (!window.guessNumber) {
-          output = `<span class="error-text">❌ 请先输入 guess 开始游戏</span>`;
-        } else {
-          const guessNum = parseInt(cmdParts[1]);
-          if (isNaN(guessNum)) {
-            output = `<span class="error-text">❌ 请输入有效的数字（1-100）</span>`;
-          } else if (guessNum < 1 || guessNum > 100) {
-            output = `<span class="warning-text">⚠️ 数字必须在1-100之间</span>`;
-          } else if (guessNum < window.guessNumber) {
-            output = `<span class="warning-text">⬆️ 猜小了！再试试更大的数字</span>`;
-          } else if (guessNum > window.guessNumber) {
-            output = `<span class="warning-text">⬇️ 猜大了！再试试更小的数字</span>`;
-          } else {
-            output = `<span class="success-text">🎉 恭喜！猜对了！数字就是 ${window.guessNumber}</span>`;
-            delete window.guessNumber;
-          }
-        }
-      } else {
-        output = `<span class="error-text">❌ 错误：未知命令 '${command}'，输入 help 查看可用命令</span>`;
-      }
-      break;
+      out = "不是内部或外部命令，也不是可运行的程序。";
   }
 
-  if (cmd !== 'clear' && cmd !== 'cls' && output) {
-    const outputLine = document.createElement('div');
-    outputLine.innerHTML = output;
-    if (outputLine.querySelector('.success-text')) {
-      outputLine.querySelector('.success-text').style.color = terminalColor;
-    }
-    terminalOutput.appendChild(outputLine);
+  if(out){
+    const d = document.createElement("div");
+    d.textContent = out;
+    body.appendChild(d);
   }
 
-  if (cmd !== 'timer' || (cmd === 'timer' && cmdParts.length < 2)) {
-    terminalOutput.removeChild(document.querySelector('.input-line'));
-    initInputLine();
-    terminalOutput.scrollTop = terminalOutput.scrollHeight;
-  }
+  body.removeChild(document.querySelector(".input-line"));
+  newLine();
+  body.scrollTop = body.scrollHeight;
 }
 
-// 初始化终端
-initInputLine();
+newLine();
 </script>
 </body>
 </html>
