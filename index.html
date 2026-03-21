@@ -3,320 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minecraft 玩家数据查询 | Mojang API</title>
-    <!-- 引入 Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 引入 Font Awesome 图标 -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- 自定义 Tailwind 配置 -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        minecraft: {
-                            green: '#4CAF50',
-                            dark: '#1e293b',
-                            light: '#f8fafc'
-                        }
-                    },
-                    fontFamily: {
-                        minecraft: ['Minecraft', 'sans-serif']
-                    }
-                }
-            }
+    <title>每日名言 | 启迪心灵的智慧</title>
+    <style>
+        /* 全局样式重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
+
+        /* 页面主体样式 */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* 名言卡片容器 */
+        .quote-container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .quote-container:hover {
+            transform: translateY(-5px);
+        }
+
+        /* 名言文本样式 */
+        .quote-text {
+            font-size: 2rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #2c3e50;
+        }
+
+        /* 名言作者样式 */
+        .quote-author {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            text-align: right;
+        }
+
+        /* 按钮样式 */
+        .new-quote-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            outline: none;
+        }
+
+        .new-quote-btn:hover {
+            background-color: #2980b9;
+        }
+
+        /* 页脚样式 */
+        footer {
+            margin-top: 30px;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+        }
+
+        /* 响应式设计 - 适配手机 */
+        @media (max-width: 768px) {
+            .quote-container {
+                padding: 25px;
             }
-            .skin-preview {
-                transform: scale(8);
-                image-rendering: pixelated;
+            
+            .quote-text {
+                font-size: 1.5rem;
             }
-            .loader {
-                border-top-color: #4CAF50;
-                animation: spinner 0.6s linear infinite;
-            }
-            @keyframes spinner {
-                to { transform: rotate(360deg); }
+            
+            .quote-author {
+                font-size: 1rem;
             }
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-minecraft-dark to-slate-800 min-h-screen text-minecraft-light">
-    <div class="container mx-auto px-4 py-8 max-w-4xl">
-        <!-- 页面标题 -->
-        <header class="text-center mb-8">
-            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold mb-2 text-minecraft-green">
-                <i class="fab fa-minecraft"></i> Minecraft 玩家数据查询
-            </h1>
-            <p class="text-slate-300">通过 Mojang API 查询 Minecraft 玩家的 UUID、皮肤、历史名称等信息</p>
-        </header>
-
-        <!-- 查询表单 -->
-        <div class="bg-slate-800/80 rounded-lg p-6 shadow-xl backdrop-blur-sm mb-8 border border-slate-700">
-            <div class="flex flex-col md:flex-row gap-4">
-                <input 
-                    type="text" 
-                    id="playerName" 
-                    placeholder="输入玩家名称 (例如: Notch)" 
-                    class="flex-1 px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-minecraft-green focus:border-transparent"
-                >
-                <button 
-                    id="searchBtn" 
-                    class="px-6 py-3 rounded-lg bg-minecraft-green hover:bg-green-600 transition-colors font-medium flex items-center justify-center gap-2"
-                >
-                    <i class="fas fa-search"></i>
-                    <span>查询</span>
-                </button>
-            </div>
-            
-            <!-- 加载状态 -->
-            <div id="loading" class="hidden mt-4 flex items-center justify-center text-slate-300">
-                <div class="loader w-6 h-6 border-2 border-slate-400 rounded-full mr-3"></div>
-                <span>正在查询数据...</span>
-            </div>
-            
-            <!-- 错误提示 -->
-            <div id="error" class="hidden mt-4 p-3 rounded-lg bg-red-900/50 border border-red-800 text-red-300"></div>
-        </div>
-
-        <!-- 结果展示区域 -->
-        <div id="result" class="hidden bg-slate-800/80 rounded-lg p-6 shadow-xl border border-slate-700">
-            <!-- 玩家基本信息 -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-                <!-- 皮肤预览 -->
-                <div class="md:col-span-1 flex justify-center items-center">
-                    <div class="relative w-32 h-32 bg-slate-700 rounded-lg overflow-hidden flex items-center justify-center">
-                        <img id="skinPreview" src="" alt="玩家皮肤" class="skin-preview">
-                    </div>
-                </div>
-                
-                <!-- 基本信息 -->
-                <div class="md:col-span-3">
-                    <h2 id="currentName" class="text-2xl font-bold mb-2 text-minecraft-green"></h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                        <div class="bg-slate-700/50 p-3 rounded-lg">
-                            <p class="text-slate-400 text-sm mb-1">UUID (无横线)</p>
-                            <p id="uuidShort" class="font-mono break-all"></p>
-                        </div>
-                        <div class="bg-slate-700/50 p-3 rounded-lg">
-                            <p class="text-slate-400 text-sm mb-1">UUID (带横线)</p>
-                            <p id="uuidFull" class="font-mono break-all"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- 历史名称 -->
-            <div class="mt-6">
-                <h3 class="text-xl font-semibold mb-3 flex items-center gap-2">
-                    <i class="fas fa-history text-minecraft-green"></i>
-                    历史名称
-                </h3>
-                <div id="nameHistory" class="bg-slate-700/50 p-4 rounded-lg max-h-60 overflow-y-auto">
-                    <ul id="nameHistoryList" class="space-y-2"></ul>
-                </div>
-            </div>
-            
-            <!-- 复制按钮区域 -->
-            <div class="mt-6 flex flex-wrap gap-3">
-                <button id="copyUuidBtn" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors flex items-center gap-2">
-                    <i class="fas fa-copy"></i>
-                    复制 UUID
-                </button>
-                <button id="copySkinBtn" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors flex items-center gap-2">
-                    <i class="fas fa-image"></i>
-                    复制皮肤链接
-                </button>
-            </div>
-        </div>
+<body>
+    <div class="quote-container">
+        <p class="quote-text" id="quoteText">行动是治愈恐惧的良药，而犹豫、拖延将不断滋养恐惧。</p>
+        <p class="quote-author" id="quoteAuthor">— 戴尔·卡耐基</p>
+        <button class="new-quote-btn" id="newQuoteBtn">换一句名言</button>
     </div>
+    <footer>
+        每日名言 © 2026
+    </footer>
 
     <script>
-        // DOM 元素
-        const playerNameInput = document.getElementById('playerName');
-        const searchBtn = document.getElementById('searchBtn');
-        const loading = document.getElementById('loading');
-        const error = document.getElementById('error');
-        const result = document.getElementById('result');
-        const currentName = document.getElementById('currentName');
-        const uuidShort = document.getElementById('uuidShort');
-        const uuidFull = document.getElementById('uuidFull');
-        const skinPreview = document.getElementById('skinPreview');
-        const nameHistoryList = document.getElementById('nameHistoryList');
-        const copyUuidBtn = document.getElementById('copyUuidBtn');
-        const copySkinBtn = document.getElementById('copySkinBtn');
-
-        // 存储当前查询的数据
-        let currentData = {
-            uuid: '',
-            skinUrl: ''
-        };
-
-        // 格式化 UUID (添加横线)
-        function formatUUID(uuid) {
-            return `${uuid.substr(0,8)}-${uuid.substr(8,4)}-${uuid.substr(12,4)}-${uuid.substr(16,4)}-${uuid.substr(20)}`;
-        }
-
-        // 显示错误信息
-        function showError(message) {
-            error.textContent = message;
-            error.classList.remove('hidden');
-            result.classList.add('hidden');
-        }
-
-        // 隐藏错误信息
-        function hideError() {
-            error.classList.add('hidden');
-        }
-
-        // 显示加载状态
-        function showLoading() {
-            loading.classList.remove('hidden');
-            hideError();
-            result.classList.add('hidden');
-        }
-
-        // 隐藏加载状态
-        function hideLoading() {
-            loading.classList.add('hidden');
-        }
-
-        // 复制到剪贴板
-        function copyToClipboard(text, successMessage = '复制成功!') {
-            navigator.clipboard.writeText(text)
-                .then(() => {
-                    // 临时显示成功提示
-                    const notification = document.createElement('div');
-                    notification.className = 'fixed bottom-4 right-4 bg-minecraft-green text-white px-4 py-2 rounded-lg shadow-lg z-50';
-                    notification.textContent = successMessage;
-                    document.body.appendChild(notification);
-                    
-                    setTimeout(() => {
-                        notification.classList.add('opacity-0', 'transition-opacity', 'duration-500');
-                        setTimeout(() => document.body.removeChild(notification), 500);
-                    }, 2000);
-                })
-                .catch(err => {
-                    alert('复制失败: ' + err);
-                });
-        }
-
-        // 查询玩家数据
-        async function fetchPlayerData(username) {
-            if (!username || username.trim() === '') {
-                showError('请输入有效的玩家名称');
-                return;
+        // 名言数据库
+        const quotes = [
+            {
+                text: "行动是治愈恐惧的良药，而犹豫、拖延将不断滋养恐惧。",
+                author: "戴尔·卡耐基"
+            },
+            {
+                text: "人生就像骑自行车，想保持平衡就得往前走。",
+                author: "阿尔伯特·爱因斯坦"
+            },
+            {
+                text: "你今天的努力，是幸运的伏笔。当下的付出，是明日的花开。",
+                author: "稻盛和夫"
+            },
+            {
+                text: "不要为尚未发生的事提前焦虑。",
+                author: "马克·吐温"
+            },
+            {
+                text: "每一个不曾起舞的日子，都是对生命的辜负。",
+                author: "弗里德里希·尼采"
+            },
+            {
+                text: "生活不是等待暴风雨过去，而是学会在雨中跳舞。",
+                author: "薇薇安·格林"
+            },
+            {
+                text: "成功不是终点，失败也不是末日：最重要的是继续前进的勇气。",
+                author: "温斯顿·丘吉尔"
+            },
+            {
+                text: "所谓自由，不是随心所欲，而是自我主宰。",
+                author: "伊曼努尔·康德"
             }
+        ];
 
-            showLoading();
+        // 获取DOM元素
+        const quoteTextElement = document.getElementById('quoteText');
+        const quoteAuthorElement = document.getElementById('quoteAuthor');
+        const newQuoteBtn = document.getElementById('newQuoteBtn');
 
-            try {
-                // 1. 通过用户名获取 UUID
-                const uuidResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
-                
-                if (!uuidResponse.ok) {
-                    if (uuidResponse.status === 404) {
-                        throw new Error('未找到该玩家，请检查名称是否正确');
-                    }
-                    throw new Error(`API 请求失败 (${uuidResponse.status})`);
-                }
-
-                const uuidData = await uuidResponse.json();
-                const uuid = uuidData.id;
-                const name = uuidData.name;
-
-                // 2. 获取名称历史
-                const historyResponse = await fetch(`https://api.mojang.com/user/profiles/${uuid}/names`);
-                const nameHistory = await historyResponse.json();
-
-                // 3. 获取皮肤信息
-                const profileResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}?unsigned=false`);
-                const profileData = await profileResponse.json();
-                
-                // 解析皮肤数据
-                let skinUrl = '';
-                if (profileData.properties && profileData.properties.length > 0) {
-                    const decoded = JSON.parse(atob(profileData.properties[0].value));
-                    if (decoded.textures && decoded.textures.SKIN) {
-                        skinUrl = decoded.textures.SKIN.url;
-                    }
-                }
-
-                // 存储当前数据
-                currentData.uuid = uuid;
-                currentData.skinUrl = skinUrl;
-
-                // 更新页面显示
-                currentName.textContent = name;
-                uuidShort.textContent = uuid;
-                uuidFull.textContent = formatUUID(uuid);
-                skinPreview.src = skinUrl || 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/33/Alex_Skin.png';
-                
-                // 清空并更新历史名称列表
-                nameHistoryList.innerHTML = '';
-                nameHistory.forEach((entry, index) => {
-                    const li = document.createElement('li');
-                    li.className = 'flex justify-between items-center border-b border-slate-600 pb-2';
-                    
-                    const dateText = entry.changedToAt 
-                        ? new Date(entry.changedToAt).toLocaleString() 
-                        : '初始名称';
-                    
-                    li.innerHTML = `
-                        <span class="${index === 0 ? 'text-minecraft-green font-bold' : ''}">${entry.name}</span>
-                        <span class="text-slate-400 text-sm">${dateText}</span>
-                    `;
-                    nameHistoryList.appendChild(li);
-                });
-
-                // 显示结果
-                hideLoading();
-                result.classList.remove('hidden');
-
-            } catch (err) {
-                hideLoading();
-                showError(err.message);
-                console.error('查询错误:', err);
-            }
+        // 生成随机名言的函数
+        function getRandomQuote() {
+            // 生成0到quotes数组长度之间的随机索引
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            return quotes[randomIndex];
         }
 
-        // 事件监听
-        searchBtn.addEventListener('click', () => {
-            fetchPlayerData(playerNameInput.value.trim());
-        });
+        // 更新名言显示的函数
+        function updateQuote() {
+            const randomQuote = getRandomQuote();
+            quoteTextElement.textContent = randomQuote.text;
+            quoteAuthorElement.textContent = `— ${randomQuote.author}`;
+            
+            // 添加淡入动画效果
+            quoteTextElement.style.opacity = 0;
+            quoteAuthorElement.style.opacity = 0;
+            setTimeout(() => {
+                quoteTextElement.style.transition = 'opacity 0.5s ease';
+                quoteAuthorElement.style.transition = 'opacity 0.5s ease';
+                quoteTextElement.style.opacity = 1;
+                quoteAuthorElement.style.opacity = 1;
+            }, 50);
+        }
 
-        // 按回车查询
-        playerNameInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                fetchPlayerData(playerNameInput.value.trim());
-            }
-        });
+        // 绑定按钮点击事件
+        newQuoteBtn.addEventListener('click', updateQuote);
 
-        // 复制 UUID 按钮
-        copyUuidBtn.addEventListener('click', () => {
-            copyToClipboard(uuidFull.textContent, 'UUID 复制成功!');
-        });
-
-        // 复制皮肤链接按钮
-        copySkinBtn.addEventListener('click', () => {
-            if (currentData.skinUrl) {
-                copyToClipboard(currentData.skinUrl, '皮肤链接复制成功!');
-            } else {
-                alert('未找到皮肤链接');
-            }
-        });
-
-        // 页面加载时预设一个示例
-        window.addEventListener('load', () => {
-            playerNameInput.value = 'Notch';
-        });
+        // 页面加载时随机显示一条名言（可选）
+        // 注释掉下面这行，默认显示第一条名言；取消注释则页面加载随机显示
+        // updateQuote();
     </script>
 </body>
 </html>
