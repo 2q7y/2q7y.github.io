@@ -1,130 +1,164 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,  initial-scale=1.0">
-    <title>壮观炸裂顶配按钮</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>高能压迫·恐惧锁定</title>
+<style>
+* {margin:0;padding:0;box-sizing:border-box}
 
-        /* 暗黑全屏背景，衬托极致光效壮观感 */
-        body {
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #000;
-            overflow: hidden;
-        }
+body{
+  min-height:100vh;
+  display:flex;align-items:center;justify-content:center;
+  background:#000;
+  overflow:hidden;
+}
 
-        /* 壮观顶配核心按钮 */
-        .epic-epic-btn {
-            padding: 1.5rem 4rem;
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: 2px; /* 字间距拉开，大气磅礴 */
-            color: #fff;
-            border: 3px solid transparent;
-            border-radius: 16px;
-            cursor: pointer;
-            user-select: none;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
+/* 全屏背景压迫暗场（悬停会狂暴变暗压场） */
+body::before{
+  content:"";position:fixed;inset:0;
+  background:radial-gradient(circle at 50% 40%, #180000, #000 70%);
+  opacity:0.6;
+  transition:opacity .4s ease,filter .4s ease;
+  pointer-events:none;
+  z-index:-2;
+}
 
-            /* 极致炫彩渐变基底（初始就大气） */
-            background: linear-gradient(45deg, #ff0080, #7928ca, #00d4ff, #ff9500);
-            background-size: 400% 400%;
-            animation: gradient-flow 8s ease infinite;
+.dread-btn{
+  padding:1.6rem 4.5rem;
+  font-size:1.5rem;font-weight:900;letter-spacing:4px;
+  color:#fff;
+  border:3px solid #ff2222;
+  border-radius:6px; /* 不圆润，硬核锋利压迫 */
+  background:#000;
+  position:relative;
+  overflow:visible;
+  cursor:pointer;
+  outline:none;
+  /* 底层永久危险红光震荡气场 */
+  box-shadow:
+   0 0 15px #ff0000,
+   0 0 30px rgba(255,0,0,.8),
+   0 0 60px rgba(255,0,0,.4);
 
-            /* 底层深空阴影，氛围感铺垫 */
-            box-shadow: 0 0 30px rgba(121, 40, 202, 0.4), 
-                        0 0 60px rgba(0, 212, 255, 0.2);
+  transform:scale(1);
+  transition:transform .2s cubic-bezier(.2,1.5,.3,1),
+              box-shadow .25s ease,border-color .2s ease;
 
-            /* 顶级丝滑过渡，所有炸裂效果不卡顿 */
-            transition: 
-                border-color 0.3s cubic-bezier(0.2, 1.2, 0.3, 1),
-                transform 0.35s cubic-bezier(0.2, 1.2, 0.3, 1),
-                box-shadow 0.4s cubic-bezier(0.2, 1.2, 0.3, 1),
-                text-shadow 0.3s cubic-bezier(0.2, 1.2, 0.3, 1);
+  animation:dread-idle-pulse 2.2s infinite alternate ease-in-out;
+  will-change:transform,box-shadow;
+  z-index:1;
+}
 
-            will-change: transform, box-shadow;
-        }
+/* 红眼水平扫描锁定线 */
+.dread-btn::before{
+  content:"";position:absolute;left:-40px;right:-40px;height:2px;
+  background:linear-gradient(90deg,transparent,#ff0000,#ff4444,#ff0000,transparent);
+  top:50%;transform:translateY(-50%) scaleX(.6);
+  opacity:.4;filter:blur(1px);
+  transition:opacity .2s;
+  animation:scan-sweep 1.6s infinite linear;
+}
 
-        /* 1. 渐变无限流动动画（大气永动氛围感） */
-        @keyframes gradient-flow {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
+/* 外溢狂暴爆闪环（极强压迫） */
+.dread-btn::after{
+  content:"";position:absolute;inset:-30px;border-radius:4px;
+  border:2px solid rgba(255,0,0,0);
+  opacity:0;pointer-events:none;
+  animation:none;
+}
 
-        /* 2. 多层粒子波纹炸裂（超级壮观扩散） */
-        .epic-epic-btn::before, .epic-epic-btn::after {
-            content: "";
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-        }
-        /* 外层强光巨波纹 */
-        .epic-epic-btn::before {
-            width: 0; height: 0;
-            background: rgba(255, 255, 255, 0.3);
-            transition: width 0.8s cubic-bezier(0.2, 1.2, 0.3, 1), 
-                        height 0.8s cubic-bezier(0.2, 1.2, 0.3, 1);
-        }
-        /* 内层炫彩裂变波纹 */
-        .epic-epic-btn::after {
-            width: 0; height: 0;
-            background: rgba(121, 40, 202, 0.4);
-            transition: width 0.7s cubic-bezier(0.2, 1.2, 0.3, 1), 
-                        height 0.7s cubic-bezier(0.2, 1.2, 0.3, 1);
-        }
+/* 永久低速危险呼吸（平时就不安） */
+@keyframes dread-idle-pulse{
+  0%{
+    box-shadow:
+     0 0 15px #ff0000,
+     0 0 30px rgba(255,0,0,.8),
+     0 0 60px rgba(255,0,0,.4);
+  }
+  100%{
+    box-shadow:
+     0 0 20px #ff2222,
+     0 0 45px rgba(255,0,0,.9),
+     0 0 90px rgba(255,0,0,.55),
+     0 0 140px rgba(255,0,0,.25);
+  }
+}
 
-        /* 3. 边框极光脉冲呼吸（无限震撼闪烁） */
-        @keyframes aurora-pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.8), 
-                              0 0 40px rgba(121, 40, 202, 0.6), 
-                              0 0 80px rgba(0, 212, 255, 0.4); }
-            70% { box-shadow: 0 0 0 25px rgba(255, 255, 255, 0), 
-                              0 0 60px rgba(121, 40, 202, 0.8), 
-                              0 0 120px rgba(0, 212, 255, 0.6); }
-            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0), 
-                              0 0 40px rgba(121, 40, 202, 0.6), 
-                              0 0 80px rgba(0, 212, 255, 0.4); }
-        }
+/* 红眼横向扫描锁定 */
+@keyframes scan-sweep{
+  0%{transform:translateY(-50%) translateX(-20px) scaleX(.5);opacity:.2;}
+  50%{transform:translateY(-50%) translateX(20px) scaleX(1.2);opacity:.7;}
+  100%{transform:translateY(-50%) translateX(-20px) scaleX(.5);opacity:.2;}
+}
 
-        /* 4. 悬停终极壮观炸裂合集 */
-        .epic-epic-btn:hover {
-            /* 超大张力超调：倾斜+大幅上浮+强力放大，气场全开 */
-            transform: rotate(3deg) scale(1.12) translateY(-8px);
-            /* 超厚纯白高光边框，锐利夺目 */
-            border-color: #ffffff;
-            /* 文字极致强光炸裂发光（刺眼震撼） */
-            text-shadow: 0 0 10px #fff, 0 0 25px #fff, 
-                         0 0 40px #7928ca, 0 0 60px #00d4ff;
-            /* 无限极光脉冲呼吸光效，全程壮观不停歇 */
-            animation: gradient-flow 6s ease infinite, aurora-pulse 1.5s infinite;
-        }
+/* 悬停：全场压暗、按钮地狱高能过载·令人不敢久看 */
+.dread-btn:hover{
+  transform:scale(1.15) skewX(-3deg); /* 失真微扭曲，不安惊悚 */
+  border-color:#ff6666;
+  box-shadow:
+   0 0 30px #ff0000,
+   0 0 60px #ff0000,
+   0 0 120px rgba(255,0,0,.9),
+   0 0 200px rgba(255,0,0,.6),
+   0 0 300px rgba(255,0,0,.3);
+  animation:dread-hover-violent 0.6s infinite alternate;
+}
 
-        /* 悬停触发双层巨型波纹裂变扩散 */
-        .epic-epic-btn:hover::before { width: 600px; height: 600px; }
-        .epic-epic-btn:hover::after { width: 450px; height: 450px; }
+/* 悬停外环狂暴炸开脉冲 */
+.dread-btn:hover::after{
+  opacity:1;
+  animation:violent-ring-pulse 0.8s infinite;
+}
 
-        /* 5. 按压硬核收敛反馈（张力收尾，不杂乱） */
-        .epic-epic-btn:active {
-            transform: rotate(3deg) scale(1.06) translateY(-2px);
-            box-shadow: 0 0 20px rgba(121, 40, 202, 0.7), 
-                        0 0 40px rgba(0, 212, 255, 0.5);
-            text-shadow: 0 0 8px #fff, 0 0 20px #7928ca;
-        }
-    </style>
+/* 悬停背景瞬间极致压暗+红潮压迫 */
+body:has(.dread-btn:hover)::before{
+  opacity:1;
+  filter:contrast(1.4) brightness(.5);
+}
+
+/* 狂暴高频震颤爆闪（不安、过载、危险） */
+@keyframes dread-hover-violent{
+  0%{
+    box-shadow:
+     0 0 30px #ff0000,
+     0 0 60px #ff0000,
+     0 0 120px rgba(255,0,0,.9),
+     0 0 200px rgba(255,0,0,.6);
+    filter:brightness(1);
+  }
+  100%{
+    box-shadow:
+     0 0 40px #ff4444,
+     0 0 80px #ff2222,
+     0 0 160px rgba(255,0,0,.95),
+     0 0 260px rgba(255,0,0,.7);
+    filter:brightness(1.25);
+  }
+}
+
+/* 外圈急速扩张压迫环 */
+@keyframes violent-ring-pulse{
+  0%{transform:scale(.8);opacity:.8;border-color:rgba(255,0,0,.9);}
+  100%{transform:scale(1.8);opacity:0;border-color:rgba(255,0,0,0);}
+}
+
+/* 点击瞬间硬核锁死冲击 */
+.dread-btn:active{
+  transform:scale(1.08) skewX(-1deg);
+  filter:brightness(1.4) contrast(1.6);
+  box-shadow:
+   0 0 40px #ff6666,
+   0 0 90px #ff2222,
+   0 0 180px rgba(255,0,0,.8);
+}
+</style>
 </head>
 <body>
-    <button class="epic-epic-btn" onclick="alert('极致壮观·炸裂顶配！')">
-        壮观终极按钮
-    </button>
+
+<button class="dread-btn" onclick="alert('高危指令已触发')">
+  终焉执行
+</button>
+
 </body>
 </html>
