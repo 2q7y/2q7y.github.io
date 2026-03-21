@@ -5,98 +5,261 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>键盘按键显示</title>
     <style>
+        /* 全局样式重置+基础配置 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+            /* 平滑过渡 */
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* 记事本风格背景：横线+淡色文字行 */
         body {
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            background-color: #f0f4f8;
-            color: #2d3748;
+            /* 记事本底色+横线纹理 */
+            background: #f9f9f9;
+            background-image: 
+                /* 横线 */
+                linear-gradient(transparent 95%, #e0e0e0 95%),
+                /* 淡色文字行（重复的占位文字） */
+                repeating-linear-gradient(
+                    to bottom,
+                    transparent 0px,
+                    transparent 38px,
+                    rgba(150, 150, 150, 0.08) 38px,
+                    rgba(150, 150, 150, 0.08) 40px
+                );
+            background-size: 100% 40px, 100% 40px;
+            color: #333;
             padding: 20px;
+            overflow: hidden;
+            position: relative;
         }
 
+        /* 记事本页边距装饰线 */
+        body::before {
+            content: '';
+            position: absolute;
+            left: 80px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ff6b6b;
+            border-radius: 1px;
+            opacity: 0.7;
+        }
+
+        /* 背景淡色占位文字（模拟记事本笔记） */
+        .background-text {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none; /* 不影响点击交互 */
+            padding: 20px 100px;
+            font-family: 'Courier New', monospace; /* 等宽字体更像记事本 */
+            font-size: 14px;
+            line-height: 40px; /* 和横线间距匹配 */
+            color: rgba(100, 100, 100, 0.15);
+            white-space: pre-wrap;
+            overflow: hidden;
+        }
+
+        /* 按键显示卡片 */
         .key-display {
             width: 90%;
-            max-width: 500px;
-            height: 200px;
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            max-width: 550px;
+            height: 220px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            border: 1px solid #eaeaea;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            transition: all 0.2s ease;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
+            position: relative;
+            overflow: hidden;
+            z-index: 1; /* 确保卡片在背景文字上层 */
         }
 
-        /* 按键按下时的动画 */
+        /* 按键按下动画 */
         .key-display.active {
             transform: scale(0.98);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            background-color: #f7fafc;
+            box-shadow: 
+                0 4px 20px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.9);
         }
 
+        /* 装饰性光效 */
+        .key-display::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -50%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to right,
+                transparent,
+                rgba(200, 200, 200, 0.05),
+                transparent
+            );
+            animation: lightMove 3s infinite linear;
+        }
+
+        @keyframes lightMove {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        /* 按键名称样式 */
         .key-name {
-            font-size: 4rem;
-            font-weight: bold;
+            font-size: 5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 12px;
+            position: relative;
+            /* 文字按下回弹动画 */
+            transition: transform 0.15s ease;
             color: #2b6cb0;
-            margin-bottom: 10px;
         }
 
+        .key-display.active .key-name {
+            transform: scale(0.95);
+        }
+
+        /* 键码样式 */
         .key-code {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
             color: #4a5568;
         }
 
+        /* 计数容器 */
         .count-container {
             width: 90%;
-            max-width: 500px;
+            max-width: 550px;
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
+            gap: 20px;
+            z-index: 1; /* 确保计数面板在背景文字上层 */
         }
 
+        /* 计数卡片 */
         .count-item {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeaea;
+            padding: 25px 20px;
             text-align: center;
         }
 
         .count-label {
             font-size: 1rem;
+            opacity: 0.7;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 400;
             color: #718096;
-            margin-bottom: 8px;
         }
 
         .count-value {
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 2.8rem;
+            font-weight: 700;
+            text-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            /* 数字变化动画 */
+            transition: all 0.2s ease;
             color: #2b6cb0;
+        }
+
+        .count-value.update {
+            animation: numberPulse 0.3s ease;
+        }
+
+        @keyframes numberPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
         }
 
         /* 响应式适配 */
         @media (max-width: 600px) {
             .key-name {
-                font-size: 3rem;
+                font-size: 3.5rem;
             }
             .count-value {
-                font-size: 1.5rem;
+                font-size: 2rem;
+            }
+            .key-display {
+                height: 180px;
+            }
+            .count-container {
+                gap: 15px;
+            }
+            .count-item {
+                padding: 20px 15px;
+            }
+            body::before {
+                left: 40px;
+            }
+            .background-text {
+                padding: 20px 60px;
             }
         }
+
+        /* 初始加载动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .key-display, .count-item {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        .key-display { animation-delay: 0.1s; opacity: 0; }
+        .count-item:nth-child(1) { animation-delay: 0.3s; opacity: 0; }
+        .count-item:nth-child(2) { animation-delay: 0.5s; opacity: 0; }
     </style>
 </head>
 <body>
+    <!-- 记事本背景文字 -->
+    <div class="background-text">
+1. 按下任意按键，上方会显示按键名称和键码
+2. 左侧计数：当前按键被按下的总次数
+3. 右侧计数：所有按键被按下的总次数
+4. 支持字母、数字、符号、功能键（Ctrl/Shift/Alt等）
+5. 空格、回车、方向键等特殊键会显示友好名称
+6. 按键按下时会有轻微的动画反馈
+7. 背景模拟记事本样式，包含横线和页边距
+8. 所有交互功能正常，背景仅作装饰
+9. 响应式设计，移动端也能正常显示
+10. 数字更新时有脉冲动画，提升交互体验
+11. 卡片采用毛玻璃效果，视觉更有层次感
+12. 装饰性光效缓慢移动，增加页面活力
+13. 初始加载时元素会依次淡入，体验更流畅
+14. 背景文字不影响任何交互操作
+15. 可自定义背景文字内容和横线间距
+    </div>
+
     <div class="key-display" id="keyDisplay">
         <div class="key-name" id="keyName">?</div>
         <div class="key-code" id="keyCode">键码：-</div>
@@ -121,7 +284,7 @@
         const singleKeyCount = document.getElementById('singleKeyCount');
         const totalKeyCount = document.getElementById('totalKeyCount');
 
-        // 特殊键名称映射（优化显示）
+        // 特殊键名称映射
         const keyMap = {
             ' ': '空格',
             'Enter': '回车',
@@ -146,38 +309,41 @@
         };
 
         // 计数变量
-        let totalCount = 0; // 总按键数
-        let keyCountMap = {}; // 存储每个按键的计数 {键名: 次数}
-        let currentKey = ''; // 记录当前按下的键
+        let totalCount = 0;
+        let keyCountMap = {};
+        let currentKey = '';
+
+        // 数字更新动画函数
+        function updateNumberWithAnimation(element, value) {
+            element.textContent = value;
+            element.classList.add('update');
+            setTimeout(() => {
+                element.classList.remove('update');
+            }, 300);
+        }
 
         // 监听键盘按下事件
         document.addEventListener('keydown', (e) => {
-            // 阻止默认行为（比如按空格时页面滚动）
             e.preventDefault();
 
-            // 显示按键名称（优先用映射，没有则用默认值）
+            // 显示按键信息
             const displayName = keyMap[e.key] || e.key;
             keyName.textContent = displayName;
-            
-            // 显示键码
             keyCode.textContent = `键码：${e.keyCode || e.code}`;
 
             // 更新计数
-            totalCount++; // 总次数+1
-            totalKeyCount.textContent = totalCount;
+            totalCount++;
+            updateNumberWithAnimation(totalKeyCount, totalCount);
 
-            // 更新当前按键的计数
             currentKey = displayName;
             keyCountMap[currentKey] = (keyCountMap[currentKey] || 0) + 1;
-            singleKeyCount.textContent = keyCountMap[currentKey];
+            updateNumberWithAnimation(singleKeyCount, keyCountMap[currentKey]);
 
-            // 触发按下动画
+            // 触发按键动画
             keyDisplay.classList.add('active');
-            
-            // 100ms后移除动画（模拟按键回弹）
             setTimeout(() => {
                 keyDisplay.classList.remove('active');
-            }, 100);
+            }, 150);
         });
     </script>
 </body>
