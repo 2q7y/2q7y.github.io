@@ -3,423 +3,339 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>极简词典（本地版）</title>
+    <title>暖心留言墙 | 分享你的心情</title>
     <style>
+        /* 全局样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: "微软雅黑", "PingFang SC", sans-serif;
         }
 
         body {
-            background-color: #f8f9fa;
+            background-color: #f5f7fa;
             color: #333;
             line-height: 1.6;
             padding: 20px;
         }
 
+        /* 页面容器 */
         .container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            padding: 30px;
         }
 
-        .visitor-stats {
-            text-align: right;
-            font-size: 14px;
-            color: #7f8c8d;
-            margin-bottom: 15px;
-        }
-
+        /* 头部样式 */
         header {
             text-align: center;
-            margin-bottom: 30px;
+            margin: 30px 0;
         }
 
         h1 {
             color: #2c3e50;
+            font-size: 2.5rem;
             margin-bottom: 10px;
         }
 
-        .search-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
+        .header-desc {
+            color: #7f8c8d;
+            font-size: 1rem;
         }
 
-        #word-input {
-            flex: 1;
+        /* 留言发布区 */
+        .post-section {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        input, textarea {
+            width: 100%;
             padding: 12px 15px;
-            border: 1px solid #e1e1e1;
+            border: 1px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 16px;
+            font-size: 1rem;
             outline: none;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s ease;
         }
 
-        #word-input:focus {
+        input:focus, textarea:focus {
             border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
         }
 
-        #search-btn {
-            padding: 12px 25px;
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .submit-btn {
             background-color: #3498db;
             color: white;
             border: none;
+            padding: 12px 30px;
             border-radius: 8px;
+            font-size: 1rem;
             cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
+            transition: all 0.2s ease;
         }
 
-        #search-btn:hover {
+        .submit-btn:hover {
             background-color: #2980b9;
+            transform: translateY(-2px);
         }
 
-        .result-area {
-            display: none;
-            padding: 20px;
-            border-top: 1px solid #eee;
+        .submit-btn:active {
+            transform: translateY(0);
         }
 
-        .word-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .word {
-            font-size: 28px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .phonetic {
-            color: #7f8c8d;
-            font-style: italic;
-        }
-
-        .pronounce-btn {
-            padding: 5px 10px;
-            background-color: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .meanings {
+        /* 留言展示区 */
+        .messages-section {
             margin-top: 20px;
         }
 
-        .meaning-item {
-            margin-bottom: 15px;
-            padding-left: 10px;
-            border-left: 3px solid #3498db;
+        .messages-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f1f1;
         }
 
-        .part-of-speech {
+        .messages-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        /* 留言卡片 */
+        .message-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            position: relative;
+            transition: transform 0.3s ease;
+        }
+
+        .message-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-author {
             font-weight: bold;
-            color: #2980b9;
-            margin-bottom: 5px;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
         }
 
-        .definition {
-            margin-left: 10px;
+        .message-content {
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.8;
         }
 
-        .example {
-            margin-left: 10px;
-            font-style: italic;
+        .message-time {
+            font-size: 0.85rem;
+            color: #95a5a6;
+            margin-bottom: 10px;
+        }
+
+        .delete-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: #ecf0f1;
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 0.8rem;
             color: #7f8c8d;
-            margin-top: 5px;
+            transition: all 0.2s ease;
         }
 
-        .error-message {
-            color: #e74c3c;
+        .delete-btn:hover {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* 空状态提示 */
+        .empty-tip {
             text-align: center;
-            padding: 20px;
-            display: none;
+            padding: 50px 0;
+            color: #95a5a6;
+            font-size: 1.1rem;
         }
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            display: none;
-        }
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .messages-list {
+                grid-template-columns: 1fr;
+            }
 
-        @media (max-width: 600px) {
-            .container {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .post-section {
                 padding: 20px;
-            }
-            
-            .search-box {
-                flex-direction: column;
-            }
-            
-            .word-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-            
-            .word {
-                font-size: 24px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="visitor-stats" id="visitor-stats">
-            总访问量: <span id="total-visits">0</span> | 今日访问量: <span id="today-visits">0</span>
-        </div>
-
+        <!-- 页面头部 -->
         <header>
-            <h1>极简词典（本地版）</h1>
-            <p>断网可用，内置2000+常用单词</p>
+            <h1>💬 暖心留言墙</h1>
+            <p class="header-desc">在这里留下你的心情、故事或祝福吧～</p>
         </header>
 
-        <div class="search-box">
-            <input type="text" id="word-input" placeholder="请输入要查询的单词..." autocomplete="off">
-            <button id="search-btn">查询</button>
-        </div>
-
-        <div class="loading" id="loading">
-            正在查询，请稍候...
-        </div>
-
-        <div class="error-message" id="error-message">
-            抱歉，未找到该单词的释义，请检查拼写或尝试其他单词。
-        </div>
-
-        <div class="result-area" id="result-area">
-            <div class="word-header">
-                <span class="word" id="word-display"></span>
-                <span class="phonetic" id="phonetic-display"></span>
-                <button class="pronounce-btn" id="pronounce-btn">播放发音</button>
+        <!-- 留言发布区域 -->
+        <section class="post-section">
+            <div class="form-group">
+                <label for="author">你的昵称</label>
+                <input type="text" id="author" placeholder="请输入你的昵称（必填）" required>
             </div>
-            <div class="meanings" id="meanings-container"></div>
-        </div>
+            <div class="form-group">
+                <label for="content">留言内容</label>
+                <textarea id="content" placeholder="分享你的心情...（必填）" required></textarea>
+            </div>
+            <button class="submit-btn" id="submitBtn">发布留言</button>
+        </section>
+
+        <!-- 留言展示区域 -->
+        <section class="messages-section">
+            <h2 class="messages-title">大家的留言</h2>
+            <div class="messages-list" id="messagesList">
+                <!-- 空状态提示 -->
+                <div class="empty-tip" id="emptyTip">暂无留言，快来发布第一条吧～</div>
+            </div>
+        </section>
     </div>
 
     <script>
-        // DOM元素获取
-        const wordInput = document.getElementById('word-input');
-        const searchBtn = document.getElementById('search-btn');
-        const resultArea = document.getElementById('result-area');
-        const errorMessage = document.getElementById('error-message');
-        const loading = document.getElementById('loading');
-        const wordDisplay = document.getElementById('word-display');
-        const phoneticDisplay = document.getElementById('phonetic-display');
-        const pronounceBtn = document.getElementById('pronounce-btn');
-        const meaningsContainer = document.getElementById('meanings-container');
-        const totalVisitsEl = document.getElementById('total-visits');
-        const todayVisitsEl = document.getElementById('today-visits');
+        // 获取DOM元素
+        const authorInput = document.getElementById('author');
+        const contentInput = document.getElementById('content');
+        const submitBtn = document.getElementById('submitBtn');
+        const messagesList = document.getElementById('messagesList');
+        const emptyTip = document.getElementById('emptyTip');
 
-        // ========== 1. 访问量统计 ==========
-        function initVisitorStats() {
-            const today = new Date().toISOString().split('T')[0];
-            const stats = JSON.parse(localStorage.getItem('visitorStats')) || {
-                total: 0,
-                todayDate: '',
-                todayCount: 0
-            };
+        // 初始化：从本地存储加载留言
+        let messages = JSON.parse(localStorage.getItem('wallMessages')) || [];
+        renderMessages();
 
-            if (stats.todayDate !== today) {
-                stats.todayDate = today;
-                stats.todayCount = 1;
-                stats.total += 1;
-            } else {
-                stats.todayCount += 1;
-            }
-
-            localStorage.setItem('visitorStats', JSON.stringify(stats));
-            totalVisitsEl.textContent = stats.total;
-            todayVisitsEl.textContent = stats.todayCount;
-        }
-        window.addEventListener('DOMContentLoaded', initVisitorStats);
-
-        // ========== 2. 本地词典数据库（2000+常用词，节选核心） ==========
-        const dictionaryDatabase = {
-            "apple": {
-                phonetic: "/ˈæpl/",
-                meanings: [
-                    { part: "n. (名词)", tran: "苹果", sent: { orig: "I eat an apple every day.", trans: "我每天吃一个苹果。" } },
-                    { part: "n. (名词)", tran: "苹果树", sent: { orig: "There is an apple tree in my yard.", trans: "我的院子里有一棵苹果树。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/apple--_us_1.mp3"
-            },
-            "banana": {
-                phonetic: "/bəˈnɑːnə/",
-                meanings: [
-                    { part: "n. (名词)", tran: "香蕉", sent: { orig: "Bananas are rich in potassium.", trans: "香蕉富含钾元素。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/banana--_us_1.mp3"
-            },
-            "computer": {
-                phonetic: "/kəmˈpjuːtər/",
-                meanings: [
-                    { part: "n. (名词)", tran: "计算机，电脑", sent: { orig: "I use a computer to work from home.", trans: "我用电脑在家工作。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/computer--_us_1.mp3"
-            },
-            "programming": {
-                phonetic: "/ˈproʊɡræmɪŋ/",
-                meanings: [
-                    { part: "n. (名词)", tran: "编程，程序设计", sent: { orig: "Programming is my favorite hobby.", trans: "编程是我最喜欢的爱好。" } },
-                    { part: "v. (动词)", tran: "编写程序（program的现在分词）", sent: { orig: "He is programming a new software.", trans: "他正在编写一个新软件。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/programming--_us_1.mp3"
-            },
-            "happy": {
-                phonetic: "/ˈhæpi/",
-                meanings: [
-                    { part: "adj. (形容词)", tran: "快乐的，幸福的", sent: { orig: "She is very happy today.", trans: "她今天非常开心。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/happy--_us_1.mp3"
-            },
-            "hello": {
-                phonetic: "/həˈloʊ/",
-                meanings: [
-                    { part: "int. (感叹词)", tran: "喂，你好（用于问候或打招呼）", sent: { orig: "Hello, how are you?", trans: "你好，最近怎么样？" } },
-                    { part: "v. (动词)", tran: "说（或大声说）“喂”；打招呼", sent: { orig: "He helloed me from across the street.", trans: "他从街对面跟我打招呼。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/hello--_us_1.mp3"
-            },
-            "world": {
-                phonetic: "/wɜːrld/",
-                meanings: [
-                    { part: "n. (名词)", tran: "世界；地球；天下", sent: { orig: "He wants to travel around the world.", trans: "他想环游世界。" } },
-                    { part: "n. (名词)", tran: "界，领域；世人", sent: { orig: "She is famous in the world of music.", trans: "她在音乐界很有名。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/world--_us_1.mp3"
-            },
-            "javascript": {
-                phonetic: "/ˈdʒɑːvəskrɪpt/",
-                meanings: [
-                    { part: "n. (名词)", tran: "JavaScript语言（一种脚本语言，用于创建交互式网页）", sent: { orig: "I use JavaScript to build interactive web pages.", trans: "我用JavaScript制作交互式网页。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/javascript--_us_1.mp3"
-            },
-            "study": {
-                phonetic: "/ˈstʌdi/",
-                meanings: [
-                    { part: "v. (动词)", tran: "学习，研读；研究", sent: { orig: "She studies English every morning.", trans: "她每天早上学习英语。" } },
-                    { part: "n. (名词)", tran: "学习，研究；书房", sent: { orig: "His study of history is very deep.", trans: "他对历史的研究很深入。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/study--_us_1.mp3"
-            },
-            "work": {
-                phonetic: "/wɜːrk/",
-                meanings: [
-                    { part: "v. (动词)", tran: "工作，劳动；干活", sent: { orig: "He works in a big company.", trans: "他在一家大公司工作。" } },
-                    { part: "n. (名词)", tran: "工作，职业；活计", sent: { orig: "My work is very interesting.", trans: "我的工作很有趣。" } }
-                ],
-                audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/work--_us_1.mp3"
-            },
-            // 以下省略1990+常用词，核心常用词已覆盖
-            "school": { phonetic: "/skuːl/", meanings: [{ part: "n. (名词)", tran: "学校；学院；上学", sent: { orig: "I go to school at 8 o'clock every day.", trans: "我每天8点去上学。" } }], audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/school--_us_1.mp3" },
-            "teacher": { phonetic: "/ˈtiːtʃər/", meanings: [{ part: "n. (名词)", tran: "教师，老师", sent: { orig: "My English teacher is very kind.", trans: "我的英语老师很和蔼。" } }], audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/teacher--_us_1.mp3" },
-            "student": { phonetic: "/ˈstuːdnt/", meanings: [{ part: "n. (名词)", tran: "学生；学者", sent: { orig: "He is a good student in our class.", trans: "他是我们班的好学生。" } }], audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/student--_us_1.mp3" },
-            "book": { phonetic: "/bʊk/", meanings: [{ part: "n. (名词)", tran: "书，书籍；本子", sent: { orig: "This is a very interesting book.", trans: "这是一本很有趣的书。" } }, { part: "v. (动词)", tran: "预订，预约", sent: { orig: "I booked a hotel room online.", trans: "我在网上预订了一间酒店房间。" } }], audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/book--_us_1.mp3" },
-            "time": { phonetic: "/taɪm/", meanings: [{ part: "n. (名词)", tran: "时间；次，回；时代", sent: { orig: "Time is money.", trans: "时间就是金钱。" } }, { part: "v. (动词)", tran: "计时；安排时间", sent: { orig: "The race was timed at 10 seconds.", trans: "这次赛跑的成绩是10秒。" } }], audio: "https://ssl.gstatic.com/dictionary/static/sounds/20200429/time--_us_1.mp3" }
-        };
-
-        // ========== 3. 本地查询逻辑（无网络请求） ==========
-        function searchWord() {
-            const word = wordInput.value.trim().toLowerCase();
-            
-            // 清空状态
-            meaningsContainer.innerHTML = '';
-            resultArea.style.display = 'none';
-            errorMessage.style.display = 'none';
-            loading.style.display = 'none';
+        // 发布留言按钮点击事件
+        submitBtn.addEventListener('click', function() {
+            // 获取输入值并去除首尾空格
+            const author = authorInput.value.trim();
+            const content = contentInput.value.trim();
 
             // 验证输入
-            if (!word) {
-                alert('请输入要查询的单词！');
+            if (!author || !content) {
+                alert('昵称和留言内容都不能为空哦～');
                 return;
             }
 
-            // 模拟加载（提升体验）
-            loading.style.display = 'block';
-            
-            // 本地查询（延迟500ms模拟加载，更自然）
-            setTimeout(() => {
-                loading.style.display = 'none';
-                
-                if (dictionaryDatabase[word]) {
-                    displayResult(dictionaryDatabase[word], word);
-                } else {
-                    errorMessage.style.display = 'block';
-                }
-            }, 500);
-        }
+            // 创建新留言对象
+            const newMessage = {
+                id: Date.now(), // 用时间戳作为唯一ID
+                author: author,
+                content: content,
+                time: getCurrentTime() // 获取当前时间
+            };
 
-        // 显示查询结果
-        function displayResult(data, word) {
-            wordDisplay.textContent = word;
-            phoneticDisplay.textContent = data.phonetic || '暂无音标';
-            pronounceBtn.dataset.audio = data.audio;
-            
-            data.meanings.forEach(meaning => {
-                const meaningItem = document.createElement('div');
-                meaningItem.className = 'meaning-item';
-                
-                const partOfSpeech = document.createElement('div');
-                partOfSpeech.className = 'part-of-speech';
-                partOfSpeech.textContent = meaning.part;
-                
-                const definition = document.createElement('div');
-                definition.className = 'definition';
-                definition.textContent = meaning.tran;
-                
-                const example = document.createElement('div');
-                example.className = 'example';
-                if (meaning.sent) {
-                    example.textContent = `${meaning.sent.orig} —— ${meaning.sent.trans}`;
-                }
-                
-                meaningItem.appendChild(partOfSpeech);
-                meaningItem.appendChild(definition);
-                if (meaning.sent) {
-                    meaningItem.appendChild(example);
-                }
-                
-                meaningsContainer.appendChild(meaningItem);
+            // 添加到留言列表并保存到本地存储
+            messages.unshift(newMessage); // 新留言放在最前面
+            localStorage.setItem('wallMessages', JSON.stringify(messages));
+
+            // 重新渲染留言列表
+            renderMessages();
+
+            // 清空输入框
+            authorInput.value = '';
+            contentInput.value = '';
+
+            // 提示发布成功
+            alert('留言发布成功啦～');
+        });
+
+        // 渲染留言列表
+        function renderMessages() {
+            // 如果没有留言，显示空提示，否则隐藏
+            if (messages.length === 0) {
+                emptyTip.style.display = 'block';
+                return;
+            } else {
+                emptyTip.style.display = 'none';
+            }
+
+            // 清空现有列表
+            messagesList.innerHTML = '';
+
+            // 遍历留言列表，创建卡片
+            messages.forEach(message => {
+                const card = document.createElement('div');
+                card.className = 'message-card';
+                card.innerHTML = `
+                    <button class="delete-btn" data-id="${message.id}">×</button>
+                    <div class="message-author">${message.author}</div>
+                    <div class="message-content">${message.content}</div>
+                    <div class="message-time">${message.time}</div>
+                `;
+                messagesList.appendChild(card);
             });
 
-            resultArea.style.display = 'block';
+            // 为所有删除按钮绑定事件
+            bindDeleteEvents();
         }
 
-        // 播放发音（需联网，无网时提示）
-        function playPronunciation() {
-            const audioUrl = pronounceBtn.dataset.audio;
-            if (audioUrl) {
-                const audio = new Audio(audioUrl);
-                audio.play().catch(err => {
-                    alert('无法播放发音（可能是断网或浏览器限制），但单词释义不受影响');
+        // 绑定删除按钮事件
+        function bindDeleteEvents() {
+            const deleteBtns = document.querySelectorAll('.delete-btn');
+            deleteBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const messageId = parseInt(this.getAttribute('data-id'));
+                    // 确认删除
+                    if (confirm('确定要删除这条留言吗？')) {
+                        // 过滤掉要删除的留言
+                        messages = messages.filter(msg => msg.id !== messageId);
+                        // 保存到本地存储
+                        localStorage.setItem('wallMessages', JSON.stringify(messages));
+                        // 重新渲染
+                        renderMessages();
+                    }
                 });
-            }
+            });
         }
 
-        // 绑定事件
-        searchBtn.addEventListener('click', searchWord);
-        pronounceBtn.addEventListener('click', playPronunciation);
-        wordInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                searchWord();
-            }
-        });
+        // 获取格式化的当前时间
+        function getCurrentTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            return `${year}-${month}-${day} ${hour}:${minute}`;
+        }
     </script>
 </body>
 </html>
