@@ -23,19 +23,6 @@
             padding: 20px;
         }
 
-        .title {
-            font-size: 2.5rem;
-            margin-bottom: 40px;
-            color: #2b6cb0;
-            text-align: center;
-        }
-
-        .hint {
-            font-size: 1rem;
-            color: #718096;
-            margin-bottom: 20px;
-        }
-
         .key-display {
             width: 90%;
             max-width: 500px;
@@ -70,66 +57,59 @@
             color: #4a5568;
         }
 
-        .key-info {
+        .count-container {
             width: 90%;
             max-width: 500px;
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
-            margin-top: 20px;
         }
 
-        .info-item {
+        .count-item {
             background-color: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            text-align: center;
         }
 
-        .info-label {
-            font-size: 0.9rem;
+        .count-label {
+            font-size: 1rem;
             color: #718096;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
 
-        .info-value {
-            font-size: 1.1rem;
+        .count-value {
+            font-size: 2rem;
             font-weight: 600;
-            color: #2d3748;
+            color: #2b6cb0;
         }
 
         /* 响应式适配 */
         @media (max-width: 600px) {
-            .title {
-                font-size: 2rem;
-            }
             .key-name {
                 font-size: 3rem;
+            }
+            .count-value {
+                font-size: 1.5rem;
             }
         }
     </style>
 </head>
 <body>
-    <h1 class="title">按下任意键试试</h1>
-    <p class="hint">支持字母、数字、符号、功能键（Ctrl/Shift/Alt等）</p>
-
     <div class="key-display" id="keyDisplay">
         <div class="key-name" id="keyName">?</div>
         <div class="key-code" id="keyCode">键码：-</div>
     </div>
 
-    <div class="key-info">
-        <div class="info-item">
-            <div class="info-label">是否按下 Shift</div>
-            <div class="info-value" id="shiftStatus">否</div>
+    <div class="count-container">
+        <div class="count-item">
+            <div class="count-label">当前按键次数</div>
+            <div class="count-value" id="singleKeyCount">0</div>
         </div>
-        <div class="info-item">
-            <div class="info-label">是否按下 Ctrl</div>
-            <div class="info-value" id="ctrlStatus">否</div>
-        </div>
-        <div class="info-item">
-            <div class="info-label">是否按下 Alt</div>
-            <div class="info-value" id="altStatus">否</div>
+        <div class="count-item">
+            <div class="count-label">总按键次数</div>
+            <div class="count-value" id="totalKeyCount">0</div>
         </div>
     </div>
 
@@ -138,9 +118,8 @@
         const keyDisplay = document.getElementById('keyDisplay');
         const keyName = document.getElementById('keyName');
         const keyCode = document.getElementById('keyCode');
-        const shiftStatus = document.getElementById('shiftStatus');
-        const ctrlStatus = document.getElementById('ctrlStatus');
-        const altStatus = document.getElementById('altStatus');
+        const singleKeyCount = document.getElementById('singleKeyCount');
+        const totalKeyCount = document.getElementById('totalKeyCount');
 
         // 特殊键名称映射（优化显示）
         const keyMap = {
@@ -166,6 +145,11 @@
             'PageDown': 'PageDown'
         };
 
+        // 计数变量
+        let totalCount = 0; // 总按键数
+        let keyCountMap = {}; // 存储每个按键的计数 {键名: 次数}
+        let currentKey = ''; // 记录当前按下的键
+
         // 监听键盘按下事件
         document.addEventListener('keydown', (e) => {
             // 阻止默认行为（比如按空格时页面滚动）
@@ -177,11 +161,15 @@
             
             // 显示键码
             keyCode.textContent = `键码：${e.keyCode || e.code}`;
-            
-            // 更新组合键状态
-            shiftStatus.textContent = e.shiftKey ? '是' : '否';
-            ctrlStatus.textContent = e.ctrlKey ? '是' : '否';
-            altStatus.textContent = e.altKey ? '是' : '否';
+
+            // 更新计数
+            totalCount++; // 总次数+1
+            totalKeyCount.textContent = totalCount;
+
+            // 更新当前按键的计数
+            currentKey = displayName;
+            keyCountMap[currentKey] = (keyCountMap[currentKey] || 0) + 1;
+            singleKeyCount.textContent = keyCountMap[currentKey];
 
             // 触发按下动画
             keyDisplay.classList.add('active');
