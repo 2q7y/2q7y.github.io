@@ -3,162 +3,225 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>高能压迫·恐惧锁定</title>
+<title>终极·高危锁定·物理恐惧</title>
 <style>
 * {margin:0;padding:0;box-sizing:border-box}
 
+/* 全局容器：物理级画面震颤+红噪点底纹 */
 body{
   min-height:100vh;
   display:flex;align-items:center;justify-content:center;
   background:#000;
   overflow:hidden;
+  position:relative;
+  /* 永久低频微震（生理不适铺垫） */
+  animation:global-tremble 8s infinite ease-in-out;
 }
 
-/* 全屏背景压迫暗场（悬停会狂暴变暗压场） */
+/* 全屏红噪点底纹（脏污、老旧、危险设备感） */
 body::before{
   content:"";position:fixed;inset:0;
-  background:radial-gradient(circle at 50% 40%, #180000, #000 70%);
-  opacity:0.6;
-  transition:opacity .4s ease,filter .4s ease;
+  background:
+    radial-gradient(circle at 50% 40%, #1a0000, #000 75%),
+    repeating-linear-gradient(0deg, rgba(255,0,0,.03) 0px, rgba(255,0,0,.03) 1px, transparent 1px, transparent 4px);
+  opacity:0.7;
   pointer-events:none;
-  z-index:-2;
+  z-index:-3;
 }
 
-.dread-btn{
-  padding:1.6rem 4.5rem;
-  font-size:1.5rem;font-weight:900;letter-spacing:4px;
+/* 全屏红警边缘扫描（悬停触发全屏红边收缩锁定） */
+body::after{
+  content:"";position:fixed;inset:0;
+  border:12px solid rgba(255,0,0,0);
+  pointer-events:none;
+  transition:border-color .3s ease, opacity .3s ease;
+  z-index:-2;
+  opacity:0;
+}
+
+/* 核心恐惧按钮 */
+.dread-core-btn{
+  padding:1.8rem 5rem;
+  font-size:1.6rem;font-weight:900;letter-spacing:6px;
   color:#fff;
-  border:3px solid #ff2222;
-  border-radius:6px; /* 不圆润，硬核锋利压迫 */
+  text-transform:uppercase; /* 大写更硬核 */
+  border:4px solid #ff0000;
+  border-radius:2px; /* 极致锋利硬边 */
   background:#000;
   position:relative;
   overflow:visible;
   cursor:pointer;
   outline:none;
-  /* 底层永久危险红光震荡气场 */
+  /* 底层永久危险红光气场 */
   box-shadow:
-   0 0 15px #ff0000,
-   0 0 30px rgba(255,0,0,.8),
-   0 0 60px rgba(255,0,0,.4);
+   0 0 20px #ff0000,
+   0 0 40px rgba(255,0,0,.9),
+   0 0 80px rgba(255,0,0,.5),
+   0 0 150px rgba(255,0,0,.3);
 
   transform:scale(1);
-  transition:transform .2s cubic-bezier(.2,1.5,.3,1),
-              box-shadow .25s ease,border-color .2s ease;
-
-  animation:dread-idle-pulse 2.2s infinite alternate ease-in-out;
+  transition:all .15s cubic-bezier(.1,2,.3,1); /* 暴力回弹，无丝滑 */
+  /* 永久危险呼吸（低频、不安） */
+  animation:
+    dread-idle-pulse 2s infinite alternate ease-in-out,
+    text-glitch 3s infinite linear; /* 文字电流失真 */
   will-change:transform,box-shadow;
   z-index:1;
 }
 
-/* 红眼水平扫描锁定线 */
-.dread-btn::before{
-  content:"";position:absolute;left:-40px;right:-40px;height:2px;
-  background:linear-gradient(90deg,transparent,#ff0000,#ff4444,#ff0000,transparent);
-  top:50%;transform:translateY(-50%) scaleX(.6);
-  opacity:.4;filter:blur(1px);
-  transition:opacity .2s;
-  animation:scan-sweep 1.6s infinite linear;
+/* 红眼扫描锁定线（双轨交叉锁定） */
+.dread-core-btn::before{
+  content:"";position:absolute;
+  left:-80px;right:-80px;height:3px;
+  background:linear-gradient(90deg,transparent,#ff0000,#ff6666,#ff0000,transparent);
+  top:50%;transform:translateY(-50%) scaleX(.7);
+  opacity:.5;filter:blur(1px);
+  animation:scan-sweep 1.2s infinite linear;
+}
+.dread-core-btn::after{
+  content:"";position:absolute;
+  top:-80px;bottom:-80px;width:3px;
+  background:linear-gradient(180deg,transparent,#ff0000,#ff6666,#ff0000,transparent);
+  left:50%;transform:translateX(-50%) scaleY(.7);
+  opacity:.5;filter:blur(1px);
+  animation:scan-sweep-vertical 1.8s infinite linear;
 }
 
-/* 外溢狂暴爆闪环（极强压迫） */
-.dread-btn::after{
-  content:"";position:absolute;inset:-30px;border-radius:4px;
-  border:2px solid rgba(255,0,0,0);
-  opacity:0;pointer-events:none;
-  animation:none;
-}
-
-/* 永久低速危险呼吸（平时就不安） */
+/* 1. 永久低频呼吸（不安感铺垫） */
 @keyframes dread-idle-pulse{
   0%{
     box-shadow:
-     0 0 15px #ff0000,
-     0 0 30px rgba(255,0,0,.8),
-     0 0 60px rgba(255,0,0,.4);
+     0 0 20px #ff0000,
+     0 0 40px rgba(255,0,0,.9),
+     0 0 80px rgba(255,0,0,.5);
   }
   100%{
     box-shadow:
-     0 0 20px #ff2222,
-     0 0 45px rgba(255,0,0,.9),
-     0 0 90px rgba(255,0,0,.55),
-     0 0 140px rgba(255,0,0,.25);
+     0 0 25px #ff2222,
+     0 0 50px rgba(255,0,0,.95),
+     0 0 100px rgba(255,0,0,.6),
+     0 0 180px rgba(255,0,0,.4);
   }
 }
 
-/* 红眼横向扫描锁定 */
+/* 2. 十字扫描锁定（被瞄准的本能恐惧） */
 @keyframes scan-sweep{
-  0%{transform:translateY(-50%) translateX(-20px) scaleX(.5);opacity:.2;}
-  50%{transform:translateY(-50%) translateX(20px) scaleX(1.2);opacity:.7;}
-  100%{transform:translateY(-50%) translateX(-20px) scaleX(.5);opacity:.2;}
+  0%{transform:translateY(-50%) translateX(-40px) scaleX(.6);opacity:.3;}
+  50%{transform:translateY(-50%) translateX(40px) scaleX(1.3);opacity:.8;}
+  100%{transform:translateY(-50%) translateX(-40px) scaleX(.6);opacity:.3;}
+}
+@keyframes scan-sweep-vertical{
+  0%{transform:translateX(-50%) translateY(-40px) scaleY(.6);opacity:.3;}
+  50%{transform:translateX(-50%) translateY(40px) scaleY(1.3);opacity:.8;}
+  100%{transform:translateX(-50%) translateY(-40px) scaleY(.6);opacity:.3;}
 }
 
-/* 悬停：全场压暗、按钮地狱高能过载·令人不敢久看 */
-.dread-btn:hover{
-  transform:scale(1.15) skewX(-3deg); /* 失真微扭曲，不安惊悚 */
-  border-color:#ff6666;
+/* 3. 文字电流失真（故障、危险、失控） */
+@keyframes text-glitch{
+  0%,100%{text-shadow:0 0 5px #ff0000,0 0 10px #ff0000;}
+  25%{text-shadow:-1px 0 5px #ff0000,1px 0 10px #ff6666;}
+  50%{text-shadow:1px 0 5px #ff0000,-1px 0 10px #ff6666;}
+  75%{text-shadow:0 1px 5px #ff0000,0 -1px 10px #ff6666;}
+}
+
+/* 4. 全局物理震颤（生理级不适） */
+@keyframes global-tremble{
+  0%,100%{transform:translate(0px,0px);}
+  25%{transform:translate(-1px,1px);}
+  50%{transform:translate(1px,-1px);}
+  75%{transform:translate(-1px,-1px);}
+}
+
+/* 5. 悬停：全场压暗+红边锁定+狂暴震颤+爆闪 */
+.dread-core-btn:hover{
+  transform:scale(1.18) skewX(-4deg); /* 暴力扭曲放大 */
   box-shadow:
-   0 0 30px #ff0000,
-   0 0 60px #ff0000,
-   0 0 120px rgba(255,0,0,.9),
-   0 0 200px rgba(255,0,0,.6),
-   0 0 300px rgba(255,0,0,.3);
-  animation:dread-hover-violent 0.6s infinite alternate;
+   0 0 40px #ff0000,
+   0 0 80px #ff0000,
+   0 0 160px rgba(255,0,0,.95),
+   0 0 280px rgba(255,0,0,.7),
+   0 0 400px rgba(255,0,0,.4);
+  /* 狂暴高频爆闪（不安、过载、要炸） */
+  animation:
+    dread-idle-pulse 0.4s infinite alternate,
+    text-glitch 0.8s infinite linear,
+    violent-flash 0.2s infinite alternate;
 }
 
-/* 悬停外环狂暴炸开脉冲 */
-.dread-btn:hover::after{
+/* 悬停触发：全屏红边收缩锁定 */
+body:has(.dread-core-btn:hover)::after{
+  border-color:rgba(255,0,0,.9);
   opacity:1;
-  animation:violent-ring-pulse 0.8s infinite;
+  animation:border-lock 1s infinite alternate;
 }
 
-/* 悬停背景瞬间极致压暗+红潮压迫 */
-body:has(.dread-btn:hover)::before{
+/* 悬停触发：全局压暗+红化（只剩按钮高亮） */
+body:has(.dread-core-btn:hover)::before{
   opacity:1;
-  filter:contrast(1.4) brightness(.5);
+  filter:contrast(1.8) brightness(.3) sepia(.2);
 }
 
-/* 狂暴高频震颤爆闪（不安、过载、危险） */
-@keyframes dread-hover-violent{
-  0%{
-    box-shadow:
-     0 0 30px #ff0000,
-     0 0 60px #ff0000,
-     0 0 120px rgba(255,0,0,.9),
-     0 0 200px rgba(255,0,0,.6);
-    filter:brightness(1);
-  }
-  100%{
-    box-shadow:
-     0 0 40px #ff4444,
-     0 0 80px #ff2222,
-     0 0 160px rgba(255,0,0,.95),
-     0 0 260px rgba(255,0,0,.7);
-    filter:brightness(1.25);
-  }
+/* 6. 狂暴爆闪（视觉冲击、生理不适） */
+@keyframes violent-flash{
+  0%{filter:brightness(1) contrast(1.5);}
+  100%{filter:brightness(1.8) contrast(2);}
 }
 
-/* 外圈急速扩张压迫环 */
-@keyframes violent-ring-pulse{
-  0%{transform:scale(.8);opacity:.8;border-color:rgba(255,0,0,.9);}
-  100%{transform:scale(1.8);opacity:0;border-color:rgba(255,0,0,0);}
+/* 7. 全屏红边收缩锁定（压迫感拉满） */
+@keyframes border-lock{
+  0%{border-width:12px;opacity:.8;}
+  100%{border-width:8px;opacity:1;}
 }
 
-/* 点击瞬间硬核锁死冲击 */
-.dread-btn:active{
-  transform:scale(1.08) skewX(-1deg);
-  filter:brightness(1.4) contrast(1.6);
+/* 8. 点击：硬核锁死+画面巨震+红光炸裂 */
+.dread-core-btn:active{
+  transform:scale(1.1) skewX(-2deg);
+  filter:brightness(2) contrast(3);
   box-shadow:
-   0 0 40px #ff6666,
-   0 0 90px #ff2222,
-   0 0 180px rgba(255,0,0,.8);
+   0 0 60px #ff6666,
+   0 0 120px #ff2222,
+   0 0 240px rgba(255,0,0,.9),
+   0 0 400px rgba(255,0,0,.6);
+  /* 点击瞬间全局巨震 */
+  animation:click-shock 0.1s linear;
+}
+
+/* 点击巨震（物理级冲击感） */
+@keyframes click-shock{
+  0%,100%{transform:scale(1.1) skewX(-2deg);}
+  50%{transform:scale(1.15) skewX(-3deg) translate(3px,-3px);}
+}
+
+/* 外溢狂暴扩张环（最后一层压迫） */
+.dread-core-btn + .ring{
+  position:absolute;
+  inset:-100px;
+  border:2px solid rgba(255,0,0,0);
+  border-radius:4px;
+  pointer-events:none;
+  opacity:0;
+  transition:all .5s cubic-bezier(.1,2,.3,1);
+  z-index:0;
+}
+.dread-core-btn:hover + .ring{
+  opacity:1;
+  transform:scale(1.5);
+  border-color:rgba(255,0,0,.8);
+  animation:ring-expand 1s infinite;
+}
+@keyframes ring-expand{
+  0%{transform:scale(1);opacity:.8;}
+  100%{transform:scale(2.5);opacity:0;}
 }
 </style>
 </head>
 <body>
 
-<button class="dread-btn" onclick="alert('高危指令已触发')">
-  终焉执行
+<!-- 核心按钮 + 外溢扩张环 -->
+<button class="dread-core-btn" onclick="alert('⚠️ 高危指令已执行 · 系统过载 ⚠️')">
+  终焉·执行
 </button>
+<div class="ring"></div>
 
 </body>
 </html>
