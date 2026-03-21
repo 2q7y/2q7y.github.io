@@ -1,61 +1,78 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>流体呼吸艺术按钮</title>
-<style>
-* {margin:0;padding:0;box-sizing:border-box}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仅含按钮的空白页</title>
+    <style>
+        /* 重置默认样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body{
-  min-height:100vh;
-  display:flex;align-items:center;justify-content:center;
-  background:#0a0a14;
-}
+        /* 页面整体样式 - 让按钮居中显示 */
+        body {
+            min-height: 100vh;
+            /* 使用flex布局让按钮水平+垂直居中 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            /* 极简背景色（可自行修改） */
+            background-color: #f5f5f5;
+        }
 
-.flow-art-btn{
-  padding:1.4rem 3.6rem;
-  font-size:1.2rem;
-  letter-spacing:2px;
-  color:#fff;
-  border:none;
-  border-radius:999px;
-  cursor:pointer;
-  position:relative;
-  overflow:hidden;
-  background:linear-gradient(120deg,#6a5acd,#20b2aa,#9370db);
-  background-size:300% 300%;
-  box-shadow:0 8px 24px rgba(106,90,205,0.25);
-  transition:transform .4s ease,box-shadow .4s ease;
-  animation:flow-drift 10s ease infinite;
-}
+        /* 按钮核心样式 */
+        .main-btn {
+            /* 按钮尺寸 */
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            /* 视觉样式 */
+            background-color: #007bff;
+            color: white;
+            border: none; /* 默认无边框 */
+            border-radius: 8px;
+            cursor: pointer;
+            /* 过渡动画 - 让所有样式变化更流畅 */
+            transition: all 0.3s ease;
+            /* 按钮阴影 */
+            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1);
+            /* 防止按钮文字被选中 */
+            user-select: none;
+            /* 预留边框空间，避免悬停时按钮位移 */
+            box-sizing: border-box;
+        }
 
-.flow-art-btn::before{
-  content:"";position:absolute;inset:0;
-  background:rgba(255,255,255,0.08);
-  opacity:0;
-  transition:opacity .5s ease;
-}
+        /* 鼠标悬停效果 - 核心修改部分 */
+        .main-btn:hover {
+            background-color: #0056b3;
+            /* 1. 按钮倾斜：使用transform的rotate属性，5deg为倾斜角度，可调整 */
+            transform: rotate(5deg);
+            /* 2. 添加白色边框：2px为边框宽度，可调整 */
+            border: 2px solid #ffffff;
+            /* 优化阴影，增强视觉效果 */
+            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
+        }
 
-.flow-art-btn:hover{
-  transform:translateY(-4px) scale(1.03);
-  box-shadow:0 12px 40px rgba(106,90,205,0.4);
-}
-.flow-art-btn:hover::before{opacity:1;}
+        /* 点击按下效果 */
+        .main-btn:active {
+            transform: rotate(5deg) translateY(2px); /* 保持倾斜，同时按下 */
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.15);
+        }
 
-.flow-art-btn:active{
-  transform:translateY(0) scale(1);
-  box-shadow:0 6px 18px rgba(106,90,205,0.3);
-}
-
-@keyframes flow-drift{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
-</style>
+        /* 禁用状态（可选） */
+        .main-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            border: none;
+            box-shadow: none;
+        }
+    </style>
 </head>
 <body>
-<button class="flow-art-btn">流动诗意</button>
+    <!-- 唯一的按钮元素 -->
+    <button class="main-btn" onclick="alert('按钮被点击了！')">点击我</button>
 </body>
 </html>
