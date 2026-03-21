@@ -3,339 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>暖心留言墙 | 分享你的心情</title>
+    <title>终端命令行模拟器 | 好玩又酷炫</title>
     <style>
-        /* 全局样式 */
+        /* 全局样式重置 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "微软雅黑", "PingFang SC", sans-serif;
+            font-family: "Consolas", "Monaco", "Courier New", monospace;
         }
 
         body {
-            background-color: #f5f7fa;
-            color: #333;
-            line-height: 1.6;
+            background-color: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
             padding: 20px;
         }
 
-        /* 页面容器 */
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        /* 头部样式 */
-        header {
-            text-align: center;
-            margin: 30px 0;
-        }
-
-        h1 {
-            color: #2c3e50;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .header-desc {
-            color: #7f8c8d;
-            font-size: 1rem;
-        }
-
-        /* 留言发布区 */
-        .post-section {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            margin-bottom: 40px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #34495e;
-        }
-
-        input, textarea {
+        /* 终端容器 */
+        .terminal {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        input:focus, textarea:focus {
-            border-color: #3498db;
-        }
-
-        textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-
-        .submit-btn {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .submit-btn:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .submit-btn:active {
-            transform: translateY(0);
-        }
-
-        /* 留言展示区 */
-        .messages-section {
-            margin-top: 20px;
-        }
-
-        .messages-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f1f1f1;
-        }
-
-        .messages-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        /* 留言卡片 */
-        .message-card {
-            background: white;
-            padding: 20px;
+            max-width: 800px;
+            height: 600px;
+            background-color: #0f0f0f;
             border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-            position: relative;
-            transition: transform 0.3s ease;
+            box-shadow: 0 0 30px rgba(0, 255, 153, 0.2);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
-        .message-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        /* 终端顶部标题栏 */
+        .terminal-header {
+            background-color: #2d2d2d;
+            padding: 8px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        .message-author {
-            font-weight: bold;
-            color: #2c3e50;
-            margin-bottom: 10px;
-            font-size: 1.1rem;
-        }
-
-        .message-content {
-            color: #555;
-            margin-bottom: 15px;
-            line-height: 1.8;
-        }
-
-        .message-time {
-            font-size: 0.85rem;
-            color: #95a5a6;
-            margin-bottom: 10px;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background: #ecf0f1;
-            border: none;
-            width: 28px;
-            height: 28px;
+        .terminal-dot {
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
-            cursor: pointer;
-            font-size: 0.8rem;
-            color: #7f8c8d;
-            transition: all 0.2s ease;
         }
 
-        .delete-btn:hover {
-            background: #e74c3c;
-            color: white;
+        .dot-red {
+            background-color: #ff5f56;
         }
 
-        /* 空状态提示 */
-        .empty-tip {
+        .dot-yellow {
+            background-color: #ffbd2e;
+        }
+
+        .dot-green {
+            background-color: #27c93f;
+        }
+
+        .terminal-title {
+            color: #ccc;
+            font-size: 14px;
+            flex: 1;
             text-align: center;
-            padding: 50px 0;
-            color: #95a5a6;
-            font-size: 1.1rem;
+        }
+
+        /* 终端内容区域 */
+        .terminal-body {
+            flex: 1;
+            padding: 20px;
+            color: #00ff99;
+            font-size: 16px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        /* 滚动条样式美化 */
+        .terminal-body::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .terminal-body::-webkit-scrollbar-track {
+            background: #1a1a1a;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb {
+            background: #333;
+            border-radius: 4px;
+        }
+
+        .terminal-body::-webkit-scrollbar-thumb:hover {
+            background: #444;
+        }
+
+        /* 命令输入区域 */
+        .input-line {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .prompt {
+            color: #00cc66;
+            margin-right: 10px;
+        }
+
+        #commandInput {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff99;
+            font-size: 16px;
+            flex: 1;
+            caret-color: #00ff99;
+        }
+
+        /* 文本样式 */
+        .welcome-text {
+            margin-bottom: 20px;
+        }
+
+        .help-text {
+            color: #ff9900;
+        }
+
+        .error-text {
+            color: #ff4444;
+        }
+
+        .success-text {
+            color: #00ff99;
         }
 
         /* 响应式适配 */
         @media (max-width: 768px) {
-            .messages-list {
-                grid-template-columns: 1fr;
+            .terminal {
+                height: 500px;
             }
-
-            h1 {
-                font-size: 2rem;
+            .terminal-body {
+                font-size: 14px;
             }
-
-            .post-section {
-                padding: 20px;
+            #commandInput {
+                font-size: 14px;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 页面头部 -->
-        <header>
-            <h1>💬 暖心留言墙</h1>
-            <p class="header-desc">在这里留下你的心情、故事或祝福吧～</p>
-        </header>
+    <div class="terminal">
+        <!-- 终端顶部标题栏 -->
+        <div class="terminal-header">
+            <div class="terminal-dot dot-red"></div>
+            <div class="terminal-dot dot-yellow"></div>
+            <div class="terminal-dot dot-green"></div>
+            <div class="terminal-title">趣味终端模拟器 (fun-terminal v1.0)</div>
+        </div>
 
-        <!-- 留言发布区域 -->
-        <section class="post-section">
-            <div class="form-group">
-                <label for="author">你的昵称</label>
-                <input type="text" id="author" placeholder="请输入你的昵称（必填）" required>
+        <!-- 终端内容区域 -->
+        <div class="terminal-body" id="terminalOutput">
+            <div class="welcome-text">
+                欢迎使用趣味终端模拟器！🎉<br>
+                输入 <span class="help-text">help</span> 查看可用命令<br>
+                ──────────────────────────────
             </div>
-            <div class="form-group">
-                <label for="content">留言内容</label>
-                <textarea id="content" placeholder="分享你的心情...（必填）" required></textarea>
-            </div>
-            <button class="submit-btn" id="submitBtn">发布留言</button>
-        </section>
-
-        <!-- 留言展示区域 -->
-        <section class="messages-section">
-            <h2 class="messages-title">大家的留言</h2>
-            <div class="messages-list" id="messagesList">
-                <!-- 空状态提示 -->
-                <div class="empty-tip" id="emptyTip">暂无留言，快来发布第一条吧～</div>
-            </div>
-        </section>
+            <!-- 命令输出会动态添加到这里 -->
+        </div>
     </div>
 
     <script>
         // 获取DOM元素
-        const authorInput = document.getElementById('author');
-        const contentInput = document.getElementById('content');
-        const submitBtn = document.getElementById('submitBtn');
-        const messagesList = document.getElementById('messagesList');
-        const emptyTip = document.getElementById('emptyTip');
+        const terminalOutput = document.getElementById('terminalOutput');
+        let commandInput; // 动态创建的输入框
 
-        // 初始化：从本地存储加载留言
-        let messages = JSON.parse(localStorage.getItem('wallMessages')) || [];
-        renderMessages();
+        // 命令历史记录
+        let commandHistory = [];
+        let historyIndex = -1;
 
-        // 发布留言按钮点击事件
-        submitBtn.addEventListener('click', function() {
-            // 获取输入值并去除首尾空格
-            const author = authorInput.value.trim();
-            const content = contentInput.value.trim();
+        // 初始化：创建输入行
+        function initInputLine() {
+            const inputLine = document.createElement('div');
+            inputLine.className = 'input-line';
+            inputLine.innerHTML = `
+                <span class="prompt">user@fun-terminal:~$</span>
+                <input type="text" id="commandInput" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            `;
+            terminalOutput.appendChild(inputLine);
+            commandInput = document.getElementById('commandInput');
+            commandInput.focus();
 
-            // 验证输入
-            if (!author || !content) {
-                alert('昵称和留言内容都不能为空哦～');
-                return;
-            }
-
-            // 创建新留言对象
-            const newMessage = {
-                id: Date.now(), // 用时间戳作为唯一ID
-                author: author,
-                content: content,
-                time: getCurrentTime() // 获取当前时间
-            };
-
-            // 添加到留言列表并保存到本地存储
-            messages.unshift(newMessage); // 新留言放在最前面
-            localStorage.setItem('wallMessages', JSON.stringify(messages));
-
-            // 重新渲染留言列表
-            renderMessages();
-
-            // 清空输入框
-            authorInput.value = '';
-            contentInput.value = '';
-
-            // 提示发布成功
-            alert('留言发布成功啦～');
-        });
-
-        // 渲染留言列表
-        function renderMessages() {
-            // 如果没有留言，显示空提示，否则隐藏
-            if (messages.length === 0) {
-                emptyTip.style.display = 'block';
-                return;
-            } else {
-                emptyTip.style.display = 'none';
-            }
-
-            // 清空现有列表
-            messagesList.innerHTML = '';
-
-            // 遍历留言列表，创建卡片
-            messages.forEach(message => {
-                const card = document.createElement('div');
-                card.className = 'message-card';
-                card.innerHTML = `
-                    <button class="delete-btn" data-id="${message.id}">×</button>
-                    <div class="message-author">${message.author}</div>
-                    <div class="message-content">${message.content}</div>
-                    <div class="message-time">${message.time}</div>
-                `;
-                messagesList.appendChild(card);
-            });
-
-            // 为所有删除按钮绑定事件
-            bindDeleteEvents();
+            // 绑定输入事件
+            commandInput.addEventListener('keydown', handleKeyPress);
         }
 
-        // 绑定删除按钮事件
-        function bindDeleteEvents() {
-            const deleteBtns = document.querySelectorAll('.delete-btn');
-            deleteBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    const messageId = parseInt(this.getAttribute('data-id'));
-                    // 确认删除
-                    if (confirm('确定要删除这条留言吗？')) {
-                        // 过滤掉要删除的留言
-                        messages = messages.filter(msg => msg.id !== messageId);
-                        // 保存到本地存储
-                        localStorage.setItem('wallMessages', JSON.stringify(messages));
-                        // 重新渲染
-                        renderMessages();
+        // 处理键盘按键
+        function handleKeyPress(e) {
+            // 回车执行命令
+            if (e.key === 'Enter') {
+                const command = commandInput.value.trim();
+                if (command) {
+                    // 添加到历史记录
+                    commandHistory.push(command);
+                    historyIndex = commandHistory.length;
+                    // 执行命令
+                    executeCommand(command);
+                    // 清空输入框
+                    commandInput.value = '';
+                }
+            }
+            // 上方向键：查看上一条命令
+            else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (historyIndex > 0) {
+                    historyIndex--;
+                    commandInput.value = commandHistory[historyIndex];
+                }
+            }
+            // 下方向键：查看下一条命令
+            else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (historyIndex < commandHistory.length - 1) {
+                    historyIndex++;
+                    commandInput.value = commandHistory[historyIndex];
+                } else {
+                    historyIndex = commandHistory.length;
+                    commandInput.value = '';
+                }
+            }
+        }
+
+        // 执行命令
+        function executeCommand(command) {
+            // 显示输入的命令
+            const commandLine = document.createElement('div');
+            commandLine.innerHTML = `<span class="prompt">user@fun-terminal:~$</span> ${command}`;
+            terminalOutput.appendChild(commandLine);
+
+            // 命令处理逻辑
+            const cmd = command.toLowerCase();
+            let output = '';
+
+            switch (cmd) {
+                case 'help':
+                    output = `
+                        <span class="help-text">可用命令：</span><br>
+                        help      - 查看帮助信息<br>
+                        clear     - 清空终端<br>
+                        date      - 查看当前时间<br>
+                        whoami    - 查看当前用户<br>
+                        joke      - 讲一个冷笑话<br>
+                        about     - 关于本终端<br>
+                        echo [内容] - 输出指定内容
+                    `;
+                    break;
+                case 'clear':
+                    terminalOutput.innerHTML = '';
+                    const welcomeText = document.createElement('div');
+                    welcomeText.className = 'welcome-text';
+                    welcomeText.innerHTML = `
+                        欢迎使用趣味终端模拟器！🎉<br>
+                        输入 <span class="help-text">help</span> 查看可用命令<br>
+                        ──────────────────────────────
+                    `;
+                    terminalOutput.appendChild(welcomeText);
+                    break;
+                case 'date':
+                    output = `<span class="success-text">当前时间：${new Date().toLocaleString()}</span>`;
+                    break;
+                case 'whoami':
+                    output = `<span class="success-text">当前用户：趣味终端游客 (user@fun-terminal)</span>`;
+                    break;
+                case 'joke':
+                    const jokes = [
+                        "为什么程序员总是分不清万圣节和圣诞节？因为 Oct 31 = Dec 25",
+                        "一个字节走进酒吧，酒保问：你喝点啥？字节说：来杯啤酒，我撑得不行了（8位撑满）",
+                        "程序员的女朋友说：你能不能别总把什么都归类？程序员：你让我分个类先...",
+                        "问：为什么鸟儿不喜欢用C++？答：因为它们怕遇到析构函数（destructor）"
+                    ];
+                    const randomJoke = jokes[Math.floor(Math.random() * jokes.length)];
+                    output = `<span class="success-text">${randomJoke}</span>`;
+                    break;
+                case 'about':
+                    output = `
+                        <span class="success-text">趣味终端模拟器 v1.0</span><br>
+                        基于HTML/CSS/JavaScript开发<br>
+                        一个好玩又酷炫的前端终端模拟工具
+                    `;
+                    break;
+                default:
+                    // 处理echo命令
+                    if (cmd.startsWith('echo ')) {
+                        const echoContent = command.substring(5);
+                        output = `<span class="success-text">${echoContent}</span>`;
+                    } else {
+                        output = `<span class="error-text">错误：未知命令 '${command}'，输入 help 查看可用命令</span>`;
                     }
-                });
-            });
+                    break;
+            }
+
+            // 显示命令输出（clear命令除外）
+            if (cmd !== 'clear' && output) {
+                const outputLine = document.createElement('div');
+                outputLine.innerHTML = output;
+                terminalOutput.appendChild(outputLine);
+            }
+
+            // 重新创建输入行并滚动到底部
+            terminalOutput.removeChild(document.querySelector('.input-line'));
+            initInputLine();
+            terminalOutput.scrollTop = terminalOutput.scrollHeight;
         }
 
-        // 获取格式化的当前时间
-        function getCurrentTime() {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const day = String(now.getDate()).padStart(2, '0');
-            const hour = String(now.getHours()).padStart(2, '0');
-            const minute = String(now.getMinutes()).padStart(2, '0');
-            return `${year}-${month}-${day} ${hour}:${minute}`;
-        }
+        // 初始化终端
+        initInputLine();
     </script>
 </body>
 </html>
