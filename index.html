@@ -3,659 +3,193 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2b2t商店 - 你的专属游戏物品商城</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Awesome -->
-    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    
-    <!-- 自定义配置 -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#22c55e', // 2b2t 主题绿
-                        secondary: '#166534',
-                        dark: '#111827',
-                        light: '#f9fafb'
-                    },
-                    fontFamily: {
-                        inter: ['Inter', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
+    <title>键盘按键显示</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
         }
-    </script>
-    
-    <style type="text/tailwindcss">
-        @layer utilities {
-            .content-auto {
-                content-visibility: auto;
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f4f8;
+            color: #2d3748;
+            padding: 20px;
+        }
+
+        .title {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: #2b6cb0;
+            text-align: center;
+        }
+
+        .hint {
+            font-size: 1rem;
+            color: #718096;
+            margin-bottom: 20px;
+        }
+
+        .key-display {
+            width: 90%;
+            max-width: 500px;
+            height: 200px;
+            background-color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            margin-bottom: 30px;
+        }
+
+        /* 按键按下时的动画 */
+        .key-display.active {
+            transform: scale(0.98);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            background-color: #f7fafc;
+        }
+
+        .key-name {
+            font-size: 4rem;
+            font-weight: bold;
+            color: #2b6cb0;
+            margin-bottom: 10px;
+        }
+
+        .key-code {
+            font-size: 1.2rem;
+            color: #4a5568;
+        }
+
+        .key-info {
+            width: 90%;
+            max-width: 500px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 600px) {
+            .title {
+                font-size: 2rem;
             }
-            .card-hover {
-                @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
-            }
-            .btn-primary {
-                @apply bg-primary text-white px-4 py-2 rounded-lg hover:bg-secondary transition-all;
-            }
-            .btn-outline {
-                @apply border border-primary text-primary px-4 py-2 rounded-lg hover:bg-primary hover:text-white transition-all;
+            .key-name {
+                font-size: 3rem;
             }
         }
     </style>
 </head>
-<body class="font-inter bg-gray-50 text-dark">
-    <!-- 导航栏 -->
-    <header class="sticky top-0 z-50 bg-white shadow-sm">
-        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
-            <!-- Logo -->
-            <a href="#" class="flex items-center gap-2">
-                <i class="fa fa-gamepad text-2xl text-primary"></i>
-                <span class="text-xl font-bold">2b2t商店</span>
-            </a>
-            
-            <!-- 导航菜单 - 桌面端 -->
-            <nav class="hidden md:flex items-center gap-6">
-                <a href="#home" class="font-medium hover:text-primary">首页</a>
-                <a href="#products" class="font-medium hover:text-primary">商品</a>
-                <a href="#categories" class="font-medium hover:text-primary">分类</a>
-                <a href="#about" class="font-medium hover:text-primary">关于我们</a>
-                <a href="#contact" class="font-medium hover:text-primary">联系我们</a>
-            </nav>
-            
-            <!-- 用户操作 -->
-            <div class="flex items-center gap-4">
-                <div class="relative" id="cart-icon">
-                    <i class="fa fa-shopping-cart text-xl cursor-pointer hover:text-primary"></i>
-                    <span class="absolute -top-2 -right-2 bg-primary text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" id="cart-count">0</span>
-                </div>
-                <button class="hidden md:block btn-primary">登录 / 注册</button>
-                
-                <!-- 移动端菜单按钮 -->
-                <button class="md:hidden text-xl" id="mobile-menu-btn">
-                    <i class="fa fa-bars"></i>
-                </button>
-            </div>
-        </div>
-        
-        <!-- 移动端导航菜单 -->
-        <div class="md:hidden hidden bg-white shadow-md absolute w-full" id="mobile-menu">
-            <div class="container mx-auto px-4 py-2 flex flex-col gap-3">
-                <a href="#home" class="py-2 border-b border-gray-100 hover:text-primary">首页</a>
-                <a href="#products" class="py-2 border-b border-gray-100 hover:text-primary">商品</a>
-                <a href="#categories" class="py-2 border-b border-gray-100 hover:text-primary">分类</a>
-                <a href="#about" class="py-2 border-b border-gray-100 hover:text-primary">关于我们</a>
-                <a href="#contact" class="py-2 hover:text-primary">联系我们</a>
-                <button class="btn-primary w-full">登录 / 注册</button>
-            </div>
-        </div>
-    </header>
+<body>
+    <h1 class="title">按下任意键试试</h1>
+    <p class="hint">支持字母、数字、符号、功能键（Ctrl/Shift/Alt等）</p>
 
-    <!-- 购物车侧边栏 -->
-    <div class="fixed top-0 right-0 h-full w-full md:w-96 bg-white shadow-2xl transform translate-x-full transition-transform duration-300 z-50" id="cart-sidebar">
-        <div class="h-full flex flex-col">
-            <div class="p-4 border-b flex justify-between items-center">
-                <h2 class="text-xl font-bold">购物车</h2>
-                <button id="close-cart" class="text-gray-500 hover:text-dark">
-                    <i class="fa fa-times text-xl"></i>
-                </button>
-            </div>
-            
-            <!-- 购物车商品列表 -->
-            <div class="flex-1 overflow-y-auto p-4" id="cart-items">
-                <div class="flex flex-col gap-4">
-                    <!-- 购物车为空提示 -->
-                    <div class="text-center py-10" id="empty-cart">
-                        <i class="fa fa-shopping-cart text-5xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500">您的购物车是空的</p>
-                        <button class="mt-4 btn-primary" onclick="closeCart()">去购物</button>
-                    </div>
-                    
-                    <!-- 购物车商品会动态添加到这里 -->
-                </div>
-            </div>
-            
-            <!-- 购物车底部 -->
-            <div class="p-4 border-t">
-                <div class="flex justify-between mb-4">
-                    <span class="font-bold">总计:</span>
-                    <span class="font-bold text-primary" id="cart-total">¥0.00</span>
-                </div>
-                <button class="btn-primary w-full mb-2">结算</button>
-                <button class="btn-outline w-full" onclick="clearCart()">清空购物车</button>
-            </div>
+    <div class="key-display" id="keyDisplay">
+        <div class="key-name" id="keyName">?</div>
+        <div class="key-code" id="keyCode">键码：-</div>
+    </div>
+
+    <div class="key-info">
+        <div class="info-item">
+            <div class="info-label">是否按下 Shift</div>
+            <div class="info-value" id="shiftStatus">否</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">是否按下 Ctrl</div>
+            <div class="info-value" id="ctrlStatus">否</div>
+        </div>
+        <div class="info-item">
+            <div class="info-label">是否按下 Alt</div>
+            <div class="info-value" id="altStatus">否</div>
         </div>
     </div>
-    
-    <!-- 遮罩层 -->
-    <div class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden" id="overlay"></div>
 
-    <!-- 英雄区域 -->
-    <section id="home" class="bg-gradient-to-r from-dark to-gray-800 text-white py-16 md:py-24">
-        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center gap-8">
-            <div class="md:w-1/2">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">2b2t 游戏物品<br>一站式采购</h1>
-                <p class="text-gray-300 mb-8 text-lg">安全可靠的交易平台，提供各类 2b2t 游戏物品、账号、道具等，快速发货，售后保障</p>
-                <div class="flex flex-wrap gap-4">
-                    <a href="#products" class="btn-primary text-lg px-6 py-3">立即选购</a>
-                    <a href="#about" class="btn-outline text-lg px-6 py-3">了解更多</a>
-                </div>
-            </div>
-            <div class="md:w-1/2">
-                <img src="https://picsum.photos/800/600?random=1" alt="2b2t游戏截图" class="rounded-lg shadow-2xl w-full">
-            </div>
-        </div>
-    </section>
-
-    <!-- 特色服务 -->
-    <section class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-4">我们的优势</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">为您提供安全、快捷、优质的 2b2t 游戏物品交易体验</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center p-6 card-hover bg-gray-50 rounded-lg">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa fa-shield text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">安全交易</h3>
-                    <p class="text-gray-600">多重安全保障，确保交易过程安全可靠，保护您的账号和财产安全</p>
-                </div>
-                
-                <div class="text-center p-6 card-hover bg-gray-50 rounded-lg">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa fa-rocket text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">极速发货</h3>
-                    <p class="text-gray-600">24小时自动发货，无需等待，付款后立即获取您的游戏物品</p>
-                </div>
-                
-                <div class="text-center p-6 card-hover bg-gray-50 rounded-lg">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa fa-headphones text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">7×24客服</h3>
-                    <p class="text-gray-600">专业客服团队全天候在线，随时为您解答问题，处理售后</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 商品分类 -->
-    <section id="categories" class="py-16 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-4">商品分类</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">浏览我们的商品分类，找到您需要的 2b2t 游戏物品</p>
-            </div>
-            
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-                <a href="#" class="card-hover bg-white rounded-lg overflow-hidden">
-                    <img src="https://picsum.photos/400/300?random=2" alt="游戏账号" class="w-full h-48 object-cover">
-                    <div class="p-4 text-center">
-                        <h3 class="font-bold text-lg">游戏账号</h3>
-                        <p class="text-gray-600 text-sm">优质账号，安全可靠</p>
-                    </div>
-                </a>
-                
-                <a href="#" class="card-hover bg-white rounded-lg overflow-hidden">
-                    <img src="https://picsum.photos/400/300?random=3" alt="游戏道具" class="w-full h-48 object-cover">
-                    <div class="p-4 text-center">
-                        <h3 class="font-bold text-lg">游戏道具</h3>
-                        <p class="text-gray-600 text-sm">各类道具，应有尽有</p>
-                    </div>
-                </a>
-                
-                <a href="#" class="card-hover bg-white rounded-lg overflow-hidden">
-                    <img src="https://picsum.photos/400/300?random=4" alt="游戏货币" class="w-full h-48 object-cover">
-                    <div class="p-4 text-center">
-                        <h3 class="font-bold text-lg">游戏货币</h3>
-                        <p class="text-gray-600 text-sm">安全交易，极速到账</p>
-                    </div>
-                </a>
-                
-                <a href="#" class="card-hover bg-white rounded-lg overflow-hidden">
-                    <img src="https://picsum.photos/400/300?random=5" alt="代练服务" class="w-full h-48 object-cover">
-                    <div class="p-4 text-center">
-                        <h3 class="font-bold text-lg">代练服务</h3>
-                        <p class="text-gray-600 text-sm">专业团队，高效代练</p>
-                    </div>
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <!-- 热门商品 -->
-    <section id="products" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center mb-12">
-                <div>
-                    <h2 class="text-3xl font-bold mb-2">热门商品</h2>
-                    <p class="text-gray-600">畅销的 2b2t 游戏物品，限时优惠</p>
-                </div>
-                <a href="#" class="text-primary hover:underline flex items-center gap-1">
-                    <span>查看全部</span>
-                    <i class="fa fa-arrow-right"></i>
-                </a>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="products-grid">
-                <!-- 商品1 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-sm card-hover" data-id="1" data-name="2b2t高级账号" data-price="299.00">
-                    <div class="relative">
-                        <img src="https://picsum.photos/400/300?random=6" alt="2b2t高级账号" class="w-full h-56 object-cover">
-                        <div class="absolute top-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded">热销</div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 flex">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-half-o"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs ml-2">(128)</span>
-                        </div>
-                        <h3 class="font-bold text-lg mb-1">2b2t高级账号</h3>
-                        <p class="text-gray-600 text-sm mb-4">已注册30天，无封禁记录，安全可靠</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-primary font-bold text-xl">¥299.00</span>
-                            <button class="btn-primary add-to-cart">加入购物车</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 商品2 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-sm card-hover" data-id="2" data-name="2b2t游戏货币" data-price="99.00">
-                    <div class="relative">
-                        <img src="https://picsum.photos/400/300?random=7" alt="2b2t游戏货币" class="w-full h-56 object-cover">
-                        <div class="absolute top-2 right-2 bg-red-500 text-white text-xs px-2 py-1 rounded">限时优惠</div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 flex">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs ml-2">(256)</span>
-                        </div>
-                        <h3 class="font-bold text-lg mb-1">2b2t游戏货币</h3>
-                        <p class="text-gray-600 text-sm mb-4">100万游戏币，极速到账，安全交易</p>
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <span class="text-primary font-bold text-xl">¥99.00</span>
-                                <span class="text-gray-400 text-sm line-through ml-2">¥129.00</span>
-                            </div>
-                            <button class="btn-primary add-to-cart">加入购物车</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 商品3 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-sm card-hover" data-id="3" data-name="2b2t稀有道具包" data-price="199.00">
-                    <div class="relative">
-                        <img src="https://picsum.photos/400/300?random=8" alt="2b2t稀有道具包" class="w-full h-56 object-cover">
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 flex">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-o"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs ml-2">(89)</span>
-                        </div>
-                        <h3 class="font-bold text-lg mb-1">2b2t稀有道具包</h3>
-                        <p class="text-gray-600 text-sm mb-4">包含多种稀有道具，提升游戏体验</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-primary font-bold text-xl">¥199.00</span>
-                            <button class="btn-primary add-to-cart">加入购物车</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 商品4 -->
-                <div class="bg-white rounded-lg overflow-hidden shadow-sm card-hover" data-id="4" data-name="2b2t代练服务" data-price="159.00">
-                    <div class="relative">
-                        <img src="https://picsum.photos/400/300?random=9" alt="2b2t代练服务" class="w-full h-56 object-cover">
-                        <div class="absolute top-2 right-2 bg-primary text-white text-xs px-2 py-1 rounded">新品</div>
-                    </div>
-                    <div class="p-4">
-                        <div class="flex items-center mb-2">
-                            <div class="text-yellow-400 flex">
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star"></i>
-                                <i class="fa fa-star-half-o"></i>
-                            </div>
-                            <span class="text-gray-500 text-xs ml-2">(45)</span>
-                        </div>
-                        <h3 class="font-bold text-lg mb-1">2b2t代练服务</h3>
-                        <p class="text-gray-600 text-sm mb-4">等级代练，任务完成，高效可靠</p>
-                        <div class="flex justify-between items-center">
-                            <span class="text-primary font-bold text-xl">¥159.00</span>
-                            <button class="btn-primary add-to-cart">加入购物车</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 关于我们 -->
-    <section id="about" class="py-16 bg-gray-50">
-        <div class="container mx-auto px-4">
-            <div class="flex flex-col md:flex-row gap-8 items-center">
-                <div class="md:w-1/2">
-                    <img src="https://picsum.photos/800/600?random=10" alt="关于2b2t商店" class="rounded-lg shadow-lg w-full">
-                </div>
-                <div class="md:w-1/2">
-                    <h2 class="text-3xl font-bold mb-4">关于2b2t商店</h2>
-                    <p class="text-gray-600 mb-4">2b2t商店是专业的 2b2t 游戏物品交易平台，成立于2020年，致力于为广大 2b2t 玩家提供安全、便捷、高效的游戏物品交易服务。</p>
-                    <p class="text-gray-600 mb-6">我们拥有专业的运营团队和技术团队，所有商品均经过严格审核，确保交易安全。平台支持多种支付方式，24小时自动发货，让您的购物体验更加便捷。</p>
-                    <div class="grid grid-cols-2 gap-4 mb-6">
-                        <div class="flex items-center gap-2">
-                            <i class="fa fa-check-circle text-primary text-xl"></i>
-                            <span>安全交易保障</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="fa fa-check-circle text-primary text-xl"></i>
-                            <span>24小时自动发货</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="fa fa-check-circle text-primary text-xl"></i>
-                            <span>7×24小时客服</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <i class="fa fa-check-circle text-primary text-xl"></i>
-                            <span>假一赔十承诺</span>
-                        </div>
-                    </div>
-                    <a href="#" class="btn-primary">联系我们</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 联系我们 -->
-    <section id="contact" class="py-16 bg-white">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-4">联系我们</h2>
-                <p class="text-gray-600 max-w-2xl mx-auto">如有任何问题或建议，欢迎联系我们，我们将尽快回复您</p>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="text-center p-6 bg-gray-50 rounded-lg card-hover">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa fa-phone text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">客服电话</h3>
-                    <p class="text-gray-600">400-123-4567</p>
-                    <p class="text-gray-500 text-sm mt-2">7×24小时服务</p>
-                </div>
-                
-                <div class="text-center p-6 bg-gray-50 rounded-lg card-hover">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa fa-envelope text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">邮箱地址</h3>
-                    <p class="text-gray-600">support@2b2tshop.com</p>
-                    <p class="text-gray-500 text-sm mt-2">工作日24小时内回复</p>
-                </div>
-                
-                <div class="text-center p-6 bg-gray-50 rounded-lg card-hover">
-                    <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i class="fa fa-wechat text-2xl text-primary"></i>
-                    </div>
-                    <h3 class="text-xl font-bold mb-2">微信客服</h3>
-                    <p class="text-gray-600">2b2tshop_kf</p>
-                    <p class="text-gray-500 text-sm mt-2">扫码添加客服</p>
-                </div>
-            </div>
-            
-            <div class="mt-12 bg-gray-50 rounded-lg p-6 md:p-8">
-                <h3 class="text-xl font-bold mb-6">在线留言</h3>
-                <form class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <label class="block text-gray-700 mb-2">姓名</label>
-                        <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的姓名">
-                    </div>
-                    <div>
-                        <label class="block text-gray-700 mb-2">联系电话</label>
-                        <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的联系电话">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-gray-700 mb-2">留言内容</label>
-                        <textarea rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50" placeholder="请输入您的留言内容"></textarea>
-                    </div>
-                    <div class="md:col-span-2">
-                        <button type="submit" class="btn-primary">提交留言</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- 页脚 -->
-    <footer class="bg-dark text-white py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-                <div>
-                    <div class="flex items-center gap-2 mb-4">
-                        <i class="fa fa-gamepad text-2xl text-primary"></i>
-                        <span class="text-xl font-bold">2b2t商店</span>
-                    </div>
-                    <p class="text-gray-400 mb-4">专业的 2b2t 游戏物品交易平台，为您提供安全、便捷的购物体验</p>
-                    <div class="flex gap-4">
-                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fa fa-weibo text-xl"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fa fa-wechat text-xl"></i></a>
-                        <a href="#" class="text-gray-400 hover:text-primary"><i class="fa fa-qq text-xl"></i></a>
-                    </div>
-                </div>
-                
-                <div>
-                    <h3 class="text-lg font-bold mb-4">快速链接</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#home" class="text-gray-400 hover:text-primary">首页</a></li>
-                        <li><a href="#products" class="text-gray-400 hover:text-primary">商品列表</a></li>
-                        <li><a href="#categories" class="text-gray-400 hover:text-primary">商品分类</a></li>
-                        <li><a href="#about" class="text-gray-400 hover:text-primary">关于我们</a></li>
-                        <li><a href="#contact" class="text-gray-400 hover:text-primary">联系我们</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="text-lg font-bold mb-4">帮助中心</h3>
-                    <ul class="space-y-2">
-                        <li><a href="#" class="text-gray-400 hover:text-primary">购物指南</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-primary">支付方式</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-primary">售后服务</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-primary">常见问题</a></li>
-                        <li><a href="#" class="text-gray-400 hover:text-primary">投诉建议</a></li>
-                    </ul>
-                </div>
-                
-                <div>
-                    <h3 class="text-lg font-bold mb-4">订阅通知</h3>
-                    <p class="text-gray-400 mb-4">订阅我们的最新优惠和活动信息</p>
-                    <div class="flex">
-                        <input type="email" class="flex-1 px-4 py-2 bg-gray-800 border border-gray-700 rounded-l-lg focus:outline-none focus:ring-1 focus:ring-primary text-white" placeholder="您的邮箱地址">
-                        <button class="bg-primary text-white px-4 py-2 rounded-r-lg hover:bg-secondary">订阅</button>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="border-t border-gray-800 pt-8 text-center text-gray-500 text-sm">
-                <p>© 2025 2b2t商店 版权所有 | 营业执照：XXXXXXXXXXXXXX</p>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript -->
     <script>
-        // 购物车数据
-        let cart = [];
-        
-        // DOM 加载完成后执行
-        document.addEventListener('DOMContentLoaded', function() {
-            // 移动端菜单切换
-            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const mobileMenu = document.getElementById('mobile-menu');
+        // 获取DOM元素
+        const keyDisplay = document.getElementById('keyDisplay');
+        const keyName = document.getElementById('keyName');
+        const keyCode = document.getElementById('keyCode');
+        const shiftStatus = document.getElementById('shiftStatus');
+        const ctrlStatus = document.getElementById('ctrlStatus');
+        const altStatus = document.getElementById('altStatus');
+
+        // 特殊键名称映射（优化显示）
+        const keyMap = {
+            ' ': '空格',
+            'Enter': '回车',
+            'Tab': '制表符',
+            'Backspace': '退格',
+            'Escape': 'ESC',
+            'ArrowUp': '上方向键',
+            'ArrowDown': '下方向键',
+            'ArrowLeft': '左方向键',
+            'ArrowRight': '右方向键',
+            'Shift': 'Shift',
+            'Control': 'Ctrl',
+            'Alt': 'Alt',
+            'CapsLock': '大小写锁定',
+            'Meta': 'Win/Command',
+            'Delete': '删除',
+            'Insert': '插入',
+            'Home': 'Home',
+            'End': 'End',
+            'PageUp': 'PageUp',
+            'PageDown': 'PageDown'
+        };
+
+        // 监听键盘按下事件
+        document.addEventListener('keydown', (e) => {
+            // 阻止默认行为（比如按空格时页面滚动）
+            e.preventDefault();
+
+            // 显示按键名称（优先用映射，没有则用默认值）
+            const displayName = keyMap[e.key] || e.key;
+            keyName.textContent = displayName;
             
-            mobileMenuBtn.addEventListener('click', function() {
-                mobileMenu.classList.toggle('hidden');
-            });
+            // 显示键码
+            keyCode.textContent = `键码：${e.keyCode || e.code}`;
             
-            // 购物车相关
-            const cartIcon = document.getElementById('cart-icon');
-            const cartSidebar = document.getElementById('cart-sidebar');
-            const closeCart = document.getElementById('close-cart');
-            const overlay = document.getElementById('overlay');
-            const cartCount = document.getElementById('cart-count');
-            const cartItems = document.getElementById('cart-items');
-            const cartTotal = document.getElementById('cart-total');
-            const emptyCart = document.getElementById('empty-cart');
+            // 更新组合键状态
+            shiftStatus.textContent = e.shiftKey ? '是' : '否';
+            ctrlStatus.textContent = e.ctrlKey ? '是' : '否';
+            altStatus.textContent = e.altKey ? '是' : '否';
+
+            // 触发按下动画
+            keyDisplay.classList.add('active');
             
-            // 打开购物车
-            cartIcon.addEventListener('click', function() {
-                cartSidebar.classList.remove('translate-x-full');
-                overlay.classList.remove('hidden');
-                updateCartUI();
-            });
-            
-            // 关闭购物车
-            window.closeCart = function() {
-                cartSidebar.classList.add('translate-x-full');
-                overlay.classList.add('hidden');
-            };
-            
-            closeCart.addEventListener('click', closeCart);
-            overlay.addEventListener('click', closeCart);
-            
-            // 添加商品到购物车
-            const addToCartButtons = document.querySelectorAll('.add-to-cart');
-            addToCartButtons.forEach(button => {
-                button.addEventListener('click', function() {
-                    const productCard = this.closest('[data-id]');
-                    const productId = productCard.dataset.id;
-                    const productName = productCard.dataset.name;
-                    const productPrice = parseFloat(productCard.dataset.price);
-                    
-                    // 检查商品是否已在购物车中
-                    const existingItem = cart.find(item => item.id === productId);
-                    
-                    if (existingItem) {
-                        // 增加数量
-                        existingItem.quantity += 1;
-                    } else {
-                        // 添加新商品
-                        cart.push({
-                            id: productId,
-                            name: productName,
-                            price: productPrice,
-                            quantity: 1
-                        });
-                    }
-                    
-                    // 更新购物车UI
-                    updateCartUI();
-                    
-                    // 显示添加成功提示
-                    alert('商品已添加到购物车！');
-                });
-            });
-            
-            // 更新购物车UI
-            function updateCartUI() {
-                // 更新购物车数量
-                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-                cartCount.textContent = totalItems;
-                
-                // 更新购物车商品列表
-                cartItems.innerHTML = '';
-                
-                if (cart.length === 0) {
-                    // 显示空购物车提示
-                    cartItems.appendChild(emptyCart);
-                    cartTotal.textContent = '¥0.00';
-                } else {
-                    // 计算总计
-                    let total = 0;
-                    
-                    // 添加购物车商品
-                    cart.forEach(item => {
-                        const itemTotal = item.price * item.quantity;
-                        total += itemTotal;
-                        
-                        const cartItem = document.createElement('div');
-                        cartItem.className = 'flex border-b border-gray-100 pb-4';
-                        cartItem.innerHTML = `
-                            <div class="w-16 h-16 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                                <img src="https://picsum.photos/400/300?random=${item.id}" alt="${item.name}" class="w-full h-full object-cover">
-                            </div>
-                            <div class="flex-1 ml-4">
-                                <h4 class="font-medium">${item.name}</h4>
-                                <div class="flex justify-between mt-2">
-                                    <div class="flex items-center">
-                                        <button class="text-gray-500 hover:text-primary px-2" onclick="updateQuantity('${item.id}', -1)">-</button>
-                                        <span class="px-2">${item.quantity}</span>
-                                        <button class="text-gray-500 hover:text-primary px-2" onclick="updateQuantity('${item.id}', 1)">+</button>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-primary font-bold">¥${itemTotal.toFixed(2)}</span>
-                                        <button class="text-red-500 text-sm mt-1" onclick="removeFromCart('${item.id}')">删除</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        cartItems.appendChild(cartItem);
-                    });
-                    
-                    // 更新总计
-                    cartTotal.textContent = `¥${total.toFixed(2)}`;
-                }
-            }
-            
-            // 更新商品数量
-            window.updateQuantity = function(productId, change) {
-                const item = cart.find(item => item.id === productId);
-                
-                if (item) {
-                    item.quantity += change;
-                    
-                    // 如果数量小于1，移除商品
-                    if (item.quantity < 1) {
-                        removeFromCart(productId);
-                    } else {
-                        updateCartUI();
-                    }
-                }
-            };
-            
-            // 从购物车移除商品
-            window.removeFromCart = function(productId) {
-                cart = cart.filter(item => item.id !== productId);
-                updateCartUI();
-            };
-            
-            // 清空购物车
-            window.clearCart = function() {
-                if (confirm('确定要清空购物车吗？')) {
-                    cart = [];
-                    updateCartUI();
-                }
-            };
+            // 100ms后移除动画（模拟按键回弹）
+            setTimeout(() => {
+                keyDisplay.classList.remove('active');
+            }, 100);
         });
     </script>
 </body>
