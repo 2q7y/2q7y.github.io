@@ -3,477 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>晚风与温柔 - 15分钟治愈游戏</title>
+    <title>雨色备忘录 | 30分钟GalGame</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "微软雅黑", "PingFang SC", sans-serif;
+            font-family: "微软雅黑", "思源黑体", sans-serif;
         }
+
         body {
-            background: linear-gradient(120deg, #f9f6f7 0%, #e8e4e6 100%);
-            min-height: 100vh;
+            background: #1a1a2e;
+            color: #f0f0f0;
+            overflow: hidden;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-            overflow-x: hidden;
         }
-        .game-container {
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+
+        /* 背景图层 */
+        .bg {
+            position: fixed;
+            top: 0;
+            left: 0;
             width: 100%;
-            max-width: 700px;
-            padding: 40px;
-            text-align: center;
-            position: relative;
+            height: 100%;
+            background: url("https://picsum.photos/id/175/1920/1080") no-repeat center center;
+            background-size: cover;
+            filter: brightness(0.4);
+            z-index: -1;
         }
-        .time-hint {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 14px;
-            color: #999;
+
+        /* 游戏容器 */
+        .game-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
         }
-        .title {
-            color: #6d597a;
-            font-size: 32px;
-            margin-bottom: 25px;
-            font-weight: 300;
-            letter-spacing: 2px;
+
+        /* 计时栏 */
+        .timer-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 8px;
+            margin-bottom: 1rem;
         }
-        .subtitle {
-            color: #917fb3;
-            font-size: 18px;
-            margin-bottom: 30px;
-            font-weight: 200;
+
+        .timer-bar span {
+            font-size: 1rem;
+            color: #ffd700;
         }
-        .scene {
-            display: none; /* 默认隐藏所有场景 */
-            opacity: 0;
-            transition: opacity 0.8s ease;
-        }
-        .scene.active {
-            display: block; /* 激活的场景显示 */
-            opacity: 1;
-        }
-        /* 情绪选择按钮 */
-        .emotion-btn {
-            background: #f0e6f6;
-            border: 2px solid #e5d5f1;
+
+        /* 剧情展示区 */
+        .story-area {
+            background: rgba(0, 0, 0, 0.7);
             border-radius: 12px;
-            padding: 18px 30px;
-            margin: 12px;
-            font-size: 17px;
-            color: #554a69;
-            cursor: pointer;
-            transition: all 0.4s ease;
-            width: 80%;
-            max-width: 400px;
-        }
-        .emotion-btn:hover {
-            background: #e5d5f1;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(155, 130, 180, 0.2);
-        }
-        /* 对话区域 */
-        .character-box {
-            margin: 40px 0;
-            min-height: 180px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .character-avatar {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: #f8f0f7;
-            margin-right: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 30px;
-            color: #917fb3;
-        }
-        .character-talk {
-            background: #faf6fa;
-            border-radius: 20px;
-            padding: 25px;
-            font-size: 18px;
-            color: #3a3447;
+            padding: 2rem;
+            flex: 1;
+            margin-bottom: 1rem;
+            overflow-y: auto;
             line-height: 1.8;
-            max-width: 550px;
-            position: relative;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            font-size: 1.1rem;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
         }
-        .character-talk::after {
-            content: "";
-            position: absolute;
-            bottom: -12px;
-            left: 30px;
-            transform: translateX(0);
-            width: 0;
-            height: 0;
-            border-left: 12px solid transparent;
-            border-right: 12px solid transparent;
-            border-top: 12px solid #faf6fa;
+
+        .story-area::-webkit-scrollbar {
+            width: 8px;
         }
-        /* 花瓣互动 */
-        .petal-container {
-            margin: 30px 0;
+
+        .story-area::-webkit-scrollbar-thumb {
+            background: #6a0dad;
+            border-radius: 4px;
         }
-        .petal {
-            width: 35px;
-            height: 35px;
-            background: #ffd6e0;
-            border-radius: 50% 0 50% 50%;
-            margin: 8px;
-            display: inline-block;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            transform: rotate(45deg);
+
+        /* 角色名称样式 */
+        .char-name {
+            color: #ff9a9e;
+            font-weight: bold;
+            margin-right: 0.5rem;
         }
-        .petal:hover {
-            background: #ffb8c8;
-            transform: scale(1.2) rotate(45deg);
-        }
-        .petal.collected {
-            background: #d8a7b5;
-            transform: scale(0.9) rotate(45deg);
-            cursor: default;
-        }
-        .petal-count {
-            font-size: 16px;
-            color: #887599;
-            margin-top: 15px;
-        }
-        /* 呼吸引导 */
-        .breath-guide {
-            margin: 30px 0;
-            font-size: 20px;
-            color: #6d597a;
-        }
-        .breath-circle {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: rgba(220, 208, 231, 0.6);
-            margin: 25px auto;
+
+        .kui { color: #87ceeb; } /* 夏目葵 - 天蓝色 */
+        .hotaru { color: #f49ac2; } /* 月岛萤 - 粉色 */
+        .protagonist { color: #98fb98; } /* 主角 - 浅绿色 */
+
+        /* 选项按钮区 */
+        .choices-area {
             display: flex;
-            align-items: center;
+            gap: 1rem;
             justify-content: center;
-            font-size: 16px;
-            color: #6d597a;
-            animation: breath 6s infinite ease-in-out;
+            flex-wrap: wrap;
         }
-        @keyframes breath {
-            0% { transform: scale(1); content: "吸气"; }
-            25% { transform: scale(1.3); content: "保持"; }
-            50% { transform: scale(1.3); content: "呼气"; }
-            75% { transform: scale(1); content: "放松"; }
-            100% { transform: scale(1); content: "吸气"; }
-        }
-        .breath-tip {
-            font-size: 15px;
-            color: #999;
-            margin-top: 10px;
-        }
-        /* 回忆选择 */
-        .memory-card {
-            background: #fef9fb;
-            border-radius: 15px;
-            padding: 20px;
-            margin: 15px auto;
-            width: 85%;
-            max-width: 500px;
+
+        .choice-btn {
+            background: linear-gradient(45deg, #4158d0, #c850c0);
+            border: none;
+            color: white;
+            padding: 1rem 2rem;
+            font-size: 1rem;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
+            min-width: 200px;
         }
-        .memory-card:hover {
-            border-color: #e5d5f1;
-            transform: translateY(-2px);
+
+        .choice-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
         }
-        .memory-card h3 {
-            color: #6d597a;
-            font-size: 18px;
-            margin-bottom: 10px;
+
+        /* 隐藏元素 */
+        .hidden {
+            display: none;
         }
-        .memory-card p {
-            color: #777;
-            font-size: 16px;
-            line-height: 1.6;
+
+        /* 打字机光标 */
+        .typing::after {
+            content: "|";
+            animation: blink 1s infinite;
         }
-        /* 按钮通用样式 */
-        .ctrl-btn {
-            background: #a78bfa;
-            color: white;
-            border: none;
-            border-radius: 12px;
-            padding: 15px 35px;
-            font-size: 17px;
-            margin: 20px 10px;
-            cursor: pointer;
-            transition: all 0.4s ease;
-        }
-        .ctrl-btn:hover {
-            background: #8b5cf6;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.2);
-        }
-        .ctrl-btn:disabled {
-            background: #d1c5e8;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
-        }
-        /* 最终治愈页面 */
-        .heal-end {
-            padding: 20px 0;
-        }
-        .heal-text {
-            font-size: 20px;
-            color: #6d597a;
-            line-height: 2;
-            margin: 30px 0;
-        }
-        .heal-icon {
-            font-size: 60px;
-            color: #a78bfa;
-            margin: 20px 0;
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
     </style>
 </head>
 <body>
+    <div class="bg"></div>
     <div class="game-container">
-        <!-- 计时提示 -->
-        <div class="time-hint" id="timeHint">游戏进度：0/15分钟</div>
-
-        <!-- 场景1：初始情绪选择（2分钟） -->
-        <div class="scene active" id="scene1">
-            <h1 class="title">✨ 晚风与温柔 ✨</h1>
-            <p class="subtitle">慢慢来，不用急，说说你的心情吧</p>
-            <button class="emotion-btn" onclick="startGame('tired')">💤 疲惫不堪</button>
-            <button class="emotion-btn" onclick="startGame('anxious')">😰 焦虑不安</button>
-            <button class="emotion-btn" onclick="startGame('lonely')">🥺 感到孤独</button>
+        <!-- 计时栏 -->
+        <div class="timer-bar">
+            <span>剧情进度：<span id="progress">0%</span></span>
+            <span>游玩时长：<span id="time">0分钟</span></span>
         </div>
 
-        <!-- 场景2：共情回应（3分钟） -->
-        <div class="scene" id="scene2">
-            <h1 class="title">我懂你的感受</h1>
-            <div class="character-box">
-                <div class="character-avatar">👧</div>
-                <div class="character-talk" id="responseTalk">
-                    <!-- 动态填充回应内容 -->
-                </div>
-            </div>
-            <button class="ctrl-btn" onclick="nextScene('scene3')">慢慢呼吸，继续...</button>
+        <!-- 剧情展示区 -->
+        <div class="story-area" id="storyArea">
+            欢迎来到《雨色备忘录》<br>
+            按任意键开始游戏...
         </div>
 
-        <!-- 场景3：呼吸放松（4分钟） -->
-        <div class="scene" id="scene3">
-            <h1 class="title">和我一起深呼吸</h1>
-            <p class="subtitle">跟着圆圈的节奏，吸气4秒→保持2秒→呼气6秒</p>
-            <div class="breath-guide">
-                <div class="breath-circle" id="breathCircle">吸气</div>
-                <p class="breath-tip">请保持这个节奏，持续1分钟，感受身体的放松</p>
-            </div>
-            <button class="ctrl-btn" id="breathBtn" disabled onclick="nextScene('scene4')">完成呼吸，继续</button>
-        </div>
-
-        <!-- 场景4：美好回忆（3分钟） -->
-        <div class="scene" id="scene4">
-            <h1 class="title">藏在心底的小美好</h1>
-            <p class="subtitle">选一个让你觉得温暖的回忆，慢慢感受</p>
-            <div class="memory-card" onclick="chooseMemory('memory1')">
-                <h3>☀️ 清晨的阳光</h3>
-                <p>醒来时刚好落在床头的阳光，暖融融的，什么都不用想</p>
-            </div>
-            <div class="memory-card" onclick="chooseMemory('memory2')">
-                <h3>☕ 温热的饮品</h3>
-                <p>冬天手里捧着一杯热奶茶/热茶，暖到心里的感觉</p>
-            </div>
-            <div class="memory-card" onclick="chooseMemory('memory3')">
-                <h3>🐾 身边的陪伴</h3>
-                <p>和喜欢的人/宠物安静待在一起，不用说话也很安心</p>
-            </div>
-            <button class="ctrl-btn" id="memoryBtn" disabled onclick="nextScene('scene5')">记住这份温暖，继续</button>
-        </div>
-
-        <!-- 场景5：花瓣治愈（2分钟） -->
-        <div class="scene" id="scene5">
-            <h1 class="title">收集温柔的花瓣</h1>
-            <p class="subtitle">每点击一片花瓣，就放下一点烦恼</p>
-            <div class="petal-container" id="petalContainer">
-                <div class="petal" onclick="collectPetal(this)"></div>
-                <div class="petal" onclick="collectPetal(this)"></div>
-                <div class="petal" onclick="collectPetal(this)"></div>
-                <div class="petal" onclick="collectPetal(this)"></div>
-                <div class="petal" onclick="collectPetal(this)"></div>
-                <div class="petal" onclick="collectPetal(this)"></div>
-                <div class="petal" onclick="collectPetal(this)"></div>
-                <div class="petal" onclick="collectPetal(this)"></div>
-            </div>
-            <p class="petal-count" id="petalCount">已收集：0/8 片花瓣</p>
-            <button class="ctrl-btn" id="petalBtn" disabled onclick="nextScene('scene6')">放下烦恼，继续</button>
-        </div>
-
-        <!-- 场景6：最终治愈（1分钟） -->
-        <div class="scene" id="scene6">
-            <h1 class="title">你已经很棒了</h1>
-            <div class="heal-end">
-                <div class="heal-icon">💖</div>
-                <p class="heal-text" id="finalHealText">
-                    生活总有不完美，疲惫、焦虑、孤独都是正常的<br>
-                    允许自己慢下来，允许自己有情绪<br>
-                    你不需要事事完美，只要好好爱着自己就够了
-                </p>
-            </div>
-            <button class="ctrl-btn" onclick="restartGame()">再来一次温柔的陪伴</button>
+        <!-- 选项按钮区 -->
+        <div class="choices-area" id="choicesArea">
+            <button class="choice-btn" id="startBtn">开始游戏</button>
         </div>
     </div>
 
     <script>
         // 全局变量
-        let currentEmotion = "";
-        let petalCollected = 0;
-        let gameStartTime = 0;
-        let timeUpdateInterval = null;
+        let gameTime = 0; // 游玩时长（分钟）
+        let progress = 0; // 剧情进度（%）
+        let isTyping = false; // 是否正在打字机效果
 
-        // 初始化游戏
-        function startGame(emotion) {
-            currentEmotion = emotion;
-            gameStartTime = new Date().getTime();
+        // DOM元素
+        const storyArea = document.getElementById('storyArea');
+        const choicesArea = document.getElementById('choicesArea');
+        const progressSpan = document.getElementById('progress');
+        const timeSpan = document.getElementById('time');
+        const startBtn = document.getElementById('startBtn');
+
+        // 打字机效果函数
+        function typeText(text, speed = 50, callback = null) {
+            if (isTyping) return;
+            isTyping = true;
+            let index = 0;
+            storyArea.innerHTML = '';
+            storyArea.classList.add('typing');
             
-            // 更新计时提示
-            timeUpdateInterval = setInterval(updateTimeHint, 1000);
-            
-            // 根据情绪填充回应
-            let talkContent = "";
-            if (emotion === "tired") {
-                talkContent = "我知道你最近很累，好像有做不完的事，压得喘不过气。不用逼自己一定要做到最好，累了就停下来，哪怕只是发发呆也好。你已经为生活拼尽全力了，真的很棒。";
-            } else if (emotion === "anxious") {
-                talkContent = "是不是总担心事情做不好？总在想「如果出错了怎么办」？其实不用怕，哪怕走得慢一点，哪怕偶尔出错，也没关系。你只需要关注当下的每一步，不用提前预支明天的焦虑。";
-            } else if (emotion === "lonely") {
-                talkContent = "好像身边很热闹，却还是觉得孤单？好像有很多话想说，却找不到人听？没关系，我在这里听你说，不用假装开心，不用勉强自己合群。你的孤独，值得被看见，也值得被温柔对待。";
-            }
-            document.getElementById("responseTalk").innerText = talkContent;
-            
-            // 切换到场景2
-            switchScene("scene2");
+            const typingInterval = setInterval(() => {
+                if (index < text.length) {
+                    // 处理换行符
+                    if (text[index] === '\n') {
+                        storyArea.innerHTML += '<br>';
+                    } else {
+                        storyArea.innerHTML += text[index];
+                    }
+                    index++;
+                    // 滚动到底部
+                    storyArea.scrollTop = storyArea.scrollHeight;
+                } else {
+                    clearInterval(typingInterval);
+                    storyArea.classList.remove('typing');
+                    isTyping = false;
+                    if (callback) callback();
+                }
+            }, speed);
         }
 
-        // 切换场景
-        function switchScene(sceneId) {
-            // 隐藏所有场景
-            const allScenes = document.querySelectorAll(".scene");
-            allScenes.forEach(scene => {
-                scene.classList.remove("active");
+        // 更新计时和进度
+        function updateStatus(minutesAdded, progressAdded) {
+            gameTime += minutesAdded;
+            progress += progressAdded;
+            progress = Math.min(progress, 100); // 不超过100%
+            
+            timeSpan.textContent = `${gameTime}分钟`;
+            progressSpan.textContent = `${Math.round(progress)}%`;
+        }
+
+        // 隐藏所有按钮
+        function hideChoices() {
+            choicesArea.innerHTML = '';
+        }
+
+        // 创建选项按钮
+        function createChoices(choices) {
+            hideChoices();
+            choices.forEach(choice => {
+                const btn = document.createElement('button');
+                btn.className = 'choice-btn';
+                btn.textContent = choice.text;
+                btn.onclick = choice.callback;
+                choicesArea.appendChild(btn);
             });
-            // 显示目标场景
-            document.getElementById(sceneId).classList.add("active");
-            
-            // 场景3：呼吸引导计时
-            if (sceneId === "scene3") {
-                // 6秒呼吸动画，1分钟后启用按钮
-                setTimeout(() => {
-                    document.getElementById("breathBtn").disabled = false;
-                }, 60000); // 1分钟 = 60000毫秒
-                
-                // 呼吸文字切换
-                let breathTexts = ["吸气", "保持", "呼气", "放松"];
-                let textIndex = 0;
-                setInterval(() => {
-                    textIndex = (textIndex + 1) % 4;
-                    document.getElementById("breathCircle").innerText = breathTexts[textIndex];
-                }, 1500); // 每1.5秒切换一次
-            }
         }
 
-        // 下一步场景（简化切换）
-        function nextScene(targetScene) {
-            switchScene(targetScene);
+        // 剧情：序章 - 雨落时分（5分钟，进度17%）
+        function prologue() {
+            updateStatus(5, 17);
+            const text = `
+<span class="char-name protagonist">晴彦</span>：（收起淋湿的笔记本，抬头望向老旧书店的屋檐）<br>
+<span class="char-name">旁白</span>：暴雨毫无征兆地落下，将放学的路截断。檐下已站着两个人——<br>
+<span class="char-name kui">夏目葵</span>：（踮脚整理被风吹乱的海报，转身致歉）抱歉抱歉！风太大把海报吹下来了……你也是躲雨吗？<br>
+<span class="char-name protagonist">晴彦</span>：嗯，本来想抄近路回家。<br>
+<span class="char-name hotaru">月岛萤</span>：（突然开口，声音轻柔）这本《雨天随笔》，是你的吗？（举起掉在脚边的笔记本）
+            `;
+            typeText(text, 40, () => {
+                createChoices([
+                    {
+                        text: "（对夏目葵）需要帮忙整理海报吗？",
+                        callback: branchKui
+                    },
+                    {
+                        text: "（对月岛萤）谢谢！你也喜欢这类随笔？",
+                        callback: branchHotaru
+                    }
+                ]);
+            });
         }
 
-        // 收集花瓣
-        function collectPetal(petalElem) {
-            if (petalElem.classList.contains("collected")) return;
-            
-            petalElem.classList.add("collected");
-            petalCollected++;
-            document.getElementById("petalCount").innerText = `已收集：${petalCollected}/8 片花瓣`;
-            
-            // 收集完所有花瓣启用按钮
-            if (petalCollected >= 8) {
-                document.getElementById("petalBtn").disabled = false;
-            }
+        // 分支1：向日葵的约定（15分钟，进度50%）
+        function branchKui() {
+            updateStatus(15, 50);
+            const text = `
+<span class="char-name protagonist">晴彦</span>：我来帮你吧，这些海报看起来不好固定。<br>
+<span class="char-name kui">夏目葵</span>：（惊喜）真的吗？太谢谢你了！我是文学社的夏目葵，这是招新海报……<br>
+<span class="char-name">旁白</span>：指尖偶然触碰，两人同时红了脸。雨还没停，你撑着伞陪葵走到社团教室。<br>
+<span class="char-name kui">夏目葵</span>：（擦拭额头汗水）其实……我一直想邀请你加入文学社，你的作文写得很好。<br>
+<span class="char-name protagonist">晴彦</span>：（看着她认真的眼睛）我会考虑的。<br>
+<span class="char-name">旁白</span>：葵从抽屉里拿出一块向日葵形状的饼干，轻轻放在你手心。雨渐渐停了，夕阳穿透云层，在她发梢镀上一层金边。<br>
+<span class="char-name kui">夏目葵</span>：下次……一起看雨后的向日葵吧？
+            `;
+            typeText(text, 40, () => {
+                createChoices([
+                    {
+                        text: "好，我很期待",
+                        callback: endKuiGood
+                    },
+                    {
+                        text: "抱歉，我还有事",
+                        callback: endKuiBad
+                    }
+                ]);
+            });
         }
 
-        // 选择回忆
-        function chooseMemory(memoryId) {
-            // 启用下一步按钮
-            document.getElementById("memoryBtn").disabled = false;
-            
-            // 根据回忆填充最终治愈文本（轻微调整）
-            let finalText = "";
-            if (memoryId === "memory1") {
-                finalText = "就像清晨的阳光总会如约而至，你的美好也从未缺席。哪怕现在觉得黑暗，也请相信，总有一束光会为你而来。";
-            } else if (memoryId === "memory2") {
-                finalText = "就像温热的饮品能暖手暖胃，你也可以给自己一点温柔。累了就给自己一杯喜欢的饮品，告诉自己：我值得被好好对待。";
-            } else if (memoryId === "memory3") {
-                finalText = "陪伴不一定需要很多人，哪怕只有自己，也要好好陪伴自己。你永远是自己最坚实的依靠，永远有人（包括你自己）爱着你。";
-            }
-            
-            // 保留基础文本 + 个性化回忆文本
-            document.getElementById("finalHealText").innerText = `
-                生活总有不完美，${currentEmotion === "tired" ? "疲惫" : currentEmotion === "anxious" ? "焦虑" : "孤独"}都是正常的
-                允许自己慢下来，允许自己有情绪
-                你不需要事事完美，只要好好爱着自己就够了
-                <br><br>${finalText}
-            `.replace(/                /g, ""); // 去除缩进
+        // 分支2：萤色的诗行（15分钟，进度50%）
+        function branchHotaru() {
+            updateStatus(15, 50);
+            const text = `
+<span class="char-name protagonist">晴彦</span>：谢谢！你也喜欢这类雨天的随笔吗？<br>
+<span class="char-name hotaru">月岛萤</span>：（轻轻点头）嗯，喜欢雨里的安静……这本诗集，是我外婆的。<br>
+<span class="char-name">旁白</span>：萤翻开诗集，指腹划过泛黄的字迹，雨滴打在屋檐上，像温柔的节拍。<br>
+<span class="char-name hotaru">月岛萤</span>：（轻声念）“雨是天空写给大地的诗，而相遇是诗里最温柔的韵脚。”<br>
+<span class="char-name protagonist">晴彦</span>：（看着她专注的侧脸）很美的句子。<br>
+<span class="char-name">旁白</span>：萤从口袋里拿出一枚银色的书签，上面刻着小小的萤火虫图案。<br>
+<span class="char-name hotaru">月岛萤</span>：这个……送给你，下次一起读诗好吗？
+            `;
+            typeText(text, 40, () => {
+                createChoices([
+                    {
+                        text: "好，一起读诗吧",
+                        callback: endHotaruGood
+                    },
+                    {
+                        text: "我不太懂诗呢",
+                        callback: endHotaruBad
+                    }
+                ]);
+            });
         }
 
-        // 更新计时提示
-        function updateTimeHint() {
-            const now = new Date().getTime();
-            const elapsedMinutes = Math.floor((now - gameStartTime) / 60000);
-            const progressText = `游戏进度：${Math.min(elapsedMinutes, 15)}/15分钟`;
-            document.getElementById("timeHint").innerText = progressText;
-            
-            // 15分钟后自动跳转到最终场景
-            if (elapsedMinutes >= 15) {
-                clearInterval(timeUpdateInterval);
-                switchScene("scene6");
-            }
+        // 结局1：葵的美好结局（10分钟，进度33%）
+        function endKuiGood() {
+            updateStatus(10, 33);
+            const text = `
+<span class="char-name">旁白</span>：一周后，你和葵来到学校后的向日葵花田。雨后的阳光格外温暖，向日葵朝着太阳的方向盛放。<br>
+<span class="char-name kui">夏目葵</span>：（笑着看向你）谢谢你愿意陪我来……其实，我早就想和你说说话了。<br>
+<span class="char-name protagonist">晴彦</span>：我也是，和你在一起的时光很开心。<br>
+<span class="char-name">旁白</span>：葵的脸颊泛起红晕，轻轻牵住了你的手。风吹过花田，带着向日葵的清香，这个夏天，有了最温柔的开始。<br>
+<br>
+【结局：向日葵的约定】
+            `;
+            typeText(text, 40, () => {
+                createChoices([
+                    {
+                        text: "重新开始",
+                        callback: restartGame
+                    }
+                ]);
+            });
         }
 
-        // 重新开始游戏
+        // 结局2：葵的普通结局（10分钟，进度33%）
+        function endKuiBad() {
+            updateStatus(10, 33);
+            const text = `
+<span class="char-name">旁白</span>：你拒绝了葵的邀请，她的眼神闪过一丝失落，但很快又恢复了笑容。<br>
+<span class="char-name kui">夏目葵</span>：没关系！那……下次有机会再说吧。<br>
+<span class="char-name">旁白</span>：你独自走在回家的路上，口袋里还留着那块向日葵饼干的甜味。回头望去，葵还站在社团教室门口，望着你的方向。<br>
+<br>
+【结局：未说出口的心意】
+            `;
+            typeText(text, 40, () => {
+                createChoices([
+                    {
+                        text: "重新开始",
+                        callback: restartGame
+                    }
+                ]);
+            });
+        }
+
+        // 结局3：萤的美好结局（10分钟，进度33%）
+        function endHotaruGood() {
+            updateStatus(10, 33);
+            const text = `
+<span class="char-name">旁白</span>：周末，你和萤来到图书馆的靠窗位置。阳光透过玻璃落在书页上，萤轻声念着诗，声音像雨滴一样温柔。<br>
+<span class="char-name hotaru">月岛萤</span>：（合上书，看向你）和你一起读诗，感觉诗里的世界都变得更温暖了。<br>
+<span class="char-name protagonist">晴彦</span>：是因为和你在一起吧。<br>
+<span class="char-name">旁白</span>：萤的脸颊微红，轻轻将头靠在你的肩上。书签在书页间闪着微光，像暗夜里的萤火虫，照亮了彼此的心跳。<br>
+<br>
+【结局：萤色的诗行】
+            `;
+            typeText(text, 40, () => {
+                createChoices([
+                    {
+                        text: "重新开始",
+                        callback: restartGame
+                    }
+                ]);
+            });
+        }
+
+        // 结局4：萤的普通结局（10分钟，进度33%）
+        function endHotaruBad() {
+            updateStatus(10, 33);
+            const text = `
+<span class="char-name">旁白</span>：你婉拒了萤的邀请，她默默收起书签，指尖微微收紧。<br>
+<span class="char-name hotaru">月岛萤</span>：（轻声）没关系……那这本诗集，就先放在你这里吧。<br>
+<span class="char-name">旁白</span>：你独自回家，翻开那本诗集，夹着的书签轻轻滑落。上面的萤火虫图案，在灯光下显得格外孤单。<br>
+<br>
+【结局：未完成的诗】
+            `;
+            typeText(text, 40, () => {
+                createChoices([
+                    {
+                        text: "重新开始",
+                        callback: restartGame
+                    }
+                ]);
+            });
+        }
+
+        // 重启游戏
         function restartGame() {
-            // 重置变量
-            currentEmotion = "";
-            petalCollected = 0;
-            gameStartTime = 0;
-            clearInterval(timeUpdateInterval);
-            
-            // 重置UI
-            document.getElementById("petalCount").innerText = "已收集：0/8 片花瓣";
-            document.getElementById("breathBtn").disabled = true;
-            document.getElementById("memoryBtn").disabled = true;
-            document.getElementById("petalBtn").disabled = true;
-            
-            // 重置花瓣状态
-            const allPetals = document.querySelectorAll(".petal");
-            allPetals.forEach(petal => {
-                petal.classList.remove("collected");
+            gameTime = 0;
+            progress = 0;
+            updateStatus(0, 0);
+            typeText("欢迎来到《雨色备忘录》<br>按任意键开始游戏...", 0, () => {
+                createChoices([
+                    {
+                        text: "开始游戏",
+                        callback: startGame
+                    }
+                ]);
             });
-            
-            // 回到初始场景
-            switchScene("scene1");
         }
+
+        // 开始游戏
+        function startGame() {
+            hideChoices();
+            typeText("【序章：雨落时分】", 80, () => {
+                setTimeout(prologue, 500);
+            });
+        }
+
+        // 初始化
+        startBtn.onclick = startGame;
     </script>
 </body>
 </html>
