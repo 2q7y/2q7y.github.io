@@ -3,412 +3,320 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>雨色备忘录 | 30分钟GalGame</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "微软雅黑", "思源黑体", sans-serif;
+    <title>Minecraft 玩家数据查询 | Mojang API</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Font Awesome 图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 自定义 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        minecraft: {
+                            green: '#4CAF50',
+                            dark: '#1e293b',
+                            light: '#f8fafc'
+                        }
+                    },
+                    fontFamily: {
+                        minecraft: ['Minecraft', 'sans-serif']
+                    }
+                }
+            }
         }
-
-        body {
-            background: #1a1a2e;
-            color: #f0f0f0;
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* 背景图层 */
-        .bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url("https://picsum.photos/id/175/1920/1080") no-repeat center center;
-            background-size: cover;
-            filter: brightness(0.4);
-            z-index: -1;
-        }
-
-        /* 游戏容器 */
-        .game-container {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 2rem;
-            max-width: 1200px;
-            margin: 0 auto;
-            width: 100%;
-        }
-
-        /* 计时栏 */
-        .timer-bar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 1rem;
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
-        .timer-bar span {
-            font-size: 1rem;
-            color: #ffd700;
-        }
-
-        /* 剧情展示区 */
-        .story-area {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 12px;
-            padding: 2rem;
-            flex: 1;
-            margin-bottom: 1rem;
-            overflow-y: auto;
-            line-height: 1.8;
-            font-size: 1.1rem;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
-        }
-
-        .story-area::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .story-area::-webkit-scrollbar-thumb {
-            background: #6a0dad;
-            border-radius: 4px;
-        }
-
-        /* 角色名称样式 */
-        .char-name {
-            color: #ff9a9e;
-            font-weight: bold;
-            margin-right: 0.5rem;
-        }
-
-        .kui { color: #87ceeb; } /* 夏目葵 - 天蓝色 */
-        .hotaru { color: #f49ac2; } /* 月岛萤 - 粉色 */
-        .protagonist { color: #98fb98; } /* 主角 - 浅绿色 */
-
-        /* 选项按钮区 */
-        .choices-area {
-            display: flex;
-            gap: 1rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .choice-btn {
-            background: linear-gradient(45deg, #4158d0, #c850c0);
-            border: none;
-            color: white;
-            padding: 1rem 2rem;
-            font-size: 1rem;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 200px;
-        }
-
-        .choice-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        /* 隐藏元素 */
-        .hidden {
-            display: none;
-        }
-
-        /* 打字机光标 */
-        .typing::after {
-            content: "|";
-            animation: blink 1s infinite;
-        }
-
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
+    </script>
+    
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .skin-preview {
+                transform: scale(8);
+                image-rendering: pixelated;
+            }
+            .loader {
+                border-top-color: #4CAF50;
+                animation: spinner 0.6s linear infinite;
+            }
+            @keyframes spinner {
+                to { transform: rotate(360deg); }
+            }
         }
     </style>
 </head>
-<body>
-    <div class="bg"></div>
-    <div class="game-container">
-        <!-- 计时栏 -->
-        <div class="timer-bar">
-            <span>剧情进度：<span id="progress">0%</span></span>
-            <span>游玩时长：<span id="time">0分钟</span></span>
+<body class="bg-gradient-to-br from-minecraft-dark to-slate-800 min-h-screen text-minecraft-light">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- 页面标题 -->
+        <header class="text-center mb-8">
+            <h1 class="text-[clamp(2rem,5vw,3rem)] font-bold mb-2 text-minecraft-green">
+                <i class="fab fa-minecraft"></i> Minecraft 玩家数据查询
+            </h1>
+            <p class="text-slate-300">通过 Mojang API 查询 Minecraft 玩家的 UUID、皮肤、历史名称等信息</p>
+        </header>
+
+        <!-- 查询表单 -->
+        <div class="bg-slate-800/80 rounded-lg p-6 shadow-xl backdrop-blur-sm mb-8 border border-slate-700">
+            <div class="flex flex-col md:flex-row gap-4">
+                <input 
+                    type="text" 
+                    id="playerName" 
+                    placeholder="输入玩家名称 (例如: Notch)" 
+                    class="flex-1 px-4 py-3 rounded-lg bg-slate-700 border border-slate-600 focus:outline-none focus:ring-2 focus:ring-minecraft-green focus:border-transparent"
+                >
+                <button 
+                    id="searchBtn" 
+                    class="px-6 py-3 rounded-lg bg-minecraft-green hover:bg-green-600 transition-colors font-medium flex items-center justify-center gap-2"
+                >
+                    <i class="fas fa-search"></i>
+                    <span>查询</span>
+                </button>
+            </div>
+            
+            <!-- 加载状态 -->
+            <div id="loading" class="hidden mt-4 flex items-center justify-center text-slate-300">
+                <div class="loader w-6 h-6 border-2 border-slate-400 rounded-full mr-3"></div>
+                <span>正在查询数据...</span>
+            </div>
+            
+            <!-- 错误提示 -->
+            <div id="error" class="hidden mt-4 p-3 rounded-lg bg-red-900/50 border border-red-800 text-red-300"></div>
         </div>
 
-        <!-- 剧情展示区 -->
-        <div class="story-area" id="storyArea">
-            欢迎来到《雨色备忘录》<br>
-            按任意键开始游戏...
-        </div>
-
-        <!-- 选项按钮区 -->
-        <div class="choices-area" id="choicesArea">
-            <button class="choice-btn" id="startBtn">开始游戏</button>
+        <!-- 结果展示区域 -->
+        <div id="result" class="hidden bg-slate-800/80 rounded-lg p-6 shadow-xl border border-slate-700">
+            <!-- 玩家基本信息 -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
+                <!-- 皮肤预览 -->
+                <div class="md:col-span-1 flex justify-center items-center">
+                    <div class="relative w-32 h-32 bg-slate-700 rounded-lg overflow-hidden flex items-center justify-center">
+                        <img id="skinPreview" src="" alt="玩家皮肤" class="skin-preview">
+                    </div>
+                </div>
+                
+                <!-- 基本信息 -->
+                <div class="md:col-span-3">
+                    <h2 id="currentName" class="text-2xl font-bold mb-2 text-minecraft-green"></h2>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        <div class="bg-slate-700/50 p-3 rounded-lg">
+                            <p class="text-slate-400 text-sm mb-1">UUID (无横线)</p>
+                            <p id="uuidShort" class="font-mono break-all"></p>
+                        </div>
+                        <div class="bg-slate-700/50 p-3 rounded-lg">
+                            <p class="text-slate-400 text-sm mb-1">UUID (带横线)</p>
+                            <p id="uuidFull" class="font-mono break-all"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 历史名称 -->
+            <div class="mt-6">
+                <h3 class="text-xl font-semibold mb-3 flex items-center gap-2">
+                    <i class="fas fa-history text-minecraft-green"></i>
+                    历史名称
+                </h3>
+                <div id="nameHistory" class="bg-slate-700/50 p-4 rounded-lg max-h-60 overflow-y-auto">
+                    <ul id="nameHistoryList" class="space-y-2"></ul>
+                </div>
+            </div>
+            
+            <!-- 复制按钮区域 -->
+            <div class="mt-6 flex flex-wrap gap-3">
+                <button id="copyUuidBtn" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors flex items-center gap-2">
+                    <i class="fas fa-copy"></i>
+                    复制 UUID
+                </button>
+                <button id="copySkinBtn" class="px-4 py-2 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors flex items-center gap-2">
+                    <i class="fas fa-image"></i>
+                    复制皮肤链接
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
-        // 全局变量
-        let gameTime = 0; // 游玩时长（分钟）
-        let progress = 0; // 剧情进度（%）
-        let isTyping = false; // 是否正在打字机效果
+        // DOM 元素
+        const playerNameInput = document.getElementById('playerName');
+        const searchBtn = document.getElementById('searchBtn');
+        const loading = document.getElementById('loading');
+        const error = document.getElementById('error');
+        const result = document.getElementById('result');
+        const currentName = document.getElementById('currentName');
+        const uuidShort = document.getElementById('uuidShort');
+        const uuidFull = document.getElementById('uuidFull');
+        const skinPreview = document.getElementById('skinPreview');
+        const nameHistoryList = document.getElementById('nameHistoryList');
+        const copyUuidBtn = document.getElementById('copyUuidBtn');
+        const copySkinBtn = document.getElementById('copySkinBtn');
 
-        // DOM元素
-        const storyArea = document.getElementById('storyArea');
-        const choicesArea = document.getElementById('choicesArea');
-        const progressSpan = document.getElementById('progress');
-        const timeSpan = document.getElementById('time');
-        const startBtn = document.getElementById('startBtn');
+        // 存储当前查询的数据
+        let currentData = {
+            uuid: '',
+            skinUrl: ''
+        };
 
-        // 打字机效果函数
-        function typeText(text, speed = 50, callback = null) {
-            if (isTyping) return;
-            isTyping = true;
-            let index = 0;
-            storyArea.innerHTML = '';
-            storyArea.classList.add('typing');
-            
-            const typingInterval = setInterval(() => {
-                if (index < text.length) {
-                    // 处理换行符
-                    if (text[index] === '\n') {
-                        storyArea.innerHTML += '<br>';
-                    } else {
-                        storyArea.innerHTML += text[index];
+        // 格式化 UUID (添加横线)
+        function formatUUID(uuid) {
+            return `${uuid.substr(0,8)}-${uuid.substr(8,4)}-${uuid.substr(12,4)}-${uuid.substr(16,4)}-${uuid.substr(20)}`;
+        }
+
+        // 显示错误信息
+        function showError(message) {
+            error.textContent = message;
+            error.classList.remove('hidden');
+            result.classList.add('hidden');
+        }
+
+        // 隐藏错误信息
+        function hideError() {
+            error.classList.add('hidden');
+        }
+
+        // 显示加载状态
+        function showLoading() {
+            loading.classList.remove('hidden');
+            hideError();
+            result.classList.add('hidden');
+        }
+
+        // 隐藏加载状态
+        function hideLoading() {
+            loading.classList.add('hidden');
+        }
+
+        // 复制到剪贴板
+        function copyToClipboard(text, successMessage = '复制成功!') {
+            navigator.clipboard.writeText(text)
+                .then(() => {
+                    // 临时显示成功提示
+                    const notification = document.createElement('div');
+                    notification.className = 'fixed bottom-4 right-4 bg-minecraft-green text-white px-4 py-2 rounded-lg shadow-lg z-50';
+                    notification.textContent = successMessage;
+                    document.body.appendChild(notification);
+                    
+                    setTimeout(() => {
+                        notification.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                        setTimeout(() => document.body.removeChild(notification), 500);
+                    }, 2000);
+                })
+                .catch(err => {
+                    alert('复制失败: ' + err);
+                });
+        }
+
+        // 查询玩家数据
+        async function fetchPlayerData(username) {
+            if (!username || username.trim() === '') {
+                showError('请输入有效的玩家名称');
+                return;
+            }
+
+            showLoading();
+
+            try {
+                // 1. 通过用户名获取 UUID
+                const uuidResponse = await fetch(`https://api.mojang.com/users/profiles/minecraft/${username}`);
+                
+                if (!uuidResponse.ok) {
+                    if (uuidResponse.status === 404) {
+                        throw new Error('未找到该玩家，请检查名称是否正确');
                     }
-                    index++;
-                    // 滚动到底部
-                    storyArea.scrollTop = storyArea.scrollHeight;
-                } else {
-                    clearInterval(typingInterval);
-                    storyArea.classList.remove('typing');
-                    isTyping = false;
-                    if (callback) callback();
+                    throw new Error(`API 请求失败 (${uuidResponse.status})`);
                 }
-            }, speed);
-        }
 
-        // 更新计时和进度
-        function updateStatus(minutesAdded, progressAdded) {
-            gameTime += minutesAdded;
-            progress += progressAdded;
-            progress = Math.min(progress, 100); // 不超过100%
-            
-            timeSpan.textContent = `${gameTime}分钟`;
-            progressSpan.textContent = `${Math.round(progress)}%`;
-        }
+                const uuidData = await uuidResponse.json();
+                const uuid = uuidData.id;
+                const name = uuidData.name;
 
-        // 隐藏所有按钮
-        function hideChoices() {
-            choicesArea.innerHTML = '';
-        }
+                // 2. 获取名称历史
+                const historyResponse = await fetch(`https://api.mojang.com/user/profiles/${uuid}/names`);
+                const nameHistory = await historyResponse.json();
 
-        // 创建选项按钮
-        function createChoices(choices) {
-            hideChoices();
-            choices.forEach(choice => {
-                const btn = document.createElement('button');
-                btn.className = 'choice-btn';
-                btn.textContent = choice.text;
-                btn.onclick = choice.callback;
-                choicesArea.appendChild(btn);
-            });
-        }
-
-        // 剧情：序章 - 雨落时分（5分钟，进度17%）
-        function prologue() {
-            updateStatus(5, 17);
-            const text = `
-<span class="char-name protagonist">晴彦</span>：（收起淋湿的笔记本，抬头望向老旧书店的屋檐）<br>
-<span class="char-name">旁白</span>：暴雨毫无征兆地落下，将放学的路截断。檐下已站着两个人——<br>
-<span class="char-name kui">夏目葵</span>：（踮脚整理被风吹乱的海报，转身致歉）抱歉抱歉！风太大把海报吹下来了……你也是躲雨吗？<br>
-<span class="char-name protagonist">晴彦</span>：嗯，本来想抄近路回家。<br>
-<span class="char-name hotaru">月岛萤</span>：（突然开口，声音轻柔）这本《雨天随笔》，是你的吗？（举起掉在脚边的笔记本）
-            `;
-            typeText(text, 40, () => {
-                createChoices([
-                    {
-                        text: "（对夏目葵）需要帮忙整理海报吗？",
-                        callback: branchKui
-                    },
-                    {
-                        text: "（对月岛萤）谢谢！你也喜欢这类随笔？",
-                        callback: branchHotaru
+                // 3. 获取皮肤信息
+                const profileResponse = await fetch(`https://sessionserver.mojang.com/session/minecraft/profile/${uuid}?unsigned=false`);
+                const profileData = await profileResponse.json();
+                
+                // 解析皮肤数据
+                let skinUrl = '';
+                if (profileData.properties && profileData.properties.length > 0) {
+                    const decoded = JSON.parse(atob(profileData.properties[0].value));
+                    if (decoded.textures && decoded.textures.SKIN) {
+                        skinUrl = decoded.textures.SKIN.url;
                     }
-                ]);
-            });
+                }
+
+                // 存储当前数据
+                currentData.uuid = uuid;
+                currentData.skinUrl = skinUrl;
+
+                // 更新页面显示
+                currentName.textContent = name;
+                uuidShort.textContent = uuid;
+                uuidFull.textContent = formatUUID(uuid);
+                skinPreview.src = skinUrl || 'https://static.wikia.nocookie.net/minecraft_gamepedia/images/3/33/Alex_Skin.png';
+                
+                // 清空并更新历史名称列表
+                nameHistoryList.innerHTML = '';
+                nameHistory.forEach((entry, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex justify-between items-center border-b border-slate-600 pb-2';
+                    
+                    const dateText = entry.changedToAt 
+                        ? new Date(entry.changedToAt).toLocaleString() 
+                        : '初始名称';
+                    
+                    li.innerHTML = `
+                        <span class="${index === 0 ? 'text-minecraft-green font-bold' : ''}">${entry.name}</span>
+                        <span class="text-slate-400 text-sm">${dateText}</span>
+                    `;
+                    nameHistoryList.appendChild(li);
+                });
+
+                // 显示结果
+                hideLoading();
+                result.classList.remove('hidden');
+
+            } catch (err) {
+                hideLoading();
+                showError(err.message);
+                console.error('查询错误:', err);
+            }
         }
 
-        // 分支1：向日葵的约定（15分钟，进度50%）
-        function branchKui() {
-            updateStatus(15, 50);
-            const text = `
-<span class="char-name protagonist">晴彦</span>：我来帮你吧，这些海报看起来不好固定。<br>
-<span class="char-name kui">夏目葵</span>：（惊喜）真的吗？太谢谢你了！我是文学社的夏目葵，这是招新海报……<br>
-<span class="char-name">旁白</span>：指尖偶然触碰，两人同时红了脸。雨还没停，你撑着伞陪葵走到社团教室。<br>
-<span class="char-name kui">夏目葵</span>：（擦拭额头汗水）其实……我一直想邀请你加入文学社，你的作文写得很好。<br>
-<span class="char-name protagonist">晴彦</span>：（看着她认真的眼睛）我会考虑的。<br>
-<span class="char-name">旁白</span>：葵从抽屉里拿出一块向日葵形状的饼干，轻轻放在你手心。雨渐渐停了，夕阳穿透云层，在她发梢镀上一层金边。<br>
-<span class="char-name kui">夏目葵</span>：下次……一起看雨后的向日葵吧？
-            `;
-            typeText(text, 40, () => {
-                createChoices([
-                    {
-                        text: "好，我很期待",
-                        callback: endKuiGood
-                    },
-                    {
-                        text: "抱歉，我还有事",
-                        callback: endKuiBad
-                    }
-                ]);
-            });
-        }
+        // 事件监听
+        searchBtn.addEventListener('click', () => {
+            fetchPlayerData(playerNameInput.value.trim());
+        });
 
-        // 分支2：萤色的诗行（15分钟，进度50%）
-        function branchHotaru() {
-            updateStatus(15, 50);
-            const text = `
-<span class="char-name protagonist">晴彦</span>：谢谢！你也喜欢这类雨天的随笔吗？<br>
-<span class="char-name hotaru">月岛萤</span>：（轻轻点头）嗯，喜欢雨里的安静……这本诗集，是我外婆的。<br>
-<span class="char-name">旁白</span>：萤翻开诗集，指腹划过泛黄的字迹，雨滴打在屋檐上，像温柔的节拍。<br>
-<span class="char-name hotaru">月岛萤</span>：（轻声念）“雨是天空写给大地的诗，而相遇是诗里最温柔的韵脚。”<br>
-<span class="char-name protagonist">晴彦</span>：（看着她专注的侧脸）很美的句子。<br>
-<span class="char-name">旁白</span>：萤从口袋里拿出一枚银色的书签，上面刻着小小的萤火虫图案。<br>
-<span class="char-name hotaru">月岛萤</span>：这个……送给你，下次一起读诗好吗？
-            `;
-            typeText(text, 40, () => {
-                createChoices([
-                    {
-                        text: "好，一起读诗吧",
-                        callback: endHotaruGood
-                    },
-                    {
-                        text: "我不太懂诗呢",
-                        callback: endHotaruBad
-                    }
-                ]);
-            });
-        }
+        // 按回车查询
+        playerNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                fetchPlayerData(playerNameInput.value.trim());
+            }
+        });
 
-        // 结局1：葵的美好结局（10分钟，进度33%）
-        function endKuiGood() {
-            updateStatus(10, 33);
-            const text = `
-<span class="char-name">旁白</span>：一周后，你和葵来到学校后的向日葵花田。雨后的阳光格外温暖，向日葵朝着太阳的方向盛放。<br>
-<span class="char-name kui">夏目葵</span>：（笑着看向你）谢谢你愿意陪我来……其实，我早就想和你说说话了。<br>
-<span class="char-name protagonist">晴彦</span>：我也是，和你在一起的时光很开心。<br>
-<span class="char-name">旁白</span>：葵的脸颊泛起红晕，轻轻牵住了你的手。风吹过花田，带着向日葵的清香，这个夏天，有了最温柔的开始。<br>
-<br>
-【结局：向日葵的约定】
-            `;
-            typeText(text, 40, () => {
-                createChoices([
-                    {
-                        text: "重新开始",
-                        callback: restartGame
-                    }
-                ]);
-            });
-        }
+        // 复制 UUID 按钮
+        copyUuidBtn.addEventListener('click', () => {
+            copyToClipboard(uuidFull.textContent, 'UUID 复制成功!');
+        });
 
-        // 结局2：葵的普通结局（10分钟，进度33%）
-        function endKuiBad() {
-            updateStatus(10, 33);
-            const text = `
-<span class="char-name">旁白</span>：你拒绝了葵的邀请，她的眼神闪过一丝失落，但很快又恢复了笑容。<br>
-<span class="char-name kui">夏目葵</span>：没关系！那……下次有机会再说吧。<br>
-<span class="char-name">旁白</span>：你独自走在回家的路上，口袋里还留着那块向日葵饼干的甜味。回头望去，葵还站在社团教室门口，望着你的方向。<br>
-<br>
-【结局：未说出口的心意】
-            `;
-            typeText(text, 40, () => {
-                createChoices([
-                    {
-                        text: "重新开始",
-                        callback: restartGame
-                    }
-                ]);
-            });
-        }
+        // 复制皮肤链接按钮
+        copySkinBtn.addEventListener('click', () => {
+            if (currentData.skinUrl) {
+                copyToClipboard(currentData.skinUrl, '皮肤链接复制成功!');
+            } else {
+                alert('未找到皮肤链接');
+            }
+        });
 
-        // 结局3：萤的美好结局（10分钟，进度33%）
-        function endHotaruGood() {
-            updateStatus(10, 33);
-            const text = `
-<span class="char-name">旁白</span>：周末，你和萤来到图书馆的靠窗位置。阳光透过玻璃落在书页上，萤轻声念着诗，声音像雨滴一样温柔。<br>
-<span class="char-name hotaru">月岛萤</span>：（合上书，看向你）和你一起读诗，感觉诗里的世界都变得更温暖了。<br>
-<span class="char-name protagonist">晴彦</span>：是因为和你在一起吧。<br>
-<span class="char-name">旁白</span>：萤的脸颊微红，轻轻将头靠在你的肩上。书签在书页间闪着微光，像暗夜里的萤火虫，照亮了彼此的心跳。<br>
-<br>
-【结局：萤色的诗行】
-            `;
-            typeText(text, 40, () => {
-                createChoices([
-                    {
-                        text: "重新开始",
-                        callback: restartGame
-                    }
-                ]);
-            });
-        }
-
-        // 结局4：萤的普通结局（10分钟，进度33%）
-        function endHotaruBad() {
-            updateStatus(10, 33);
-            const text = `
-<span class="char-name">旁白</span>：你婉拒了萤的邀请，她默默收起书签，指尖微微收紧。<br>
-<span class="char-name hotaru">月岛萤</span>：（轻声）没关系……那这本诗集，就先放在你这里吧。<br>
-<span class="char-name">旁白</span>：你独自回家，翻开那本诗集，夹着的书签轻轻滑落。上面的萤火虫图案，在灯光下显得格外孤单。<br>
-<br>
-【结局：未完成的诗】
-            `;
-            typeText(text, 40, () => {
-                createChoices([
-                    {
-                        text: "重新开始",
-                        callback: restartGame
-                    }
-                ]);
-            });
-        }
-
-        // 重启游戏
-        function restartGame() {
-            gameTime = 0;
-            progress = 0;
-            updateStatus(0, 0);
-            typeText("欢迎来到《雨色备忘录》<br>按任意键开始游戏...", 0, () => {
-                createChoices([
-                    {
-                        text: "开始游戏",
-                        callback: startGame
-                    }
-                ]);
-            });
-        }
-
-        // 开始游戏
-        function startGame() {
-            hideChoices();
-            typeText("【序章：雨落时分】", 80, () => {
-                setTimeout(prologue, 500);
-            });
-        }
-
-        // 初始化
-        startBtn.onclick = startGame;
+        // 页面加载时预设一个示例
+        window.addEventListener('load', () => {
+            playerNameInput.value = 'Notch';
+        });
     </script>
 </body>
 </html>
