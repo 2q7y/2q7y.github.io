@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>复古CMD · 现代融合版（修复版）</title>
+<title>CMD</title>
 <style>
 * {
   margin: 0;
@@ -101,7 +101,7 @@ body {
 <div class="cmd-terminal" id="cmdBody">
 Microsoft Windows [版本 10.0.0000.0]<br>
 (c) Microsoft Corporation。保留所有权利。<br><br>
-C:\> <span class="text-help">复古CMD内核 | 现代极简视觉 · 输入help查看全部命令</span>
+C:\> <span class="text-help">输入help查看全部命令</span>
 </div>
 
 <script>
@@ -258,8 +258,8 @@ function executeCommand(command) {
 
     case "weather":
       const city = cmdParts.length > 1 ? cmdParts[1] : "北京";
-      const weathers = ["晴", "多云", "小雨", "大雨", "阴", "雷阵雨", "小雪"];
-      const temp = Math.floor(Math.random() * 40) - 10; // -10~30℃
+      const weathers = ["晴", "多云", "小雨", "大雨", "阴", "雷阵雨", "小雪", "超级无敌大雪 嘻嘻嘻"];
+      const temp = Math.floor(Math.random() * 400000) - 100000; // -10~30℃
       const wind = `${Math.floor(Math.random() * 10) + 1}级`;
       const randomWeather = weathers[Math.floor(Math.random() * weathers.length)];
       output = `
@@ -275,7 +275,7 @@ function executeCommand(command) {
         "white": "#ffffff",
         "green": "#88ff88",
         "red": "#ff6666",
-        "blue": "#6699ff",
+        "blue": "#0000ff",
         "yellow": "#ffcc66",
         "purple": "#cc99ff"
       };
@@ -316,15 +316,15 @@ function executeCommand(command) {
         } else {
           const num = parseInt(cmdParts[1]);
           if (isNaN(num)) {
-            output = `<span class="text-error">❌ 请输入有效的数字（1-100）</span>`;
+            output = `<span class="text-error">请输入有效的数字（1-100）</span>`;
           } else if (num < 1 || num > 100) {
-            output = `<span class="text-warning">⚠️ 数字必须在1-100之间</span>`;
+            output = `<span class="text-warning">数字必须在1-100之间</span>`;
           } else if (num < guessNumber) {
-            output = `<span class="text-warning">⬆️ 猜小了！再试试更大的数字</span>`;
+            output = `<span class="text-warning">猜小了</span>`;
           } else if (num > guessNumber) {
-            output = `<span class="text-warning">⬇️ 猜大了！再试试更小的数字</span>`;
+            output = `<span class="text-warning">猜大了</span>`;
           } else {
-            output = `<span class="text-success">🎉 恭喜猜对了！数字就是 ${guessNumber}</span>`;
+            output = `<span class="text-success">恭喜猜对了!数字就是 ${guessNumber}</span>`;
             guessNumber = null; // 重置游戏
           }
         }
@@ -348,10 +348,6 @@ function executeCommand(command) {
     case "sysinfo":
       output = `
         <span class="text-success">🖥️ 系统信息（模拟）</span><br>
-        ├─ 操作系统：Windows 10 专业版 (CMD模式)<br>
-        ├─ CPU：Intel Core i7-12700K<br>
-        ├─ 内存：16GB DDR4 (使用率：${Math.floor(Math.random() * 80) + 10}%)<br>
-        └─ 终端版本：复古CMD+现代视觉 v1.0 (修复版)
       `;
       break;
 
