@@ -1,77 +1,479 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>微光引路，拾见真谛</title>
-<style>
-body{margin:0;overflow:hidden;font-family:"PingFang SC",sans-serif;background:#f6f8fc;color:#333;}
-#game{width:100vw;height:100vh;position:relative;background:linear-gradient(#e8edf7,#f6f8fc);}
-.scene{width:100%;height:100%;position:absolute;top:0;left:0;transition:opacity 2s ease;opacity:0;pointer-events:none;}
-.scene.active{opacity:1;pointer-events:auto;}
-.char{position:absolute;bottom:12vh;width:120px;height:180px;background-size:contain;background-repeat:no-repeat;background-position:center;transition:left 1.5s ease;}
-#girl{left:20%;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 180%22><path fill=%22%23e8eaf6%22 d=%22M60 20a20 20 0 1 0 0 40z%22/><path fill=%22%23f2f4ff%22 d=%22M40 60 L80 60 L90 160 L30 160z%22/></svg>');}
-#boy{left:10%;background-image:url('data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 120 180%22><path fill=%22%23dfe3ee%22 d=%22M60 25a18 18 0 1 0 0 36z%22/><path fill=%22%23cdd6e8%22 d=%22M42 61 L78 61 L84 155 L36 155z%22/></svg>');}
-.dialog{position:absolute;bottom:8vh;left:10vw;right:10vw;padding:2rem;border-radius:16px;background:rgba(255,255,255,0.85);box-shadow:0 8px 24px rgba(0,0,0,0.08);}
-.txt{font-size:1rem;line-height:1.8;margin-bottom:1rem;}
-.btn{border:none;border-radius:999px;padding:0.6rem 1.4rem;background:#b3c4ee;color:#1d2b55;cursor:pointer;}
-.ending{display:none;position:absolute;inset:0;background:rgba(254,255,255,0.9);z-index:9;text-align:center;padding-top:30vh;}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>晚风与温柔 - 15分钟治愈游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "微软雅黑", "PingFang SC", sans-serif;
+        }
+        body {
+            background: linear-gradient(120deg, #f9f6f7 0%, #e8e4e6 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        .game-container {
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 700px;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+        }
+        .time-hint {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 14px;
+            color: #999;
+        }
+        .title {
+            color: #6d597a;
+            font-size: 32px;
+            margin-bottom: 25px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+        .subtitle {
+            color: #917fb3;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: 200;
+        }
+        .scene {
+            display: none; /* 默认隐藏所有场景 */
+            opacity: 0;
+            transition: opacity 0.8s ease;
+        }
+        .scene.active {
+            display: block; /* 激活的场景显示 */
+            opacity: 1;
+        }
+        /* 情绪选择按钮 */
+        .emotion-btn {
+            background: #f0e6f6;
+            border: 2px solid #e5d5f1;
+            border-radius: 12px;
+            padding: 18px 30px;
+            margin: 12px;
+            font-size: 17px;
+            color: #554a69;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            width: 80%;
+            max-width: 400px;
+        }
+        .emotion-btn:hover {
+            background: #e5d5f1;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(155, 130, 180, 0.2);
+        }
+        /* 对话区域 */
+        .character-box {
+            margin: 40px 0;
+            min-height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .character-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: #f8f0f7;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #917fb3;
+        }
+        .character-talk {
+            background: #faf6fa;
+            border-radius: 20px;
+            padding: 25px;
+            font-size: 18px;
+            color: #3a3447;
+            line-height: 1.8;
+            max-width: 550px;
+            position: relative;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        .character-talk::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 30px;
+            transform: translateX(0);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 12px solid #faf6fa;
+        }
+        /* 花瓣互动 */
+        .petal-container {
+            margin: 30px 0;
+        }
+        .petal {
+            width: 35px;
+            height: 35px;
+            background: #ffd6e0;
+            border-radius: 50% 0 50% 50%;
+            margin: 8px;
+            display: inline-block;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: rotate(45deg);
+        }
+        .petal:hover {
+            background: #ffb8c8;
+            transform: scale(1.2) rotate(45deg);
+        }
+        .petal.collected {
+            background: #d8a7b5;
+            transform: scale(0.9) rotate(45deg);
+            cursor: default;
+        }
+        .petal-count {
+            font-size: 16px;
+            color: #887599;
+            margin-top: 15px;
+        }
+        /* 呼吸引导 */
+        .breath-guide {
+            margin: 30px 0;
+            font-size: 20px;
+            color: #6d597a;
+        }
+        .breath-circle {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: rgba(220, 208, 231, 0.6);
+            margin: 25px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #6d597a;
+            animation: breath 6s infinite ease-in-out;
+        }
+        @keyframes breath {
+            0% { transform: scale(1); content: "吸气"; }
+            25% { transform: scale(1.3); content: "保持"; }
+            50% { transform: scale(1.3); content: "呼气"; }
+            75% { transform: scale(1); content: "放松"; }
+            100% { transform: scale(1); content: "吸气"; }
+        }
+        .breath-tip {
+            font-size: 15px;
+            color: #999;
+            margin-top: 10px;
+        }
+        /* 回忆选择 */
+        .memory-card {
+            background: #fef9fb;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 15px auto;
+            width: 85%;
+            max-width: 500px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .memory-card:hover {
+            border-color: #e5d5f1;
+            transform: translateY(-2px);
+        }
+        .memory-card h3 {
+            color: #6d597a;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .memory-card p {
+            color: #777;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        /* 按钮通用样式 */
+        .ctrl-btn {
+            background: #a78bfa;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            padding: 15px 35px;
+            font-size: 17px;
+            margin: 20px 10px;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+        .ctrl-btn:hover {
+            background: #8b5cf6;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.2);
+        }
+        .ctrl-btn:disabled {
+            background: #d1c5e8;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        /* 最终治愈页面 */
+        .heal-end {
+            padding: 20px 0;
+        }
+        .heal-text {
+            font-size: 20px;
+            color: #6d597a;
+            line-height: 2;
+            margin: 30px 0;
+        }
+        .heal-icon {
+            font-size: 60px;
+            color: #a78bfa;
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-<div id="game">
-  <!--场景1 迷茫林间-->
-  <div class="scene active" id="s1">
-    <div class="char" id="girl"></div>
-    <div class="char" id="boy"></div>
-  </div>
+    <div class="game-container">
+        <!-- 计时提示 -->
+        <div class="time-hint" id="timeHint">游戏进度：0/15分钟</div>
 
-  <!--对话容器-->
-  <div class="dialog" id="dialogBox">
-    <div class="txt" id="txt"></div>
-    <button class="btn" id="nextBtn">继续前行</button>
-  </div>
+        <!-- 场景1：初始情绪选择（2分钟） -->
+        <div class="scene active" id="scene1">
+            <h1 class="title">✨ 晚风与温柔 ✨</h1>
+            <p class="subtitle">慢慢来，不用急，说说你的心情吧</p>
+            <button class="emotion-btn" onclick="startGame('tired')">💤 疲惫不堪</button>
+            <button class="emotion-btn" onclick="startGame('anxious')">😰 焦虑不安</button>
+            <button class="emotion-btn" onclick="startGame('lonely')">🥺 感到孤独</button>
+        </div>
 
-  <!--结局黑屏温柔收束-->
-  <div class="ending" id="endBox">
-    <h2>你终于停下脚步</h2>
-    <p>原来真谛不在远方追逐<br>而在陪伴、感受、认真活着</p>
-  </div>
-</div>
+        <!-- 场景2：共情回应（3分钟） -->
+        <div class="scene" id="scene2">
+            <h1 class="title">我懂你的感受</h1>
+            <div class="character-box">
+                <div class="character-avatar">👧</div>
+                <div class="character-talk" id="responseTalk">
+                    <!-- 动态填充回应内容 -->
+                </div>
+            </div>
+            <button class="ctrl-btn" onclick="nextScene('scene3')">慢慢呼吸，继续...</button>
+        </div>
 
-<script>
-//剧情段落：谁说话、文字、男主状态偏移
-const script=[
-  {who:"girl",text:"你总是走得很急，好像害怕错过什么。",boyX:12},
-  {who:"boy",text:"我想找到人生的真谛，可越追越迷茫。",boyX:14},
-  {who:"girl",text:"别急着抵达，先看看风、落叶、微光。",boyX:18},
-  {who:"girl",text:"很多答案不会奔跑，只会慢慢靠近愿意停留的人。",boyX:22},
-  {who:"boy",text:"我好像很久没有认真感受平凡了。",boyX:26},
-  {who:"girl",text:"真谛不是惊天动地的远方，而是不再内耗、珍惜当下、温柔生活。",boyX:32},
-  {who:"end",text:"",boyX:40}
-];
+        <!-- 场景3：呼吸放松（4分钟） -->
+        <div class="scene" id="scene3">
+            <h1 class="title">和我一起深呼吸</h1>
+            <p class="subtitle">跟着圆圈的节奏，吸气4秒→保持2秒→呼气6秒</p>
+            <div class="breath-guide">
+                <div class="breath-circle" id="breathCircle">吸气</div>
+                <p class="breath-tip">请保持这个节奏，持续1分钟，感受身体的放松</p>
+            </div>
+            <button class="ctrl-btn" id="breathBtn" disabled onclick="nextScene('scene4')">完成呼吸，继续</button>
+        </div>
 
-let cur=0;
-const txt=document.getElementById('txt');
-const btn=document.getElementById('nextBtn');
-const boy=document.getElementById('boy');
-const endBox=document.getElementById('endBox');
+        <!-- 场景4：美好回忆（3分钟） -->
+        <div class="scene" id="scene4">
+            <h1 class="title">藏在心底的小美好</h1>
+            <p class="subtitle">选一个让你觉得温暖的回忆，慢慢感受</p>
+            <div class="memory-card" onclick="chooseMemory('memory1')">
+                <h3>☀️ 清晨的阳光</h3>
+                <p>醒来时刚好落在床头的阳光，暖融融的，什么都不用想</p>
+            </div>
+            <div class="memory-card" onclick="chooseMemory('memory2')">
+                <h3>☕ 温热的饮品</h3>
+                <p>冬天手里捧着一杯热奶茶/热茶，暖到心里的感觉</p>
+            </div>
+            <div class="memory-card" onclick="chooseMemory('memory3')">
+                <h3>🐾 身边的陪伴</h3>
+                <p>和喜欢的人/宠物安静待在一起，不用说话也很安心</p>
+            </div>
+            <button class="ctrl-btn" id="memoryBtn" disabled onclick="nextScene('scene5')">记住这份温暖，继续</button>
+        </div>
 
-function render(){
-  const s=script[cur];
-  txt.innerText=(s.who==="girl"?"知夏：":"陆屿：")+s.text;
-  boy.style.left=s.boyX+"%";
-  if(s.who==="end"){
-    document.getElementById('dialogBox').style.display="none";
-    endBox.style.display="block";
-  }
-}
-btn.onclick=()=>{
-  if(cur<script.length-1){
-    cur++;render();
-  }
-};
-render();
-</script>
+        <!-- 场景5：花瓣治愈（2分钟） -->
+        <div class="scene" id="scene5">
+            <h1 class="title">收集温柔的花瓣</h1>
+            <p class="subtitle">每点击一片花瓣，就放下一点烦恼</p>
+            <div class="petal-container" id="petalContainer">
+                <div class="petal" onclick="collectPetal(this)"></div>
+                <div class="petal" onclick="collectPetal(this)"></div>
+                <div class="petal" onclick="collectPetal(this)"></div>
+                <div class="petal" onclick="collectPetal(this)"></div>
+                <div class="petal" onclick="collectPetal(this)"></div>
+                <div class="petal" onclick="collectPetal(this)"></div>
+                <div class="petal" onclick="collectPetal(this)"></div>
+                <div class="petal" onclick="collectPetal(this)"></div>
+            </div>
+            <p class="petal-count" id="petalCount">已收集：0/8 片花瓣</p>
+            <button class="ctrl-btn" id="petalBtn" disabled onclick="nextScene('scene6')">放下烦恼，继续</button>
+        </div>
+
+        <!-- 场景6：最终治愈（1分钟） -->
+        <div class="scene" id="scene6">
+            <h1 class="title">你已经很棒了</h1>
+            <div class="heal-end">
+                <div class="heal-icon">💖</div>
+                <p class="heal-text" id="finalHealText">
+                    生活总有不完美，疲惫、焦虑、孤独都是正常的<br>
+                    允许自己慢下来，允许自己有情绪<br>
+                    你不需要事事完美，只要好好爱着自己就够了
+                </p>
+            </div>
+            <button class="ctrl-btn" onclick="restartGame()">再来一次温柔的陪伴</button>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentEmotion = "";
+        let petalCollected = 0;
+        let gameStartTime = 0;
+        let timeUpdateInterval = null;
+
+        // 初始化游戏
+        function startGame(emotion) {
+            currentEmotion = emotion;
+            gameStartTime = new Date().getTime();
+            
+            // 更新计时提示
+            timeUpdateInterval = setInterval(updateTimeHint, 1000);
+            
+            // 根据情绪填充回应
+            let talkContent = "";
+            if (emotion === "tired") {
+                talkContent = "我知道你最近很累，好像有做不完的事，压得喘不过气。不用逼自己一定要做到最好，累了就停下来，哪怕只是发发呆也好。你已经为生活拼尽全力了，真的很棒。";
+            } else if (emotion === "anxious") {
+                talkContent = "是不是总担心事情做不好？总在想「如果出错了怎么办」？其实不用怕，哪怕走得慢一点，哪怕偶尔出错，也没关系。你只需要关注当下的每一步，不用提前预支明天的焦虑。";
+            } else if (emotion === "lonely") {
+                talkContent = "好像身边很热闹，却还是觉得孤单？好像有很多话想说，却找不到人听？没关系，我在这里听你说，不用假装开心，不用勉强自己合群。你的孤独，值得被看见，也值得被温柔对待。";
+            }
+            document.getElementById("responseTalk").innerText = talkContent;
+            
+            // 切换到场景2
+            switchScene("scene2");
+        }
+
+        // 切换场景
+        function switchScene(sceneId) {
+            // 隐藏所有场景
+            const allScenes = document.querySelectorAll(".scene");
+            allScenes.forEach(scene => {
+                scene.classList.remove("active");
+            });
+            // 显示目标场景
+            document.getElementById(sceneId).classList.add("active");
+            
+            // 场景3：呼吸引导计时
+            if (sceneId === "scene3") {
+                // 6秒呼吸动画，1分钟后启用按钮
+                setTimeout(() => {
+                    document.getElementById("breathBtn").disabled = false;
+                }, 60000); // 1分钟 = 60000毫秒
+                
+                // 呼吸文字切换
+                let breathTexts = ["吸气", "保持", "呼气", "放松"];
+                let textIndex = 0;
+                setInterval(() => {
+                    textIndex = (textIndex + 1) % 4;
+                    document.getElementById("breathCircle").innerText = breathTexts[textIndex];
+                }, 1500); // 每1.5秒切换一次
+            }
+        }
+
+        // 下一步场景（简化切换）
+        function nextScene(targetScene) {
+            switchScene(targetScene);
+        }
+
+        // 收集花瓣
+        function collectPetal(petalElem) {
+            if (petalElem.classList.contains("collected")) return;
+            
+            petalElem.classList.add("collected");
+            petalCollected++;
+            document.getElementById("petalCount").innerText = `已收集：${petalCollected}/8 片花瓣`;
+            
+            // 收集完所有花瓣启用按钮
+            if (petalCollected >= 8) {
+                document.getElementById("petalBtn").disabled = false;
+            }
+        }
+
+        // 选择回忆
+        function chooseMemory(memoryId) {
+            // 启用下一步按钮
+            document.getElementById("memoryBtn").disabled = false;
+            
+            // 根据回忆填充最终治愈文本（轻微调整）
+            let finalText = "";
+            if (memoryId === "memory1") {
+                finalText = "就像清晨的阳光总会如约而至，你的美好也从未缺席。哪怕现在觉得黑暗，也请相信，总有一束光会为你而来。";
+            } else if (memoryId === "memory2") {
+                finalText = "就像温热的饮品能暖手暖胃，你也可以给自己一点温柔。累了就给自己一杯喜欢的饮品，告诉自己：我值得被好好对待。";
+            } else if (memoryId === "memory3") {
+                finalText = "陪伴不一定需要很多人，哪怕只有自己，也要好好陪伴自己。你永远是自己最坚实的依靠，永远有人（包括你自己）爱着你。";
+            }
+            
+            // 保留基础文本 + 个性化回忆文本
+            document.getElementById("finalHealText").innerText = `
+                生活总有不完美，${currentEmotion === "tired" ? "疲惫" : currentEmotion === "anxious" ? "焦虑" : "孤独"}都是正常的
+                允许自己慢下来，允许自己有情绪
+                你不需要事事完美，只要好好爱着自己就够了
+                <br><br>${finalText}
+            `.replace(/                /g, ""); // 去除缩进
+        }
+
+        // 更新计时提示
+        function updateTimeHint() {
+            const now = new Date().getTime();
+            const elapsedMinutes = Math.floor((now - gameStartTime) / 60000);
+            const progressText = `游戏进度：${Math.min(elapsedMinutes, 15)}/15分钟`;
+            document.getElementById("timeHint").innerText = progressText;
+            
+            // 15分钟后自动跳转到最终场景
+            if (elapsedMinutes >= 15) {
+                clearInterval(timeUpdateInterval);
+                switchScene("scene6");
+            }
+        }
+
+        // 重新开始游戏
+        function restartGame() {
+            // 重置变量
+            currentEmotion = "";
+            petalCollected = 0;
+            gameStartTime = 0;
+            clearInterval(timeUpdateInterval);
+            
+            // 重置UI
+            document.getElementById("petalCount").innerText = "已收集：0/8 片花瓣";
+            document.getElementById("breathBtn").disabled = true;
+            document.getElementById("memoryBtn").disabled = true;
+            document.getElementById("petalBtn").disabled = true;
+            
+            // 重置花瓣状态
+            const allPetals = document.querySelectorAll(".petal");
+            allPetals.forEach(petal => {
+                petal.classList.remove("collected");
+            });
+            
+            // 回到初始场景
+            switchScene("scene1");
+        }
+    </script>
 </body>
 </html>
