@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>进阶版增量游戏</title>
+    <title>幻想模拟器 - 冒险之旅</title>
     <style>
         * {
             margin: 0;
@@ -13,1235 +13,766 @@
         }
 
         body {
-            background-color: #1a1a2e;
+            background: linear-gradient(135deg, #1a2a6c, #2c3e50);
             color: #fff;
+            min-height: 100vh;
             padding: 20px;
-            max-width: 1200px;
+        }
+
+        .container {
+            max-width: 1000px;
             margin: 0 auto;
-            line-height: 1.6;
-        }
-
-        .game-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .panel {
-            background-color: #16213e;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
             padding: 20px;
-            border-radius: 10px;
-            height: fit-content;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
         }
 
-        .main-panel {
-            grid-column: 2;
+        .game-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #4a6fa5;
         }
 
-        .left-panel {
-            grid-column: 1;
+        .game-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #f1c40f;
+            text-shadow: 0 0 10px rgba(241, 196, 15, 0.7);
         }
 
-        .right-panel {
-            grid-column: 3;
+        .game-header p {
+            color: #bdc3c7;
+            font-size: 1.1rem;
         }
 
-        .resource-display {
-            font-size: 28px;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 15px;
-            background-color: #0f3460;
-            border-radius: 8px;
-        }
-
-        .clicker-btn {
-            width: 100%;
-            height: 180px;
-            background-color: #0f3460;
-            border: none;
-            border-radius: 10px;
-            color: #fff;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-bottom: 25px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .clicker-btn:hover {
-            background-color: #533483;
-            transform: scale(1.02);
-            box-shadow: 0 0 20px rgba(83, 52, 131, 0.5);
-        }
-
-        .clicker-btn::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: 0.5s;
-        }
-
-        .clicker-btn:hover::after {
-            left: 100%;
-        }
-
-        .upgrade-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .upgrade-card {
-            background-color: #0f3460;
-            padding: 18px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            border-left: 4px solid #4cc9f0;
-        }
-
-        .upgrade-card:hover {
-            background-color: #533483;
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .upgrade-card.locked {
-            opacity: 0.5;
-            cursor: not-allowed;
-            border-left-color: #666;
-        }
-
-        .upgrade-card.locked:hover {
-            background-color: #0f3460;
-            transform: none;
-            box-shadow: none;
-        }
-
-        .upgrade-name {
-            font-size: 18px;
-            margin-bottom: 8px;
-            font-weight: bold;
-        }
-
-        .upgrade-level {
-            font-size: 12px;
-            color: #a8d8ff;
-            margin-bottom: 5px;
-        }
-
-        .upgrade-cost {
-            font-size: 14px;
-            color: #a8d8ff;
-        }
-
-        .upgrade-effect {
-            font-size: 14px;
-            color: #f0e68c;
-            margin-top: 8px;
-        }
-
-        .stats {
-            margin-top: 20px;
-            font-size: 16px;
-            color: #a8d8ff;
-            background-color: #0f3460;
-            padding: 15px;
-            border-radius: 8px;
-        }
-
-        .tab-container {
-            margin-bottom: 20px;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .tab-btn {
-            padding: 10px 20px;
-            background-color: #0f3460;
-            border: none;
-            border-radius: 5px;
-            color: #fff;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .tab-btn.active {
-            background-color: #533483;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
+        /* 角色创建面板 */
+        #character-creator {
             display: block;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(44, 62, 80, 0.8);
+            border-radius: 10px;
         }
 
-        .achievement-card {
-            background-color: #0f3460;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            border-left: 4px solid #e74c3c;
-        }
-
-        .achievement-card.unlocked {
-            border-left-color: #2ecc71;
-        }
-
-        .achievement-title {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .achievement-desc {
-            font-size: 14px;
-            color: #a8d8ff;
-        }
-
-        .shop-item {
-            background-color: #0f3460;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .shop-item:hover {
-            background-color: #533483;
-        }
-
-        .shop-item.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .shop-item.disabled:hover {
-            background-color: #0f3460;
-        }
-
-        .skin-selector {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 15px;
-        }
-
-        .skin-btn {
-            width: 80px;
-            height: 80px;
-            border-radius: 8px;
-            border: 2px solid transparent;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .skin-btn.active {
-            border-color: #4cc9f0;
-        }
-
-        .chart-container {
-            height: 250px;
-            margin-top: 20px;
-        }
-
-        .offline-earnings {
-            background-color: #0f3460;
-            padding: 15px;
-            border-radius: 8px;
+        #character-creator h2 {
+            color: #3498db;
             margin-bottom: 20px;
             text-align: center;
         }
 
-        .btn {
-            padding: 10px 20px;
-            background-color: #4cc9f0;
-            border: none;
-            border-radius: 5px;
-            color: #1a1a2e;
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            margin-bottom: 5px;
+            color: #ecf0f1;
             font-weight: bold;
+        }
+
+        .form-group input, .form-group select {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+
+        .stats-distribution {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 20px 0;
+        }
+
+        .stat-box {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(142, 68, 173, 0.7);
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-box p {
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .stat-box button {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: none;
+            background: #3498db;
+            color: white;
+            font-size: 1.2rem;
             cursor: pointer;
-            transition: all 0.2s ease;
-            margin-top: 10px;
+            margin: 0 5px;
         }
 
-        .btn:hover {
-            background-color: #4361ee;
-        }
-
-        .btn:disabled {
-            background-color: #666;
+        .stat-box button:disabled {
+            background: #95a5a6;
             cursor: not-allowed;
         }
 
-        @media (max-width: 900px) {
-            .game-container {
+        .remaining-points {
+            text-align: center;
+            margin: 15px 0;
+            font-size: 1.2rem;
+            color: #f1c40f;
+        }
+
+        /* 游戏主面板 */
+        #game-panel {
+            display: none;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+        }
+
+        .character-info {
+            background: rgba(44, 62, 80, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .character-info h2 {
+            color: #3498db;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid #7f8c8d;
+            padding-bottom: 10px;
+        }
+
+        .char-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .char-stat {
+            background: rgba(142, 68, 173, 0.5);
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .char-stat span {
+            font-weight: bold;
+            color: #f1c40f;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .action-btn {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(45deg, #27ae60, #2ecc71);
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .action-btn.adventure {
+            background: linear-gradient(45deg, #e67e22, #f39c12);
+        }
+
+        .action-btn.rest {
+            background: linear-gradient(45deg, #8e44ad, #9b59b6);
+        }
+
+        .action-btn.train {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }
+
+        /* 冒险面板 */
+        .adventure-panel {
+            background: rgba(44, 62, 80, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .adventure-panel h2 {
+            color: #e67e22;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 1px solid #7f8c8d;
+            padding-bottom: 10px;
+        }
+
+        .log-container {
+            height: 400px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .log-entry {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .log-entry.success {
+            border-left: 4px solid #2ecc71;
+        }
+
+        .log-entry.danger {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .log-entry.info {
+            border-left: 4px solid #3498db;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #3498db;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #2980b9;
+        }
+
+        .btn-create {
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+
+        .btn-create:hover {
+            background: linear-gradient(45deg, #c0392b, #a93226);
+        }
+
+        @media (max-width: 768px) {
+            #game-panel {
                 grid-template-columns: 1fr;
             }
             
-            .left-panel, .main-panel, .right-panel {
-                grid-column: 1;
+            .stats-distribution {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                grid-template-columns: 1fr;
             }
         }
     </style>
-    <!-- 引入图表库 -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="game-container">
-        <!-- 左侧面板：资源和核心操作 -->
-        <div class="panel left-panel">
-            <div class="resource-display">
-                <div>
-                    <span>金币: <span id="gold">0</span></span>
-                    <br>
-                    <span>宝石: <span id="gems">0</span></span>
-                </div>
-                <div>
-                    <span>每秒金币: <span id="goldPerSecond">0</span></span>
-                    <br>
-                    <span>点击收益: <span id="clickValue">1</span></span>
-                </div>
-            </div>
-
-            <button class="clicker-btn" id="clickerBtn">
-                <span id="clickerText">点击获取金币</span>
-            </button>
-
-            <div class="offline-earnings" id="offlineEarnings">
-                <div>离线收益待领取</div>
-                <div id="offlineAmount">0 金币</div>
-                <button class="btn" id="claimOfflineBtn" disabled>领取</button>
-            </div>
-
-            <div class="stats">
-                <p>游戏时长: <span id="playTime">0</span> 秒</p>
-                <p>总点击次数: <span id="totalClicks">0</span></p>
-                <p>已解锁升级: <span id="unlockedUpgrades">0</span>/8</p>
-                <p>已完成成就: <span id="completedAchievements">0</span>/6</p>
-            </div>
+    <div class="container">
+        <div class="game-header">
+            <h1>幻想模拟器</h1>
+            <p>开启你的奇幻冒险之旅，塑造属于自己的传奇人生</p>
         </div>
 
-        <!-- 中间面板：升级和数据可视化 -->
-        <div class="panel main-panel">
-            <div class="tab-container">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="upgrades">升级</button>
-                    <button class="tab-btn" data-tab="stats">数据统计</button>
-                    <button class="tab-btn" data-tab="skins">皮肤</button>
+        <!-- 角色创建面板 -->
+        <div id="character-creator">
+            <h2>创建你的角色</h2>
+            
+            <div class="form-group">
+                <label for="char-name">角色名称</label>
+                <input type="text" id="char-name" placeholder="输入你的角色名" required>
+            </div>
+
+            <div class="form-group">
+                <label for="char-class">职业选择</label>
+                <select id="char-class" required>
+                    <option value="">请选择职业</option>
+                    <option value="warrior">战士 - 高力量、高体质</option>
+                    <option value="mage">法师 - 高智力、高精神</option>
+                    <option value="rogue">盗贼 - 高敏捷、高幸运</option>
+                    <option value="priest">牧师 - 高精神、高体质</option>
+                </select>
+            </div>
+
+            <div class="remaining-points">可用属性点: <span id="remaining-points">20</span></div>
+
+            <div class="stats-distribution">
+                <div class="stat-box">
+                    <p>力量 (STR)</p>
+                    <button id="str-minus" disabled>-</button>
+                    <span id="str-value">5</span>
+                    <button id="str-plus">+</button>
+                    <p>影响物理攻击</p>
                 </div>
 
-                <!-- 升级标签页 -->
-                <div class="tab-content active" id="upgrades">
-                    <div class="upgrade-grid">
-                        <!-- 基础升级 -->
-                        <div class="upgrade-card" id="upgrade1">
-                            <div class="upgrade-name">初级矿工</div>
-                            <div class="upgrade-level">等级: <span id="upgrade1Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade1Cost">10</span> 金币</div>
-                            <div class="upgrade-effect">效果: +0.5 金币/秒</div>
-                        </div>
-
-                        <div class="upgrade-card locked" id="upgrade2">
-                            <div class="upgrade-name">金矿</div>
-                            <div class="upgrade-level">等级: <span id="upgrade2Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade2Cost">50</span> 金币</div>
-                            <div class="upgrade-effect">效果: +2 金币/秒</div>
-                        </div>
-
-                        <div class="upgrade-card locked" id="upgrade3">
-                            <div class="upgrade-name">点击强化</div>
-                            <div class="upgrade-level">等级: <span id="upgrade3Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade3Cost">30</span> 金币</div>
-                            <div class="upgrade-effect">效果: 点击收益+1</div>
-                        </div>
-
-                        <div class="upgrade-card locked" id="upgrade4">
-                            <div class="upgrade-name">自动化工厂</div>
-                            <div class="upgrade-level">等级: <span id="upgrade4Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade4Cost">200</span> 金币</div>
-                            <div class="upgrade-effect">效果: +10 金币/秒</div>
-                        </div>
-
-                        <!-- 高级升级 -->
-                        <div class="upgrade-card locked" id="upgrade5">
-                            <div class="upgrade-name">银行</div>
-                            <div class="upgrade-level">等级: <span id="upgrade5Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade5Cost">500</span> 金币</div>
-                            <div class="upgrade-effect">效果: 所有收益+10%</div>
-                        </div>
-
-                        <div class="upgrade-card locked" id="upgrade6">
-                            <div class="upgrade-name">科技研发</div>
-                            <div class="upgrade-level">等级: <span id="upgrade6Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade6Cost">1000</span> 金币</div>
-                            <div class="upgrade-effect">效果: 每秒+20金币</div>
-                        </div>
-
-                        <div class="upgrade-card locked" id="upgrade7">
-                            <div class="upgrade-name">超级点击</div>
-                            <div class="upgrade-level">等级: <span id="upgrade7Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade7Cost">800</span> 金币</div>
-                            <div class="upgrade-effect">效果: 点击收益×2</div>
-                        </div>
-
-                        <div class="upgrade-card locked" id="upgrade8">
-                            <div class="upgrade-name">全球垄断</div>
-                            <div class="upgrade-level">等级: <span id="upgrade8Level">0</span></div>
-                            <div class="upgrade-cost">成本: <span id="upgrade8Cost">5000</span> 金币</div>
-                            <div class="upgrade-effect">效果: 所有收益×2</div>
-                        </div>
-                    </div>
+                <div class="stat-box">
+                    <p>敏捷 (AGI)</p>
+                    <button id="agi-minus" disabled>-</button>
+                    <span id="agi-value">5</span>
+                    <button id="agi-plus">+</button>
+                    <p>影响速度和闪避</p>
                 </div>
 
-                <!-- 数据统计标签页 -->
-                <div class="tab-content" id="stats">
-                    <div class="chart-container">
-                        <canvas id="goldChart"></canvas>
-                    </div>
-                    <div class="stats">
-                        <p>总获得金币: <span id="totalGoldEarned">0</span></p>
-                        <p>总购买升级数: <span id="totalUpgradesBought">0</span></p>
-                        <p>最高每秒收益: <span id="maxGoldPerSecond">0</span></p>
-                        <p>最后离线收益: <span id="lastOfflineEarnings">0</span></p>
-                    </div>
+                <div class="stat-box">
+                    <p>体质 (VIT)</p>
+                    <button id="vit-minus" disabled>-</button>
+                    <span id="vit-value">5</span>
+                    <button id="vit-plus">+</button>
+                    <p>影响生命值</p>
                 </div>
 
-                <!-- 皮肤标签页 -->
-                <div class="tab-content" id="skins">
-                    <h3>选择点击按钮皮肤</h3>
-                    <div class="skin-selector">
-                        <button class="skin-btn active" id="skin1" style="background-color: #0f3460;"></button>
-                        <button class="skin-btn" id="skin2" style="background-color: #e74c3c;"></button>
-                        <button class="skin-btn" id="skin3" style="background-color: #2ecc71;"></button>
-                        <button class="skin-btn" id="skin4" style="background-color: #f39c12;"></button>
-                        <button class="skin-btn" id="skin5" style="background-color: #9b59b6;"></button>
-                    </div>
-                    <h3 style="margin-top: 20px;">全局主题</h3>
-                    <button class="btn" id="toggleThemeBtn">切换亮色/暗色主题</button>
+                <div class="stat-box">
+                    <p>智力 (INT)</p>
+                    <button id="int-minus" disabled>-</button>
+                    <span id="int-value">5</span>
+                    <button id="int-plus">+</button>
+                    <p>影响魔法攻击</p>
+                </div>
+
+                <div class="stat-box">
+                    <p>精神 (SPR)</p>
+                    <button id="spr-minus" disabled>-</button>
+                    <span id="spr-value">5</span>
+                    <button id="spr-plus">+</button>
+                    <p>影响魔法值</p>
+                </div>
+
+                <div class="stat-box">
+                    <p>幸运 (LUK)</p>
+                    <button id="luk-minus" disabled>-</button>
+                    <span id="luk-value">5</span>
+                    <button id="luk-plus">+</button>
+                    <p>影响掉落和暴击</p>
                 </div>
             </div>
+
+            <button class="btn btn-create" id="create-char">创建角色</button>
         </div>
 
-        <!-- 右侧面板：成就、商店、道具 -->
-        <div class="panel right-panel">
-            <div class="tab-container">
-                <div class="tabs">
-                    <button class="tab-btn active" data-tab="achievements">成就</button>
-                    <button class="tab-btn" data-tab="shop">商店</button>
-                    <button class="tab-btn" data-tab="inventory">道具栏</button>
+        <!-- 游戏主面板 -->
+        <div id="game-panel">
+            <!-- 角色信息面板 -->
+            <div class="character-info">
+                <h2 id="char-name-display">角色信息</h2>
+                
+                <div class="char-stats">
+                    <div class="char-stat">职业: <span id="char-class-display">-</span></div>
+                    <div class="char-stat">等级: <span id="char-level">1</span></div>
+                    <div class="char-stat">力量: <span id="char-str">0</span></div>
+                    <div class="char-stat">敏捷: <span id="char-agi">0</span></div>
+                    <div class="char-stat">体质: <span id="char-vit">0</span></div>
+                    <div class="char-stat">智力: <span id="char-int">0</span></div>
+                    <div class="char-stat">精神: <span id="char-spr">0</span></div>
+                    <div class="char-stat">幸运: <span id="char-luk">0</span></div>
+                    <div class="char-stat">生命值: <span id="char-hp">100</span>/100</div>
+                    <div class="char-stat">魔法值: <span id="char-mp">100</span>/100</div>
+                    <div class="char-stat">金币: <span id="char-gold">0</span></div>
+                    <div class="char-stat">经验值: <span id="char-exp">0</span>/100</div>
                 </div>
 
-                <!-- 成就标签页 -->
-                <div class="tab-content active" id="achievements">
-                    <div class="achievement-card" id="achievement1">
-                        <div class="achievement-title">初次点击</div>
-                        <div class="achievement-desc">点击获取10次金币 - 奖励: 5宝石</div>
-                    </div>
-                    <div class="achievement-card" id="achievement2">
-                        <div class="achievement-title">小有积蓄</div>
-                        <div class="achievement-desc">拥有100金币 - 奖励: 10宝石</div>
-                    </div>
-                    <div class="achievement-card" id="achievement3">
-                        <div class="achievement-title">升级达人</div>
-                        <div class="achievement-desc">购买5个不同的升级 - 奖励: 20宝石</div>
-                    </div>
-                    <div class="achievement-card" id="achievement4">
-                        <div class="achievement-title">自动赚钱</div>
-                        <div class="achievement-desc">每秒收益达到50 - 奖励: 50宝石</div>
-                    </div>
-                    <div class="achievement-card" id="achievement5">
-                        <div class="achievement-title">宝石收藏家</div>
-                        <div class="achievement-desc">拥有100宝石 - 奖励: 100宝石</div>
-                    </div>
-                    <div class="achievement-card" id="achievement6">
-                        <div class="achievement-title">游戏大亨</div>
-                        <div class="achievement-desc">拥有10000金币 - 奖励: 500宝石</div>
-                    </div>
+                <div class="action-buttons">
+                    <button class="action-btn adventure" id="btn-adventure">冒险探索</button>
+                    <button class="action-btn train" id="btn-train">训练提升</button>
+                    <button class="action-btn rest" id="btn-rest">休息恢复</button>
+                    <button class="action-btn" id="btn-refresh">刷新状态</button>
                 </div>
+            </div>
 
-                <!-- 商店标签页 -->
-                <div class="tab-content" id="shop">
-                    <div class="shop-item" id="shopItem1">
-                        <div class="upgrade-name">加速药水 (10宝石)</div>
-                        <div class="upgrade-effect">效果: 1分钟内所有收益×2</div>
-                    </div>
-                    <div class="shop-item" id="shopItem2">
-                        <div class="upgrade-name">点击药水 (5宝石)</div>
-                        <div class="upgrade-effect">效果: 30秒内点击收益×3</div>
-                    </div>
-                    <div class="shop-item" id="shopItem3">
-                        <div class="upgrade-name">离线收益卡 (20宝石)</div>
-                        <div class="upgrade-effect">效果: 离线收益×1.5 (永久)</div>
-                    </div>
-                    <div class="shop-item" id="shopItem4">
-                        <div class="upgrade-name">金币礼包 (50宝石)</div>
-                        <div class="upgrade-effect">效果: 立即获得1000金币</div>
-                    </div>
+            <!-- 冒险面板 -->
+            <div class="adventure-panel">
+                <h2>冒险日志</h2>
+                <div class="log-container" id="adventure-log">
+                    <div class="log-entry info">欢迎来到幻想模拟器！你的冒险即将开始...</div>
                 </div>
-
-                <!-- 道具栏标签页 -->
-                <div class="tab-content" id="inventory">
-                    <div id="inventoryItems">
-                        <p>你的道具栏是空的，去商店购买道具吧！</p>
-                    </div>
-                    <div id="activeEffects">
-                        <h4>激活的效果:</h4>
-                        <div id="activeEffectsList">无</div>
-                    </div>
-                </div>
+                <button class="btn" id="clear-log">清空日志</button>
             </div>
         </div>
     </div>
 
     <script>
-        // 游戏状态管理 - 大幅扩展
-        const gameState = {
-            // 基础资源
+        // 全局变量
+        let character = {
+            name: "",
+            class: "",
+            level: 1,
+            stats: {
+                str: 5,
+                agi: 5,
+                vit: 5,
+                int: 5,
+                spr: 5,
+                luk: 5
+            },
+            hp: 100,
+            mp: 100,
+            maxHp: 100,
+            maxMp: 100,
             gold: 0,
-            gems: 0,
-            goldPerSecond: 0,
-            clickValue: 1,
-            
-            // 游戏统计
-            playTime: 0,
-            totalClicks: 0,
-            totalGoldEarned: 0,
-            totalUpgradesBought: 0,
-            maxGoldPerSecond: 0,
-            lastOfflineEarnings: 0,
-            
-            // 升级系统（支持多阶升级）
-            upgrades: {
-                upgrade1: { cost: 10, effect: 0.5, unlocked: true, level: 0, maxLevel: 10, type: 'passive' },
-                upgrade2: { cost: 50, effect: 2, unlocked: false, level: 0, maxLevel: 10, type: 'passive' },
-                upgrade3: { cost: 30, effect: 1, unlocked: false, level: 0, maxLevel: 10, type: 'click' },
-                upgrade4: { cost: 200, effect: 10, unlocked: false, level: 0, maxLevel: 5, type: 'passive' },
-                upgrade5: { cost: 500, effect: 0.1, unlocked: false, level: 0, maxLevel: 5, type: 'multiplier' },
-                upgrade6: { cost: 1000, effect: 20, unlocked: false, level: 0, maxLevel: 5, type: 'passive' },
-                upgrade7: { cost: 800, effect: 2, unlocked: false, level: 0, maxLevel: 3, type: 'clickMultiplier' },
-                upgrade8: { cost: 5000, effect: 2, unlocked: false, level: 0, maxLevel: 1, type: 'globalMultiplier' }
-            },
-            
-            // 解锁的升级数量
-            unlockedUpgradesCount: 1,
-            
-            // 成就系统
-            achievements: {
-                achievement1: { unlocked: false, condition: () => gameState.totalClicks >= 10, reward: 5 },
-                achievement2: { unlocked: false, condition: () => gameState.gold >= 100, reward: 10 },
-                achievement3: { unlocked: false, condition: () => getUniqueUpgradesBought() >= 5, reward: 20 },
-                achievement4: { unlocked: false, condition: () => gameState.goldPerSecond >= 50, reward: 50 },
-                achievement5: { unlocked: false, condition: () => gameState.gems >= 100, reward: 100 },
-                achievement6: { unlocked: false, condition: () => gameState.gold >= 10000, reward: 500 }
-            },
-            
-            // 商店和道具
-            inventory: [],
-            activeEffects: {},
-            offlineMultiplier: 1,
-            
-            // 皮肤和主题
-            currentSkin: 'skin1',
-            darkTheme: true,
-            
-            // 数据统计
-            goldHistory: Array(30).fill(0),
-            lastUpdateTime: Date.now(),
-            lastSaveTime: Date.now()
+            exp: 0,
+            expToNextLevel: 100
         };
 
-        // DOM 元素引用
-        const elements = {
-            // 基础资源
-            gold: document.getElementById('gold'),
-            gems: document.getElementById('gems'),
-            goldPerSecond: document.getElementById('goldPerSecond'),
-            clickValue: document.getElementById('clickValue'),
-            clickerBtn: document.getElementById('clickerBtn'),
-            clickerText: document.getElementById('clickerText'),
-            
-            // 统计数据
-            playTime: document.getElementById('playTime'),
-            totalClicks: document.getElementById('totalClicks'),
-            unlockedUpgrades: document.getElementById('unlockedUpgrades'),
-            totalGoldEarned: document.getElementById('totalGoldEarned'),
-            totalUpgradesBought: document.getElementById('totalUpgradesBought'),
-            maxGoldPerSecond: document.getElementById('maxGoldPerSecond'),
-            lastOfflineEarnings: document.getElementById('lastOfflineEarnings'),
-            
-            // 升级相关
-            upgrade1: document.getElementById('upgrade1'),
-            upgrade1Level: document.getElementById('upgrade1Level'),
-            upgrade1Cost: document.getElementById('upgrade1Cost'),
-            upgrade2: document.getElementById('upgrade2'),
-            upgrade2Level: document.getElementById('upgrade2Level'),
-            upgrade2Cost: document.getElementById('upgrade2Cost'),
-            upgrade3: document.getElementById('upgrade3'),
-            upgrade3Level: document.getElementById('upgrade3Level'),
-            upgrade3Cost: document.getElementById('upgrade3Cost'),
-            upgrade4: document.getElementById('upgrade4'),
-            upgrade4Level: document.getElementById('upgrade4Level'),
-            upgrade4Cost: document.getElementById('upgrade4Cost'),
-            upgrade5: document.getElementById('upgrade5'),
-            upgrade5Level: document.getElementById('upgrade5Level'),
-            upgrade5Cost: document.getElementById('upgrade5Cost'),
-            upgrade6: document.getElementById('upgrade6'),
-            upgrade6Level: document.getElementById('upgrade6Level'),
-            upgrade6Cost: document.getElementById('upgrade6Cost'),
-            upgrade7: document.getElementById('upgrade7'),
-            upgrade7Level: document.getElementById('upgrade7Level'),
-            upgrade7Cost: document.getElementById('upgrade7Cost'),
-            upgrade8: document.getElementById('upgrade8'),
-            upgrade8Level: document.getElementById('upgrade8Level'),
-            upgrade8Cost: document.getElementById('upgrade8Cost'),
-            
-            // 标签页
-            tabBtns: document.querySelectorAll('.tab-btn'),
-            tabContents: document.querySelectorAll('.tab-content'),
-            
-            // 成就
-            achievement1: document.getElementById('achievement1'),
-            achievement2: document.getElementById('achievement2'),
-            achievement3: document.getElementById('achievement3'),
-            achievement4: document.getElementById('achievement4'),
-            achievement5: document.getElementById('achievement5'),
-            achievement6: document.getElementById('achievement6'),
-            
-            // 商店
-            shopItem1: document.getElementById('shopItem1'),
-            shopItem2: document.getElementById('shopItem2'),
-            shopItem3: document.getElementById('shopItem3'),
-            shopItem4: document.getElementById('shopItem4'),
-            
-            // 道具栏
-            inventoryItems: document.getElementById('inventoryItems'),
-            activeEffectsList: document.getElementById('activeEffectsList'),
-            
-            // 皮肤
-            skinBtns: document.querySelectorAll('.skin-btn'),
-            toggleThemeBtn: document.getElementById('toggleThemeBtn'),
-            
-            // 离线收益
-            offlineEarnings: document.getElementById('offlineEarnings'),
-            offlineAmount: document.getElementById('offlineAmount'),
-            claimOfflineBtn: document.getElementById('claimOfflineBtn'),
-            
-            // 图表
-            goldChart: document.getElementById('goldChart')
+        let remainingPoints = 20;
+
+        // DOM 元素
+        const statElements = {
+            str: document.getElementById('str-value'),
+            agi: document.getElementById('agi-value'),
+            vit: document.getElementById('vit-value'),
+            int: document.getElementById('int-value'),
+            spr: document.getElementById('spr-value'),
+            luk: document.getElementById('luk-value'),
+            remaining: document.getElementById('remaining-points')
         };
 
-        // 计算购买的独特升级数量
-        function getUniqueUpgradesBought() {
-            let count = 0;
-            Object.keys(gameState.upgrades).forEach(upgradeId => {
-                if (gameState.upgrades[upgradeId].level > 0) {
-                    count++;
-                }
-            });
-            return count;
-        }
+        const statButtons = {
+            str: {
+                minus: document.getElementById('str-minus'),
+                plus: document.getElementById('str-plus')
+            },
+            agi: {
+                minus: document.getElementById('agi-minus'),
+                plus: document.getElementById('agi-plus')
+            },
+            vit: {
+                minus: document.getElementById('vit-minus'),
+                plus: document.getElementById('vit-plus')
+            },
+            int: {
+                minus: document.getElementById('int-minus'),
+                plus: document.getElementById('int-plus')
+            },
+            spr: {
+                minus: document.getElementById('spr-minus'),
+                plus: document.getElementById('spr-plus')
+            },
+            luk: {
+                minus: document.getElementById('luk-minus'),
+                plus: document.getElementById('luk-plus')
+            }
+        };
 
-        // 初始化图表
-        let goldChartInstance;
-        function initChart() {
-            goldChartInstance = new Chart(elements.goldChart, {
-                type: 'line',
-                data: {
-                    labels: Array(30).fill(''),
-                    datasets: [{
-                        label: '金币数量',
-                        data: gameState.goldHistory,
-                        borderColor: '#4cc9f0',
-                        backgroundColor: 'rgba(76, 201, 240, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#fff'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#fff'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#fff'
-                            }
+        // 初始化属性按钮事件
+        function initStatButtons() {
+            // 为每个属性添加增减事件
+            for (const stat in statButtons) {
+                // 增加属性
+                statButtons[stat].plus.addEventListener('click', () => {
+                    if (remainingPoints > 0) {
+                        character.stats[stat]++;
+                        statElements[stat].textContent = character.stats[stat];
+                        remainingPoints--;
+                        statElements.remaining.textContent = remainingPoints;
+                        
+                        // 启用减号按钮
+                        statButtons[stat].minus.disabled = false;
+                        
+                        // 如果没有剩余点数，禁用所有加号按钮
+                        if (remainingPoints === 0) {
+                            disableAllPlusButtons();
                         }
                     }
-                }
-            });
-        }
+                });
 
-        // 更新UI显示
-        function updateUI() {
-            // 更新基础资源显示
-            elements.gold.textContent = gameState.gold.toFixed(1);
-            elements.gems.textContent = gameState.gems;
-            elements.goldPerSecond.textContent = calculateTotalGoldPerSecond().toFixed(1);
-            elements.clickValue.textContent = calculateTotalClickValue().toFixed(1);
-            
-            // 更新统计数据
-            elements.playTime.textContent = Math.floor(gameState.playTime);
-            elements.totalClicks.textContent = gameState.totalClicks;
-            elements.unlockedUpgrades.textContent = gameState.unlockedUpgradesCount;
-            elements.totalGoldEarned.textContent = gameState.totalGoldEarned.toFixed(1);
-            elements.totalUpgradesBought.textContent = gameState.totalUpgradesBought;
-            elements.maxGoldPerSecond.textContent = gameState.maxGoldPerSecond.toFixed(1);
-            elements.lastOfflineEarnings.textContent = gameState.lastOfflineEarnings.toFixed(1);
-            
-            // 更新升级显示
-            Object.keys(gameState.upgrades).forEach(upgradeId => {
-                const upgrade = gameState.upgrades[upgradeId];
-                const element = elements[upgradeId];
-                const levelElement = elements[`${upgradeId}Level`];
-                const costElement = elements[`${upgradeId}Cost`];
-                
-                // 更新解锁状态
-                if (upgrade.unlocked) {
-                    element.classList.remove('locked');
-                } else {
-                    element.classList.add('locked');
-                }
-                
-                // 更新等级和成本
-                levelElement.textContent = upgrade.level;
-                costElement.textContent = Math.floor(upgrade.cost);
-                
-                // 如果达到最大等级，标记为已满级
-                if (upgrade.level >= upgrade.maxLevel) {
-                    element.classList.add('locked');
-                    costElement.textContent = "MAX";
-                }
-            });
-            
-            // 更新成就显示
-            Object.keys(gameState.achievements).forEach(achievementId => {
-                const achievement = gameState.achievements[achievementId];
-                const element = elements[achievementId];
-                
-                if (achievement.unlocked) {
-                    element.classList.add('unlocked');
-                } else {
-                    element.classList.remove('unlocked');
-                }
-            });
-            
-            // 更新道具栏
-            updateInventoryUI();
-            
-            // 更新图表
-            updateChart();
-            
-            // 更新离线收益按钮状态
-            elements.claimOfflineBtn.disabled = gameState.lastOfflineEarnings <= 0;
-            
-            // 更新商店物品状态
-            updateShopUI();
-        }
-
-        // 计算总每秒收益（包含所有加成）
-        function calculateTotalGoldPerSecond() {
-            let base = gameState.goldPerSecond;
-            
-            // 应用百分比加成
-            Object.keys(gameState.upgrades).forEach(upgradeId => {
-                const upgrade = gameState.upgrades[upgradeId];
-                if (upgrade.type === 'multiplier' && upgrade.level > 0) {
-                    base += base * upgrade.effect * upgrade.level;
-                }
-                if (upgrade.type === 'globalMultiplier' && upgrade.level > 0) {
-                    base *= upgrade.effect * upgrade.level;
-                }
-            });
-            
-            // 应用激活的效果
-            if (gameState.activeEffects.boost) {
-                base *= 2;
-            }
-            
-            return base;
-        }
-
-        // 计算总点击收益（包含所有加成）
-        function calculateTotalClickValue() {
-            let base = gameState.clickValue;
-            
-            // 应用点击加成
-            Object.keys(gameState.upgrades).forEach(upgradeId => {
-                const upgrade = gameState.upgrades[upgradeId];
-                if (upgrade.type === 'click' && upgrade.level > 0) {
-                    base += upgrade.effect * upgrade.level;
-                }
-                if (upgrade.type === 'clickMultiplier' && upgrade.level > 0) {
-                    base *= upgrade.effect * upgrade.level;
-                }
-                if (upgrade.type === 'globalMultiplier' && upgrade.level > 0) {
-                    base *= upgrade.effect * upgrade.level;
-                }
-            });
-            
-            // 应用激活的效果
-            if (gameState.activeEffects.clickBoost) {
-                base *= 3;
-            }
-            
-            return base;
-        }
-
-        // 处理点击获取金币
-        function handleClick() {
-            gameState.gold += calculateTotalClickValue();
-            gameState.totalClicks++;
-            gameState.totalGoldEarned += calculateTotalClickValue();
-            
-            // 检查解锁条件
-            checkUpgradeUnlocks();
-            checkAchievements();
-            
-            updateUI();
-        }
-
-        // 检查升级解锁条件
-        function checkUpgradeUnlocks() {
-            // 基础升级解锁
-            if (!gameState.upgrades.upgrade2.unlocked && gameState.gold >= 30) {
-                gameState.upgrades.upgrade2.unlocked = true;
-                gameState.unlockedUpgradesCount++;
-            }
-            if (!gameState.upgrades.upgrade3.unlocked && gameState.gold >= 20) {
-                gameState.upgrades.upgrade3.unlocked = true;
-                gameState.unlockedUpgradesCount++;
-            }
-            if (!gameState.upgrades.upgrade4.unlocked && getUniqueUpgradesBought() >= 3) {
-                gameState.upgrades.upgrade4.unlocked = true;
-                gameState.unlockedUpgradesCount++;
-            }
-            
-            // 高级升级解锁
-            if (!gameState.upgrades.upgrade5.unlocked && gameState.gold >= 300) {
-                gameState.upgrades.upgrade5.unlocked = true;
-                gameState.unlockedUpgradesCount++;
-            }
-            if (!gameState.upgrades.upgrade6.unlocked && gameState.gold >= 800) {
-                gameState.upgrades.upgrade6.unlocked = true;
-                gameState.unlockedUpgradesCount++;
-            }
-            if (!gameState.upgrades.upgrade7.unlocked && gameState.gold >= 600) {
-                gameState.upgrades.upgrade7.unlocked = true;
-                gameState.unlockedUpgradesCount++;
-            }
-            if (!gameState.upgrades.upgrade8.unlocked && gameState.gold >= 3000) {
-                gameState.upgrades.upgrade8.unlocked = true;
-                gameState.unlockedUpgradesCount++;
+                // 减少属性
+                statButtons[stat].minus.addEventListener('click', () => {
+                    if (character.stats[stat] > 5) {
+                        character.stats[stat]--;
+                        statElements[stat].textContent = character.stats[stat];
+                        remainingPoints++;
+                        statElements.remaining.textContent = remainingPoints;
+                        
+                        // 启用所有加号按钮
+                        enableAllPlusButtons();
+                        
+                        // 如果属性回到5，禁用减号按钮
+                        if (character.stats[stat] === 5) {
+                            statButtons[stat].minus.disabled = true;
+                        }
+                    }
+                });
             }
         }
 
-        // 检查成就解锁
-        function checkAchievements() {
-            Object.keys(gameState.achievements).forEach(achievementId => {
-                const achievement = gameState.achievements[achievementId];
-                if (!achievement.unlocked && achievement.condition()) {
-                    achievement.unlocked = true;
-                    gameState.gems += achievement.reward;
-                    
-                    // 显示成就解锁提示
-                    alert(`成就解锁: ${elements[achievementId].querySelector('.achievement-title').textContent}！奖励: ${achievement.reward}宝石`);
-                }
-            });
+        // 禁用所有加号按钮
+        function disableAllPlusButtons() {
+            for (const stat in statButtons) {
+                statButtons[stat].plus.disabled = true;
+            }
         }
 
-        // 购买升级
-        function purchaseUpgrade(upgradeId) {
-            const upgrade = gameState.upgrades[upgradeId];
-            
-            // 检查条件
-            if (!upgrade.unlocked || gameState.gold < upgrade.cost || upgrade.level >= upgrade.maxLevel) {
+        // 启用所有加号按钮
+        function enableAllPlusButtons() {
+            for (const stat in statButtons) {
+                statButtons[stat].plus.disabled = false;
+            }
+        }
+
+        // 创建角色
+        document.getElementById('create-char').addEventListener('click', () => {
+            const charName = document.getElementById('char-name').value;
+            const charClass = document.getElementById('char-class').value;
+
+            // 验证输入
+            if (!charName || !charClass) {
+                alert('请填写角色名称并选择职业！');
                 return;
             }
+
+            if (remainingPoints > 0) {
+                if (!confirm('你还有剩余的属性点未分配，确定要创建角色吗？')) {
+                    return;
+                }
+            }
+
+            // 设置角色信息
+            character.name = charName;
+            character.class = charClass;
             
-            // 扣除金币
-            gameState.gold -= upgrade.cost;
+            // 根据职业调整基础属性
+            adjustClassStats();
             
-            // 升级等级
-            upgrade.level++;
-            gameState.totalUpgradesBought++;
-            
-            // 应用升级效果
-            switch(upgrade.type) {
-                case 'passive':
-                    gameState.goldPerSecond += upgrade.effect;
+            // 计算最大生命值和魔法值
+            calculateMaxHpMp();
+
+            // 更新角色面板显示
+            updateCharacterPanel();
+
+            // 切换显示面板
+            document.getElementById('character-creator').style.display = 'none';
+            document.getElementById('game-panel').style.display = 'grid';
+
+            // 添加日志
+            addLogEntry(`欢迎 ${character.name}（${getClassName(character.class)}）加入冒险！`, 'info');
+        });
+
+        // 根据职业调整属性
+        function adjustClassStats() {
+            switch (character.class) {
+                case 'warrior':
+                    character.stats.str += 5;
+                    character.stats.vit += 3;
                     break;
-                case 'click':
-                    gameState.clickValue += upgrade.effect;
+                case 'mage':
+                    character.stats.int += 5;
+                    character.stats.spr += 3;
                     break;
-                // 其他类型的效果在计算时应用
-            }
-            
-            // 更新最大每秒收益
-            if (calculateTotalGoldPerSecond() > gameState.maxGoldPerSecond) {
-                gameState.maxGoldPerSecond = calculateTotalGoldPerSecond();
-            }
-            
-            // 升级成本上涨（非线性）
-            upgrade.cost = Math.floor(upgrade.cost * (1.1 + upgrade.level * 0.05));
-            
-            // 检查解锁条件
-            checkUpgradeUnlocks();
-            checkAchievements();
-            
-            updateUI();
-        }
-
-        // 自动获取金币
-        function autoGainGold() {
-            const goldToAdd = calculateTotalGoldPerSecond() / 10;
-            gameState.gold += goldToAdd;
-            gameState.totalGoldEarned += goldToAdd;
-            gameState.playTime += 0.1;
-            
-            // 更新金币历史数据
-            gameState.goldHistory.shift();
-            gameState.goldHistory.push(gameState.gold);
-            
-            // 检查成就
-            checkAchievements();
-            
-            updateUI();
-        }
-
-        // 初始化标签页切换
-        function initTabs() {
-            elements.tabBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // 获取标签页组和目标ID
-                    const tabGroup = btn.parentElement;
-                    const targetTab = btn.getAttribute('data-tab');
-                    
-                    // 移除同组所有激活状态
-                    tabGroup.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                    document.querySelectorAll(`.tab-content[id="${targetTab}"]`).forEach(content => {
-                        content.closest('.tab-container').querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    });
-                    
-                    // 添加激活状态
-                    btn.classList.add('active');
-                    document.getElementById(targetTab).classList.add('active');
-                });
-            });
-        }
-
-        // 初始化升级购买事件
-        function initUpgradeEvents() {
-            Object.keys(gameState.upgrades).forEach(upgradeId => {
-                elements[upgradeId].addEventListener('click', () => purchaseUpgrade(upgradeId));
-            });
-        }
-
-        // 初始化商店事件
-        function initShopEvents() {
-            // 加速药水
-            elements.shopItem1.addEventListener('click', () => {
-                if (gameState.gems >= 10 && !gameState.activeEffects.boost) {
-                    gameState.gems -= 10;
-                    gameState.activeEffects.boost = true;
-                    
-                    // 添加到道具使用记录
-                    addToInventory('加速药水');
-                    
-                    // 1分钟后移除效果
-                    setTimeout(() => {
-                        delete gameState.activeEffects.boost;
-                        updateUI();
-                        alert('加速药水效果已结束！');
-                    }, 60000);
-                    
-                    updateUI();
-                }
-            });
-            
-            // 点击药水
-            elements.shopItem2.addEventListener('click', () => {
-                if (gameState.gems >= 5 && !gameState.activeEffects.clickBoost) {
-                    gameState.gems -= 5;
-                    gameState.activeEffects.clickBoost = true;
-                    
-                    // 添加到道具使用记录
-                    addToInventory('点击药水');
-                    
-                    // 30秒后移除效果
-                    setTimeout(() => {
-                        delete gameState.activeEffects.clickBoost;
-                        updateUI();
-                        alert('点击药水效果已结束！');
-                    }, 30000);
-                    
-                    updateUI();
-                }
-            });
-            
-            // 离线收益卡
-            elements.shopItem3.addEventListener('click', () => {
-                if (gameState.gems >= 20 && gameState.offlineMultiplier === 1) {
-                    gameState.gems -= 20;
-                    gameState.offlineMultiplier = 1.5;
-                    
-                    // 添加到道具使用记录
-                    addToInventory('离线收益卡 (永久)');
-                    
-                    updateUI();
-                    alert('离线收益×1.5！');
-                }
-            });
-            
-            // 金币礼包
-            elements.shopItem4.addEventListener('click', () => {
-                if (gameState.gems >= 50) {
-                    gameState.gems -= 50;
-                    gameState.gold += 1000;
-                    gameState.totalGoldEarned += 1000;
-                    
-                    // 添加到道具使用记录
-                    addToInventory('金币礼包');
-                    
-                    updateUI();
-                }
-            });
-        }
-
-        // 更新商店UI状态
-        function updateShopUI() {
-            elements.shopItem1.classList.toggle('disabled', gameState.gems < 10 || gameState.activeEffects.boost);
-            elements.shopItem2.classList.toggle('disabled', gameState.gems < 5 || gameState.activeEffects.clickBoost);
-            elements.shopItem3.classList.toggle('disabled', gameState.gems < 20 || gameState.offlineMultiplier > 1);
-            elements.shopItem4.classList.toggle('disabled', gameState.gems < 50);
-        }
-
-        // 添加道具到库存
-        function addToInventory(itemName) {
-            gameState.inventory.push({
-                name: itemName,
-                time: new Date().toLocaleTimeString()
-            });
-        }
-
-        // 更新道具栏UI
-        function updateInventoryUI() {
-            if (gameState.inventory.length === 0) {
-                elements.inventoryItems.innerHTML = '<p>你的道具栏是空的，去商店购买道具吧！</p>';
-            } else {
-                elements.inventoryItems.innerHTML = '';
-                gameState.inventory.slice(-5).forEach(item => {
-                    const itemElement = document.createElement('div');
-                    itemElement.className = 'shop-item';
-                    itemElement.innerHTML = `
-                        <div class="upgrade-name">${item.name}</div>
-                        <div class="upgrade-effect">使用时间: ${item.time}</div>
-                    `;
-                    elements.inventoryItems.appendChild(itemElement);
-                });
-            }
-            
-            // 更新激活的效果
-            const effects = [];
-            if (gameState.activeEffects.boost) effects.push('加速药水 (收益×2)');
-            if (gameState.activeEffects.clickBoost) effects.push('点击药水 (点击×3)');
-            if (gameState.offlineMultiplier > 1) effects.push(`离线收益×${gameState.offlineMultiplier}`);
-            
-            elements.activeEffectsList.textContent = effects.length > 0 ? effects.join(', ') : '无';
-        }
-
-        // 初始化皮肤切换
-        function initSkinEvents() {
-            elements.skinBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    // 移除所有激活状态
-                    elements.skinBtns.forEach(b => b.classList.remove('active'));
-                    
-                    // 添加当前激活状态
-                    btn.classList.add('active');
-                    gameState.currentSkin = btn.id;
-                    
-                    // 应用皮肤颜色
-                    elements.clickerBtn.style.backgroundColor = btn.style.backgroundColor;
-                });
-            });
-            
-            // 主题切换
-            elements.toggleThemeBtn.addEventListener('click', () => {
-                gameState.darkTheme = !gameState.darkTheme;
-                document.body.style.backgroundColor = gameState.darkTheme ? '#1a1a2e' : '#f5f5f5';
-                document.body.style.color = gameState.darkTheme ? '#fff' : '#1a1a2e';
-            });
-        }
-
-        // 更新图表
-        function updateChart() {
-            if (goldChartInstance) {
-                goldChartInstance.data.datasets[0].data = gameState.goldHistory;
-                goldChartInstance.update();
+                case 'rogue':
+                    character.stats.agi += 5;
+                    character.stats.luk += 3;
+                    break;
+                case 'priest':
+                    character.stats.spr += 5;
+                    character.stats.vit += 3;
+                    break;
             }
         }
 
-        // 计算离线收益
-        function calculateOfflineEarnings() {
-            const now = Date.now();
-            const timeAway = (now - gameState.lastUpdateTime) / 1000; // 秒数
-            const maxOfflineTime = 3600; // 最大离线时间1小时
-            const actualTime = Math.min(timeAway, maxOfflineTime);
-            
-            const earnings = calculateTotalGoldPerSecond() * actualTime * gameState.offlineMultiplier;
-            gameState.lastOfflineEarnings = earnings;
-            
-            // 更新UI显示
-            elements.offlineAmount.textContent = `${earnings.toFixed(1)} 金币`;
-            
-            return earnings;
+        // 计算最大生命值和魔法值
+        function calculateMaxHpMp() {
+            character.maxHp = 100 + (character.stats.vit * 10);
+            character.maxMp = 100 + (character.stats.spr * 8);
+            character.hp = character.maxHp;
+            character.mp = character.maxMp;
         }
 
-        // 领取离线收益
-        function claimOfflineEarnings() {
-            if (gameState.lastOfflineEarnings > 0) {
-                gameState.gold += gameState.lastOfflineEarnings;
-                gameState.totalGoldEarned += gameState.lastOfflineEarnings;
-                gameState.lastOfflineEarnings = 0;
-                updateUI();
-            }
+        // 更新角色面板显示
+        function updateCharacterPanel() {
+            document.getElementById('char-name-display').textContent = character.name;
+            document.getElementById('char-class-display').textContent = getClassName(character.class);
+            document.getElementById('char-level').textContent = character.level;
+            document.getElementById('char-str').textContent = character.stats.str;
+            document.getElementById('char-agi').textContent = character.stats.agi;
+            document.getElementById('char-vit').textContent = character.stats.vit;
+            document.getElementById('char-int').textContent = character.stats.int;
+            document.getElementById('char-spr').textContent = character.stats.spr;
+            document.getElementById('char-luk').textContent = character.stats.luk;
+            document.getElementById('char-hp').textContent = character.hp;
+            document.getElementById('char-mp').textContent = character.mp;
+            document.getElementById('char-gold').textContent = character.gold;
+            document.getElementById('char-exp').textContent = `${character.exp}/${character.expToNextLevel}`;
         }
 
-        // 保存游戏进度到本地存储
-        function saveGame() {
-            const saveData = {
-                ...gameState,
-                lastUpdateTime: Date.now()
+        // 获取职业名称
+        function getClassName(classKey) {
+            const classNames = {
+                'warrior': '战士',
+                'mage': '法师',
+                'rogue': '盗贼',
+                'priest': '牧师'
             };
-            
-            localStorage.setItem('idleGameSave', JSON.stringify(saveData));
-            gameState.lastSaveTime = Date.now();
+            return classNames[classKey] || '未知职业';
         }
 
-        // 加载游戏进度
-        function loadGame() {
-            const saveData = localStorage.getItem('idleGameSave');
-            if (saveData) {
-                try {
-                    const parsedData = JSON.parse(saveData);
-                    
-                    // 合并保存的数据
-                    Object.keys(parsedData).forEach(key => {
-                        gameState[key] = parsedData[key];
-                    });
-                    
-                    // 计算离线收益
-                    calculateOfflineEarnings();
-                    
-                    alert('游戏进度加载成功！');
-                } catch (e) {
-                    console.error('加载保存数据失败:', e);
+        // 添加日志条目
+        function addLogEntry(message, type = 'info') {
+            const logContainer = document.getElementById('adventure-log');
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            
+            const timestamp = new Date().toLocaleTimeString();
+            logEntry.innerHTML = `<strong>[${timestamp}]</strong> ${message}`;
+            
+            logContainer.appendChild(logEntry);
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+
+        // 冒险探索
+        document.getElementById('btn-adventure').addEventListener('click', () => {
+            if (character.hp < 20) {
+                addLogEntry('你的生命值过低，无法进行冒险！先休息恢复吧。', 'danger');
+                return;
+            }
+
+            // 消耗生命值和魔法值
+            const hpCost = Math.floor(Math.random() * 20) + 10;
+            const mpCost = Math.floor(Math.random() * 15) + 5;
+            
+            character.hp = Math.max(0, character.hp - hpCost);
+            character.mp = Math.max(0, character.mp - mpCost);
+
+            // 生成冒险结果
+            const successChance = (character.stats.agi + character.stats.luk) / 2;
+            const isSuccess = Math.random() * 100 < successChance;
+
+            if (isSuccess) {
+                // 成功冒险
+                const expGained = Math.floor(Math.random() * 30) + 20 * character.level;
+                const goldGained = Math.floor(Math.random() * 50) + 10 * character.level;
+                
+                character.exp += expGained;
+                character.gold += goldGained;
+
+                addLogEntry(`冒险成功！你获得了 ${expGained} 点经验值和 ${goldGained} 枚金币。消耗了 ${hpCost} 生命值和 ${mpCost} 魔法值。`, 'success');
+                
+                // 检查升级
+                checkLevelUp();
+            } else {
+                // 冒险失败
+                addLogEntry(`冒险失败！你遇到了强大的敌人，被迫撤退。消耗了 ${hpCost} 生命值和 ${mpCost} 魔法值。`, 'danger');
+            }
+
+            // 有几率获得特殊奖励
+            if (Math.random() * 100 < character.stats.luk) {
+                const bonusGold = Math.floor(Math.random() * 100) + 50;
+                character.gold += bonusGold;
+                addLogEntry(`幸运！你发现了隐藏的宝藏，获得了 ${bonusGold} 枚额外金币！`, 'success');
+            }
+
+            updateCharacterPanel();
+        });
+
+        // 训练提升
+        document.getElementById('btn-train').addEventListener('click', () => {
+            if (character.hp < 30) {
+                addLogEntry('你的生命值过低，无法进行训练！先休息恢复吧。', 'danger');
+                return;
+            }
+
+            // 消耗生命值
+            const hpCost = Math.floor(Math.random() * 30) + 20;
+            character.hp = Math.max(0, character.hp - hpCost);
+
+            // 随机提升一个属性
+            const stats = ['str', 'agi', 'vit', 'int', 'spr', 'luk'];
+            const randomStat = stats[Math.floor(Math.random() * stats.length)];
+            const statIncrease = Math.floor(Math.random() * 3) + 1;
+            
+            character.stats[randomStat] += statIncrease;
+            
+            // 重新计算生命值和魔法值
+            calculateMaxHpMp();
+
+            addLogEntry(`训练完成！你的${getStatName(randomStat)}提升了 ${statIncrease} 点。消耗了 ${hpCost} 生命值。`, 'success');
+            updateCharacterPanel();
+        });
+
+        // 获取属性名称
+        function getStatName(statKey) {
+            const statNames = {
+                'str': '力量',
+                'agi': '敏捷',
+                'vit': '体质',
+                'int': '智力',
+                'spr': '精神',
+                'luk': '幸运'
+            };
+            return statNames[statKey] || '未知属性';
+        }
+
+        // 休息恢复
+        document.getElementById('btn-rest').addEventListener('click', () => {
+            const restoreHp = Math.floor(Math.random() * 50) + 50 + (character.stats.vit * 2);
+            const restoreMp = Math.floor(Math.random() * 40) + 40 + (character.stats.spr * 2);
+            
+            character.hp = Math.min(character.maxHp, character.hp + restoreHp);
+            character.mp = Math.min(character.maxMp, character.mp + restoreMp);
+
+            addLogEntry(`休息完成！你恢复了 ${restoreHp} 点生命值和 ${restoreMp} 点魔法值。`, 'info');
+            updateCharacterPanel();
+        });
+
+        // 刷新状态
+        document.getElementById('btn-refresh').addEventListener('click', () => {
+            addLogEntry('状态已刷新！', 'info');
+            updateCharacterPanel();
+        });
+
+        // 清空日志
+        document.getElementById('clear-log').addEventListener('click', () => {
+            document.getElementById('adventure-log').innerHTML = '';
+            addLogEntry('日志已清空', 'info');
+        });
+
+        // 检查升级
+        function checkLevelUp() {
+            while (character.exp >= character.expToNextLevel) {
+                // 升级
+                character.level++;
+                character.exp -= character.expToNextLevel;
+                character.expToNextLevel = Math.floor(character.expToNextLevel * 1.5);
+                
+                // 升级奖励
+                const statPoints = 5 + character.level;
+                for (const stat in character.stats) {
+                    character.stats[stat] += Math.floor(Math.random() * 3) + 1;
                 }
+                
+                // 重新计算生命值和魔法值
+                calculateMaxHpMp();
+
+                addLogEntry(`恭喜！你升级到了 ${character.level} 级！所有属性都得到了提升，生命值和魔法值已恢复满。`, 'success');
             }
         }
 
-        // 初始化事件监听
-        function initEventListeners() {
-            // 核心点击事件
-            elements.clickerBtn.addEventListener('click', handleClick);
-            
-            // 标签页切换
-            initTabs();
-            
-            // 升级购买
-            initUpgradeEvents();
-            
-            // 商店事件
-            initShopEvents();
-            
-            // 皮肤切换
-            initSkinEvents();
-            
-            // 离线收益领取
-            elements.claimOfflineBtn.addEventListener('click', claimOfflineEarnings);
-            
-            // 键盘快捷键
-            document.addEventListener('keydown', (e) => {
-                if (e.code === 'Space') { // 空格键点击
-                    handleClick();
-                }
-                if (e.code === 'KeyS') { // S键保存
-                    saveGame();
-                    alert('游戏已保存！');
-                }
-            });
-        }
-
-        // 游戏初始化
+        // 初始化游戏
         function initGame() {
-            // 加载保存的进度
-            loadGame();
-            
-            // 初始化图表
-            initChart();
-            
-            // 初始化事件监听
-            initEventListeners();
-            
-            // 设置初始解锁的升级数量
-            gameState.unlockedUpgradesCount = 1;
-            
-            // 首次更新UI
-            updateUI();
-            
-            // 自动获取金币（每100ms）
-            setInterval(autoGainGold, 100);
-            
-            // 自动保存（每30秒）
-            setInterval(saveGame, 30000);
-            
-            // 更新最后活动时间
-            setInterval(() => {
-                gameState.lastUpdateTime = Date.now();
-            }, 1000);
+            initStatButtons();
+            addLogEntry('游戏已准备就绪，请创建你的角色开始冒险！', 'info');
         }
 
         // 启动游戏
-        initGame();
+        window.addEventListener('load', initGame);
     </script>
 </body>
 </html>
