@@ -3,245 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>键盘打字记事本</title>
+    <title>仅含按钮的空白页</title>
     <style>
+        /* 重置默认样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: "Segoe UI", "Roboto", Arial, sans-serif;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        /* 页面整体样式 - 让按钮居中显示 */
         body {
             min-height: 100vh;
+            /* 使用flex布局让按钮水平+垂直居中 */
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            background: #f9f9f9;
-            /* 横线行 */
-            background-image:
-                linear-gradient(transparent 95%, #e0e0e0 95%);
-            background-size: 100% 40px;
-            color: #333;
-            padding: 20px;
-            overflow: hidden;
-            position: relative;
+            /* 极简背景色（可自行修改） */
+            background-color: #f5f5f5;
         }
 
-        /* 红装订线 */
-        body::before {
-            content: '';
-            position: absolute;
-            left: 80px;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            background: #ff6b6b;
-            border-radius: 1px;
-            opacity: 0.7;
-            z-index: 0;
+        /* 按钮核心样式 */
+        .main-btn {
+            /* 按钮尺寸 */
+            padding: 1rem 2.5rem;
+            font-size: 1.2rem;
+            /* 视觉样式 */
+            background-color: #007bff;
+            color: white;
+            border: none; /* 默认无边框 */
+            border-radius: 8px;
+            cursor: pointer;
+            /* 过渡动画 - 让所有样式变化更流畅 */
+            transition: all 0.3s ease;
+            /* 按钮阴影 */
+            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.1);
+            /* 防止按钮文字被选中 */
+            user-select: none;
+            /* 预留边框空间，避免悬停时按钮位移 */
+            box-sizing: border-box;
         }
 
-        /* 记事本打字区域（实时输出按键） */
-        .notepad-lines {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 0;
-            pointer-events: none;
-            padding: 20px 100px;
-            font-family: "Courier New", monospace;
-            font-size: 14px;
-            line-height: 40px;
-            color: #444;
-            white-space: pre-wrap;
-            overflow: hidden;
+        /* 鼠标悬停效果 - 核心修改部分 */
+        .main-btn:hover {
+            background-color: #0056b3;
+            /* 1. 按钮倾斜：使用transform的rotate属性，5deg为倾斜角度，可调整 */
+            transform: rotate(5deg);
+            /* 2. 添加白色边框：2px为边框宽度，可调整 */
+            border: 2px solid #ffffff;
+            /* 优化阴影，增强视觉效果 */
+            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
         }
 
-        .key-display {
-            width: 90%;
-            max-width: 550px;
-            height: 220px;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(12px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            border: 1px solid #eaeaea;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 40px;
-            position: relative;
-            overflow: hidden;
-            z-index: 1;
+        /* 点击按下效果 */
+        .main-btn:active {
+            transform: rotate(5deg) translateY(2px); /* 保持倾斜，同时按下 */
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.15);
         }
 
-        .key-display.active {
-            transform: scale(0.98);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        /* 禁用状态（可选） */
+        .main-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            border: none;
+            box-shadow: none;
         }
-
-        .key-name {
-            font-size: 5rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            transition: transform 0.15s ease;
-            color: #2b6cb0;
-        }
-
-        .key-display.active .key-name {
-            transform: scale(0.95);
-        }
-
-        .key-code {
-            font-size: 1.3rem;
-            opacity: 0.8;
-            color: #4a5568;
-        }
-
-        .count-container {
-            width: 90%;
-            max-width: 550px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            z-index: 1;
-        }
-
-        .count-item {
-            background: rgba(255, 255, 255, 0.96);
-            border-radius: 16px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid #eaeaea;
-            padding: 25px 20px;
-            text-align: center;
-        }
-
-        .count-label {
-            font-size: 1rem;
-            opacity: 0.7;
-            margin-bottom: 10px;
-            color: #718096;
-        }
-
-        .count-value {
-            font-size: 2.8rem;
-            font-weight: 700;
-            color: #2b6cb0;
-        }
-
-        .count-value.update {
-            animation: numberPulse 0.3s ease;
-        }
-
-        @keyframes numberPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-
-        @media (max-width: 600px) {
-            .key-name { font-size: 3.5rem; }
-            .count-value { font-size: 2rem; }
-            body::before { left: 40px; }
-            .notepad-lines { padding: 20px 60px; }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .key-display, .count-item {
-            animation: fadeIn 0.8s ease forwards; opacity: 0;
-        }
-        .key-display { animation-delay: 0.1s; }
-        .count-item:nth-child(1) { animation-delay: 0.3s; }
-        .count-item:nth-child(2) { animation-delay: 0.5s; }
     </style>
 </head>
 <body>
-
-<!-- 实时打字记事本背景 -->
-<div class="notepad-lines" id="noteLines"></div>
-
-<div class="key-display" id="keyDisplay">
-    <div class="key-name" id="keyName">?</div>
-    <div class="key-code" id="keyCode">键码：-</div>
-</div>
-
-<div class="count-container">
-    <div class="count-item">
-        <div class="count-label">当前按键次数</div>
-        <div class="count-value" id="singleKeyCount">0</div>
-    </div>
-    <div class="count-item">
-        <div class="count-label">总按键次数</div>
-        <div class="count-value" id="totalKeyCount">0</div>
-    </div>
-</div>
-
-<script>
-const keyDisplay = document.getElementById('keyDisplay');
-const keyName = document.getElementById('keyName');
-const keyCode = document.getElementById('keyCode');
-const singleKeyCount = document.getElementById('singleKeyCount');
-const totalKeyCount = document.getElementById('totalKeyCount');
-const noteLines = document.getElementById('noteLines');
-
-const keyMap = {
-    ' ':' ',
-    'Enter':'\n',
-    'Tab':'\t',
-    'Backspace':'⌫',
-    'Escape':'ESC',
-    'ArrowUp':'↑','ArrowDown':'↓','ArrowLeft':'←','ArrowRight':'→'
-};
-
-let totalCount = 0;
-let keyCountMap = {};
-
-function updateNumberWithAnimation(el, val){
-    el.textContent = val;
-    el.classList.add('update');
-    setTimeout(()=>el.classList.remove('update'),300);
-}
-
-// 追加字符到记事本
-function appendToNote(char){
-    noteLines.textContent += char;
-    // 自动滚动到底部
-    noteLines.scrollTop = noteLines.scrollHeight;
-}
-
-document.addEventListener('keydown', e=>{
-    e.preventDefault();
-
-    let disp = keyMap[e.key] || e.key;
-
-    // 写到记事本：字母/符号直接写；回车换行；退格简单符号
-    if(e.key.length === 1) appendToNote(e.key);
-    else if(e.key === 'Enter') appendToNote('\n');
-    else if(e.key === 'Backspace') appendToNote('⌫');
-
-    keyName.textContent = disp;
-    keyCode.textContent = "键码："+(e.keyCode||e.code);
-
-    totalCount++;
-    updateNumberWithAnimation(totalKeyCount, totalCount);
-
-    keyCountMap[disp] = (keyCountMap[disp]||0)+1;
-    updateNumberWithAnimation(singleKeyCount, keyCountMap[disp]);
-
-    keyDisplay.classList.add('active');
-    setTimeout(()=>keyDisplay.classList.remove('active'),150);
-});
-</script>
-
+    <!-- 唯一的按钮元素 -->
+    <button class="main-btn" onclick="alert('按钮被点击了！')">点击我</button>
 </body>
 </html>
