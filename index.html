@@ -3,183 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>每日名言 | 启迪心灵的智慧</title>
+    <title>仅含按钮的空白页</title>
     <style>
-        /* 全局样式重置 */
+        /* 重置默认样式 */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
 
-        /* 页面主体样式 */
+        /* 页面整体样式 - 让按钮居中显示 */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
+            /* 使用flex布局让按钮水平+垂直居中 */
             display: flex;
-            flex-direction: column;
-            justify-content: center;
             align-items: center;
-            padding: 20px;
-            color: #333;
+            justify-content: center;
+            /* 极简背景色（可自行修改） */
+            background-color: #f5f5f5;
         }
 
-        /* 名言卡片容器 */
-        .quote-container {
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            padding: 40px;
-            max-width: 800px;
-            width: 100%;
-            text-align: center;
-            transition: transform 0.3s ease;
-        }
-
-        .quote-container:hover {
-            transform: translateY(-5px);
-        }
-
-        /* 名言文本样式 */
-        .quote-text {
-            font-size: 2rem;
-            line-height: 1.6;
-            margin-bottom: 20px;
-            font-style: italic;
-            color: #2c3e50;
-        }
-
-        /* 名言作者样式 */
-        .quote-author {
+        /* 按钮核心样式 */
+        .main-btn {
+            /* 按钮尺寸 */
+            padding: 1rem 2.5rem;
             font-size: 1.2rem;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-            text-align: right;
-        }
-
-        /* 按钮样式 */
-        .new-quote-btn {
-            background-color: #3498db;
+            /* 视觉样式 */
+            background-color: #007bff;
             color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1rem;
-            border-radius: 50px;
+            border: none; /* 默认无边框 */
+            border-radius: 8px;
             cursor: pointer;
-            transition: background-color 0.3s ease;
-            outline: none;
+            /* 过渡动画 - 让所有样式变化更流畅 */
+            transition: all 0.2s ease;
+            /* 按钮阴影 */
+            box-shadow: 0 4px 6px rgba(0, 123, 255, 0.3);
+            /* 防止按钮文字被选中 */
+            user-select: none;
+            /* 预留边框空间，避免悬停时按钮位移 */
+            box-sizing: border-box;
         }
 
-        .new-quote-btn:hover {
-            background-color: #2980b9;
+        /* 鼠标悬停效果 - 核心修改部分 */
+        .main-btn:hover {
+            background-color: #0056b3;
+            /* 1. 按钮倾斜：使用transform的rotate属性，5deg为倾斜角度，可调整 */
+            transform: rotate(25deg);
+            /* 2. 添加白色边框：2px为边框宽度，可调整 */
+            border: 10px solid #ffffff;
+            /* 优化阴影，增强视觉效果 */
+            box-shadow: 0 6px 12px rgba(0, 123, 255, 0.2);
         }
 
-        /* 页脚样式 */
-        footer {
-            margin-top: 30px;
-            color: #7f8c8d;
-            font-size: 0.9rem;
+        /* 点击按下效果 */
+        .main-btn:active {
+            transform: rotate(5deg) translateY(2px); /* 保持倾斜，同时按下 */
+            box-shadow: 0 2px 4px rgba(0, 123, 255, 0.15);
         }
 
-        /* 响应式设计 - 适配手机 */
-        @media (max-width: 768px) {
-            .quote-container {
-                padding: 25px;
-            }
-            
-            .quote-text {
-                font-size: 1.5rem;
-            }
-            
-            .quote-author {
-                font-size: 1rem;
-            }
+        /* 禁用状态（可选） */
+        .main-btn:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+            border: none;
+            box-shadow: none;
         }
     </style>
 </head>
 <body>
-    <div class="quote-container">
-        <p class="quote-text" id="quoteText">行动是治愈恐惧的良药，而犹豫、拖延将不断滋养恐惧。</p>
-        <p class="quote-author" id="quoteAuthor">— 戴尔·卡耐基</p>
-        <button class="new-quote-btn" id="newQuoteBtn">换一句名言</button>
-    </div>
-    <footer>
-        每日名言 © 2026
-    </footer>
-
-    <script>
-        // 名言数据库
-        const quotes = [
-            {
-                text: "行动是治愈恐惧的良药，而犹豫、拖延将不断滋养恐惧。",
-                author: "戴尔·卡耐基"
-            },
-            {
-                text: "人生就像骑自行车，想保持平衡就得往前走。",
-                author: "阿尔伯特·爱因斯坦"
-            },
-            {
-                text: "你今天的努力，是幸运的伏笔。当下的付出，是明日的花开。",
-                author: "稻盛和夫"
-            },
-            {
-                text: "不要为尚未发生的事提前焦虑。",
-                author: "马克·吐温"
-            },
-            {
-                text: "每一个不曾起舞的日子，都是对生命的辜负。",
-                author: "弗里德里希·尼采"
-            },
-            {
-                text: "生活不是等待暴风雨过去，而是学会在雨中跳舞。",
-                author: "薇薇安·格林"
-            },
-            {
-                text: "成功不是终点，失败也不是末日：最重要的是继续前进的勇气。",
-                author: "温斯顿·丘吉尔"
-            },
-            {
-                text: "所谓自由，不是随心所欲，而是自我主宰。",
-                author: "伊曼努尔·康德"
-            }
-        ];
-
-        // 获取DOM元素
-        const quoteTextElement = document.getElementById('quoteText');
-        const quoteAuthorElement = document.getElementById('quoteAuthor');
-        const newQuoteBtn = document.getElementById('newQuoteBtn');
-
-        // 生成随机名言的函数
-        function getRandomQuote() {
-            // 生成0到quotes数组长度之间的随机索引
-            const randomIndex = Math.floor(Math.random() * quotes.length);
-            return quotes[randomIndex];
-        }
-
-        // 更新名言显示的函数
-        function updateQuote() {
-            const randomQuote = getRandomQuote();
-            quoteTextElement.textContent = randomQuote.text;
-            quoteAuthorElement.textContent = `— ${randomQuote.author}`;
-            
-            // 添加淡入动画效果
-            quoteTextElement.style.opacity = 0;
-            quoteAuthorElement.style.opacity = 0;
-            setTimeout(() => {
-                quoteTextElement.style.transition = 'opacity 0.5s ease';
-                quoteAuthorElement.style.transition = 'opacity 0.5s ease';
-                quoteTextElement.style.opacity = 1;
-                quoteAuthorElement.style.opacity = 1;
-            }, 50);
-        }
-
-        // 绑定按钮点击事件
-        newQuoteBtn.addEventListener('click', updateQuote);
-
-        // 页面加载时随机显示一条名言（可选）
-        // 注释掉下面这行，默认显示第一条名言；取消注释则页面加载随机显示
-        // updateQuote();
-    </script>
+    <!-- 唯一的按钮元素 -->
+    <button class="main-btn" onclick="alert('按钮被点击了！')">点击我</button>
 </body>
 </html>
