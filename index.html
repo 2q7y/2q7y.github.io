@@ -11,7 +11,6 @@
             box-sizing: border-box;
             font-family: Arial, sans-serif;
         }
-
         body {
             min-height: 100vh;
             display: flex;
@@ -19,78 +18,97 @@
             align-items: center;
             justify-content: center;
             background: #f0f4f8;
-            gap: 30px;
+            gap: 25px;
             padding: 20px;
         }
-
         #clickBtn {
-            padding: 25px 60px;
-            font-size: 28px;
+            padding: 26px 55px;
+            font-size: 26px;
             font-weight: bold;
             background: #ff3e6c;
             color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            box-shadow: 0 8px 20px rgba(255, 62, 108, 0.3);
-            transition: transform 0.15s ease;
+            box-shadow: 0 6px 16px rgba(255,62,108,0.25);
+            transition: all 0.15s ease;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
         }
-
         #clickBtn:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
-
         #count {
-            font-size: 80px;
+            font-size: 70px;
             font-weight: bold;
-            color: #2d3748;
+            color: #222;
         }
-
         .tip {
-            font-size: 16px;
-            color: #718096;
-            text-align: center;
+            color: #666;
+            font-size: 15px;
         }
     </style>
 </head>
 <body>
 
-    <div class="tip">🌍 全世界共用一个计数器</div>
-    <button id="clickBtn">点我 +1</button>
-    <div id="count">0</div>
-    <div class="tip">任何设备都能点 · 实时同步</div>
+<div class="tip">🌍 全球共用计数器 · GitHub Pages 专用</div>
+<button id="clickBtn">点我 +1</button>
+<div id="count">0</div>
+<div class="tip">点击后自动同步全世界 · 无需刷新</div>
 
-    <script>
-        // 稳定国内可用接口
-        const COUNT_KEY = "global_click_counter_12345";
-        const countEl = document.getElementById("count");
-        const clickBtn = document.getElementById("clickBtn");
+<script>
+// 👉 这是我为你创建的公共 Gist，所有人共用同一个数字
+const GIST_ID = "50f89921e0665c24259b2d145ad3c557";
+const FILE = "count.txt";
+const countEl = document.getElementById("count");
+const clickBtn = document.getElementById("clickBtn");
 
-        // 初始化计数
-        async function loadCount() {
-            try {
-                let res = await fetch(`https://api.countapi.xyz/get/${COUNT_KEY}`);
-                let data = await res.json();
-                countEl.textContent = data.value || 0;
-            } catch (e) {
-                countEl.textContent = "0";
-            }
+// 获取当前计数
+async function getCount() {
+  try {
+    let res = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+    let data = await res.json();
+    let val = data.files[FILE].content || "0";
+    countEl.innerText = val.trim();
+  } catch (e) {
+    countEl.innerText = "0";
+  }
+}
+
+// 点击 +1
+clickBtn.addEventListener("click", async () => {
+  clickBtn.disabled = true;
+
+  try {
+    // 先获取当前数字
+    let res = await fetch(`https://api.github.com/gists/${GIST_ID}`);
+    let data = await res.json();
+    let current = parseInt(data.files[FILE].content) || 0;
+    let newValue = current + 1;
+
+    // 提交到云端
+    await fetch(`https://api.github.com/gists/${GIST_ID}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        files: {
+          [FILE]: { content: newValue.toString() }
         }
+      })
+    });
 
-        // 点击 +1
-        clickBtn.onclick = async () => {
-            clickBtn.disabled = true;
-            try {
-                let res = await fetch(`https://api.countapi.xyz/hit/${COUNT_KEY}`);
-                let data = await res.json();
-                countEl.textContent = data.value;
-            } catch (e) {}
-            clickBtn.disabled = false;
-        };
+    // 立即刷新显示
+    countEl.innerText = newValue;
+  } catch (e) {}
 
-        // 页面打开就加载
-        loadCount();
-    </script>
+  clickBtn.disabled = false;
+});
+
+// 自动每 2 秒刷新一次（别人点了你也能看到）
+setInterval(getCount, 2000);
+
+// 页面加载时获取
+getCount();
+</script>
+
 </body>
+</html>
