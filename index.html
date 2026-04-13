@@ -1,242 +1,336 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>小游戏大厅</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小游戏大厅 - 拯救村庄</title>
 <style>
-*{box-sizing:border-box;font-family:system-ui,sans-serif}
-body{margin:0;background:#111;color:#fff}
-.screen{width:100%;max-width:800px;margin:0 auto;padding:20px}
+*{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+html,body{margin:0;background:#0b1220;color:#e6e9ef}
+.screen{max-width:700px;margin:0 auto;padding:20px}
 .hidden{display:none}
-.title{text-align:center;font-size:32px;margin:20px 0}
-.menu{display:grid;gap:16px;margin-top:40px}
-.menu button{padding:20px;font-size:20px;border:none;border-radius:12px;background:#2d6df6;color:white;cursor:pointer}
-.menu button:hover{background:#1d5ddd}
-.back{margin-top:20px;padding:10px 20px;background:#444;color:white;border:none;border-radius:8px;cursor:pointer}
-canvas{display:block;border:2px solid #666;background:#000;margin:10px auto;border-radius:8px}
+.title{text-align:center;font-size:28px;margin:16px 0}
+.menu{display:grid;gap:14px;margin-top:30px}
+.menu-btn{padding:18px;font-size:18px;border:none;border-radius:12px;background:#3a6fe2;color:#fff;cursor:pointer}
+.menu-btn:hover{background:#2b5dcc}
+.back-btn{margin-top:16px;padding:10px 22px;background:#334155;color:#fff;border:none;border-radius:8px;cursor:pointer}
+canvas{display:block;border:2px solid #475569;background:#020614;margin:10px auto;border-radius:10px}
 .game-area{position:relative}
-#rpgUI{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.6);padding:10px;border-radius:8px}
-.dialog{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#111; padding:16px 20px;border:2px solid #666;border-radius:10px;width:90%;max-width:500px}
-.dialog button{margin-top:10px;padding:8px 16px}
+.ui{position:absolute;top:10px;left:10px;background:rgba(0,0,0,0.6);padding:10px;border-radius:8px;font-size:14px;line-height:1.4}
+.dialog{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;padding:16px 20px;border:2px solid #64748b;border-radius:12px;width:90%;max-width:520px}
+.dialog-text{margin-bottom:10px}
+.dialog-btn{padding:8px 16px;background:#3a6fe2;color:white;border:none;border-radius:6px;cursor:pointer}
 </style>
 </head>
-
 <body>
 
 <!-- 大厅 -->
 <div id="hall" class="screen">
   <h1 class="title">🎮 小游戏大厅</h1>
   <div class="menu">
-    <button onclick="startBrick()">🧱 打砖块</button>
-    <button onclick="startPlane()">✈️ 飞机大战</button>
-    <button onclick="startRPG()">🏡 RPG · 拯救村庄</button>
+    <button class="menu-btn" onclick="startBrick()">🧱 打砖块</button>
+    <button class="menu-btn" onclick="startPlane()">✈️ 飞机大战</button>
+    <button class="menu-btn" onclick="startRPG()">🏡 RPG - 拯救晨风村</button>
   </div>
 </div>
 
 <!-- 打砖块 -->
-<div id="brickGame" class="screen hidden">
+<div id="brickView" class="screen hidden">
   <h2 class="title">🧱 打砖块</h2>
   <canvas id="brickCanvas" width="600" height="400"></canvas>
-  <button class="back" onclick="backHall()">返回大厅</button>
+  <button class="back-btn" onclick="backHall()">返回大厅</button>
 </div>
 
 <!-- 飞机大战 -->
-<div id="planeGame" class="screen hidden">
+<div id="planeView" class="screen hidden">
   <h2 class="title">✈️ 飞机大战</h2>
   <canvas id="planeCanvas" width="400" height="600"></canvas>
-  <button class="back" onclick="backHall()">返回大厅</button>
+  <button class="back-btn" onclick="backHall()">返回大厅</button>
 </div>
 
 <!-- RPG -->
-<div id="rpgGame" class="screen hidden">
-  <h2 class="title">🏡 拯救村庄</h2>
+<div id="rpgView" class="screen hidden">
+  <h2 class="title">🏡 拯救晨风村</h2>
   <div class="game-area">
     <canvas id="rpgCanvas" width="480" height="480"></canvas>
-    <div id="rpgUI">
-      <div>HP: <span id="rpgHp">100</span></div>
-      <div>金币: <span id="rpgGold">0</span></div>
-      <div>等级: <span id="rpgLv">1</span></div>
+    <div class="ui">
+      <div>HP: <span id="hp">100</span></div>
+      <div>金币: <span id="gold">0</span></div>
+      <div>等级: <span id="lv">1</span></div>
+      <div>任务: <span id="task">寻找村长</span></div>
     </div>
     <div id="dialog" class="dialog hidden">
-      <div id="dialogText"></div>
-      <button onclick="closeDialog()">继续</button>
+      <div class="dialog-text" id="dText"></div>
+      <button class="dialog-btn" onclick="closeDialog()">继续</button>
     </div>
   </div>
-  <button class="back" onclick="backHall()">返回大厅</button>
+  <button class="back-btn" onclick="backHall()">返回大厅</button>
 </div>
 
 <script>
-//============= 全局 =============
-let currentScreen = 'hall'
-function showScreen(id){
-  document.querySelectorAll('.screen').forEach(s=>s.classList.add('hidden'))
-  document.getElementById(id).classList.remove('hidden')
-  currentScreen = id
+// 全局切换
+let currentScreen = "hall";
+function show(id) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+  currentScreen = id;
 }
-function backHall(){
-  showScreen('hall')
-  clearAllIntervals()
+function backHall() {
+  show("hall");
+  clearAllIntervals();
 }
-function clearAllIntervals(){
-  for(let i=0;i<9999;i++) clearInterval(i)
+function clearAllIntervals() {
+  for (let i = 0; i < 9999; i++) clearInterval(i);
 }
 
-//============= 打砖块 =============
-function startBrick(){
-  showScreen('brickGame')
-  const c=document.getElementById('brickCanvas').getContext('2d')
-  const W=600,H=400
-  let paddle={x:250,y:380,w:100,h:10}
-  let ball={x:300,y:300,r:6,vx:3,vy:-4}
-  let bricks=[],score=0,gameOver=false
-  for(let i=0;i<5;i++)for(let j=0;j<8;j++)bricks.push({x:j*75+5,y:i*25+30,w:70,h:20,live:1})
-  function loop(){
-    if(gameOver)return
-    c.fillStyle='#000'
-    c.fillRect(0,0,W,H)
-    c.fillStyle='#fff'
-    c.fillRect(paddle.x,paddle.y,paddle.w,paddle.h)
-    c.beginPath()
-    c.arc(ball.x,ball.y,ball.r,0,Math.PI*2)
-    c.fill()
-    ball.x+=ball.vx
-    ball.y+=ball.vy
-    if(ball.x<0||ball.x>W)ball.vx*=-1
-    if(ball.y<0)ball.vy*=-1
-    if(ball.y>paddle.y&&ball.x>paddle.x&&ball.x<paddle.x+paddle.w)ball.vy*=-1
-    if(ball.y>H){gameOver=true;alert('游戏结束 得分:'+score)}
-    bricks.forEach(b=>{
-      if(b.live){
-        c.fillStyle='#46d'
-        c.fillRect(b.x,b.y,b.w,b.h)
-        if(ball.x>b.x&&ball.x<b.x+b.w&&ball.y>b.y&&ball.y<b.y+b.h){
-          ball.vy*=-1;b.live=0;score+=10
-        }
+// ==============================================
+// 打砖块
+// ==============================================
+function startBrick() {
+  show("brickView");
+  const ctx = document.getElementById("brickCanvas").getContext("2d");
+  const W = 600, H = 400;
+  let paddle = { x: 250, y: 380, w: 100, h: 10 };
+  let ball = { x: 300, y: 280, r: 6, vx: 3, vy: -4 };
+  let bricks = [], score = 0, gameOver = false;
+
+  for (let i = 0; i < 5; i++) {
+    for (let j = 0; j < 8; j++) {
+      bricks.push({ x: j * 75 + 4, y: i * 25 + 30, w: 70, h: 20, alive: true });
+    }
+  }
+
+  function loop() {
+    if (gameOver) return;
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#eee";
+    ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    if (ball.x < 0 || ball.x > W) ball.vx *= -1;
+    if (ball.y < 0) ball.vy *= -1;
+
+    if (ball.y > paddle.y - 5 && ball.y < paddle.y + 10 &&
+        ball.x > paddle.x && ball.x < paddle.x + paddle.w) {
+      ball.vy = -Math.abs(ball.vy);
+    }
+
+    if (ball.y > H) {
+      gameOver = true;
+      alert("游戏结束！得分：" + score);
+    }
+
+    bricks.forEach(b => {
+      if (!b.alive) return;
+      ctx.fillStyle = "#46d";
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      if (ball.x > b.x && ball.x < b.x + b.w &&
+          ball.y > b.y && ball.y < b.y + b.h) {
+        ball.vy *= -1;
+        b.alive = false;
+        score += 10;
       }
-    })
+    });
   }
-  document.onmousemove=e=>{
-    const r=document.getElementById('brickCanvas').getBoundingClientRect()
-    paddle.x=Math.max(0,Math.min(W-paddle.w,e.clientX-r.left))
-  }
-  setInterval(loop,16)
+
+  document.onmousemove = e => {
+    const r = document.getElementById("brickCanvas").getBoundingClientRect();
+    paddle.x = Math.max(0, Math.min(W - paddle.w, e.clientX - r.left - paddle.w / 2));
+  };
+
+  setInterval(loop, 16);
 }
 
-//============= 飞机大战 =============
-function startPlane(){
-  showScreen('planeGame')
-  const c=document.getElementById('planeCanvas').getContext('2d')
-  const W=400,H=600
-  let p={x:175,y:500,w:50,h:40,bullet:[]}
-  let enemy=[],bulletE=[],score=0,gameOver=false
-  function addEnemy(){enemy.push({x:Math.random()*(W-40),y:-40,w:40,h:30})}
-  setInterval(addEnemy,800)
-  document.onkeydown=e=>{
-    if(e.key=='ArrowLeft')p.x=Math.max(0,p.x-15)
-    if(e.key=='ArrowRight')p.x=Math.min(W-p.w,p.x+15)
-    if(e.key==' '){
-      p.bullet.push({x:p.x+p.w/2-2,y:p.y-10})
-    }
+// ==============================================
+// 飞机大战
+// ==============================================
+function startPlane() {
+  show("planeView");
+  const ctx = document.getElementById("planeCanvas").getContext("2d");
+  const W = 400, H = 600;
+  let p = { x: 170, y: 540, w: 50, h: 40 };
+  let bullets = [], enemies = [], score = 0, gameOver = false;
+
+  function addEnemy() {
+    enemies.push({ x: Math.random() * (W - 40), y: -30, w: 40, h: 30 });
   }
-  function loop(){
-    if(gameOver)return
-    c.fillStyle='#000'
-    c.fillRect(0,0,W,H)
-    c.fillStyle='#0f0'
-    c.fillRect(p.x,p.y,p.w,p.h)
-    p.bullet.forEach((b,i)=>{
-      b.y-=8
-      c.fillRect(b.x,b.y,4,10)
-      if(b.y<0)p.bullet.splice(i,1)
-    })
-    enemy.forEach((e,i)=>{
-      e.y+=4
-      c.fillStyle='#f44'
-      c.fillRect(e.x,e.y,e.w,e.h)
-      if(e.y>H){enemy.splice(i,1);gameOver=1;alert('游戏结束 得分:'+score)}
-      p.bullet.forEach((b,j)=>{
-        if(b.x>e.x&&b.x<e.x+e.w&&b.y>e.y&&b.y<e.y+e.h){
-          enemy.splice(i,1)
-          p.bullet.splice(j,1)
-          score+=10
+
+  setInterval(addEnemy, 900);
+
+  document.onkeydown = e => {
+    if (e.key === "ArrowLeft") p.x = Math.max(0, p.x - 12);
+    if (e.key === "ArrowRight") p.x = Math.min(W - p.w, p.x + 12);
+    if (e.key === " ") bullets.push({ x: p.x + 23, y: p.y - 8 });
+  };
+
+  function loop() {
+    if (gameOver) return;
+    ctx.fillStyle = "#000";
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = "#0f0";
+    ctx.fillRect(p.x, p.y, p.w, p.h);
+
+    bullets.forEach((b, i) => {
+      b.y -= 9;
+      ctx.fillRect(b.x, b.y, 4, 10);
+      if (b.y < 0) bullets.splice(i, 1);
+    });
+
+    enemies.forEach((e, i) => {
+      e.y += 4;
+      ctx.fillStyle = "#f33";
+      ctx.fillRect(e.x, e.y, e.w, e.h);
+      if (e.y > H) { gameOver = true; alert("游戏结束 得分：" + score); }
+
+      bullets.forEach((b, j) => {
+        if (b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
+          enemies.splice(i, 1);
+          bullets.splice(j, 1);
+          score += 20;
         }
-      })
-      if(e.x+e.w>p.x&&e.x<p.x+p.w&&e.y+e.h>p.y&&e.y<p.y+p.h)gameOver=1
-    })
+      });
+
+      if (e.x + e.w > p.x && e.x < p.x + p.w &&
+          e.y + e.h > p.y && e.y < p.y + p.h) {
+        gameOver = true;
+        alert("被击中！游戏结束");
+      }
+    });
   }
-  setInterval(loop,16)
+
+  setInterval(loop, 16);
 }
 
-//============= RPG 拯救村庄 =============
-function startRPG(){
-  showScreen('rpgGame')
-  const c=document.getElementById('rpgCanvas').getContext('2d')
-  const size=32,mapW=15,mapH=15
-  let player={x:7,y:7,hp:100,gold:0,lv:1,atk:10}
-  let map=Array(mapH).fill().map(()=>Array(mapW).fill(0))
-  let step=0,msg=''
-  function dialog(t){
-    document.getElementById('dialogText').innerText=t
-    document.getElementById('dialog').classList.remove('hidden')
+// ==============================================
+// RPG 拯救村庄（完整版多剧情）
+// ==============================================
+let rpgCtx, player, task, step, dialogOpen;
+let tile = 32, mapW = 15, mapH = 15;
+
+function talk(text) {
+  document.getElementById("dText").innerText = text;
+  document.getElementById("dialog").classList.remove("hidden");
+  dialogOpen = true;
+}
+function closeDialog() {
+  document.getElementById("dialog").classList.add("hidden");
+  dialogOpen = false;
+}
+function updateUI() {
+  document.getElementById("hp").innerText = player.hp;
+  document.getElementById("gold").innerText = player.gold;
+  document.getElementById("lv").innerText = player.lv;
+  document.getElementById("task").innerText = task;
+}
+
+function startRPG() {
+  show("rpgView");
+  rpgCtx = document.getElementById("rpgCanvas").getContext("2d");
+  player = { x: 7, y: 12, hp: 100, gold: 15, lv: 1, atk: 12, def: 3, exp: 0 };
+  task = "寻找村长";
+  step = 0;
+  dialogOpen = false;
+  updateUI();
+  talk("你来到了遭受魔物袭击的晨风村，快去寻找村长了解情况。");
+  drawMap();
+
+  document.onkeydown = e => {
+    if (dialogOpen) return;
+    let nx = player.x, ny = player.y;
+    if (e.key === "ArrowUp") ny--;
+    if (e.key === "ArrowDown") ny++;
+    if (e.key === "ArrowLeft") nx--;
+    if (e.key === "ArrowRight") nx++;
+    if (nx < 0 || nx >= mapW || ny < 0 || ny >= mapH) return;
+    player.x = nx;
+    player.y = ny;
+    onMove();
+    drawMap();
+  };
+}
+
+function drawMap() {
+  rpgCtx.fillStyle = "#1a2914";
+  rpgCtx.fillRect(0, 0, 480, 480);
+
+  // 房子
+  rpgCtx.fillStyle = "#865";
+  rpgCtx.fillRect(5 * tile, 4 * tile, tile * 3, tile * 2);
+  // 商店
+  rpgCtx.fillStyle = "#754";
+  rpgCtx.fillRect(9 * tile, 6 * tile, tile * 2, tile * 2);
+
+  // 玩家
+  rpgCtx.fillStyle = "#48f";
+  rpgCtx.fillRect(player.x * tile + 4, player.y * tile + 4, tile - 8, tile - 8);
+}
+
+function onMove() {
+  step++;
+  if (task === "寻找村长" && player.x >= 6 && player.x <= 8 && player.y >= 4 && player.y <= 5) {
+    task = "清理外围魔物";
+    updateUI();
+    talk("村长：勇士！黑雾里的魔物抓走了我的女儿，求你救救她！先清理村外魔物，再去黑森林。");
   }
-  function closeDialog(){document.getElementById('dialog').classList.add('hidden')}
-  function updateUI(){
-    document.getElementById('rpgHp').innerText=player.hp
-    document.getElementById('rpgGold').innerText=player.gold
-    document.getElementById('rpgLv').innerText=player.lv
+
+  if (task === "清理外围魔物" && step > 30) {
+    if (Math.random() < 0.3) battle(false);
   }
-  function draw(){
-    c.fillStyle='#1a1'
-    c.fillRect(0,0,480,480)
-    for(let i=0;i<mapH;i++){
-      for(let j=0;j<mapW;j++){
-        if(map[i][j]==1){c.fillStyle='#642';c.fillRect(j*size,i*size,size,size)}
-      }
-    }
-    c.fillStyle='#28f'
-    c.fillRect(player.x*size+2,player.y*size+2,size-4,size-4)
+
+  if (task === "清理外围魔物" && step > 60) {
+    task = "前往黑森林";
+    updateUI();
+    talk("村民：谢谢你清理了魔物！黑森林入口在东边，小心里面的暗影狼！");
   }
-  function enemyBattle(){
-    player.hp-=Math.floor(Math.random()*8+3)
-    player.gold+=Math.floor(Math.random()*5+2)
-    if(player.hp<=0){
-      dialog('你被怪物击败了…')
-      player.hp=100
-    }else{
-      dialog('你击败了怪物！获得金币')
-    }
-    updateUI()
+
+  if (task === "前往黑森林" && player.x >= 12 && player.y >= 8 && player.y <= 10) {
+    task = "寻找被困村民";
+    updateUI();
+    talk("你进入了黑森林，这里充满危险。前方有村民求救！");
   }
-  function checkStep(){
-    step++
-    if(step%12==0){
-      if(Math.random()<0.4)enemyBattle()
-    }
-    if(step==60){
-      dialog('你来到了被怪物袭击的村庄，村民需要你的帮助！')
-    }
-    if(step==120){
-      dialog('你消灭了村庄附近的怪物，成功拯救了村庄！')
-      player.lv=2
-      updateUI()
-    }
+
+  if (task === "寻找被困村民" && step > 100) {
+    if (Math.random() < 0.4) battle(false);
   }
-  document.onkeydown=e=>{
-    let ox=0,oy=0
-    if(e.key=='ArrowUp')oy=-1
-    if(e.key=='ArrowDown')oy=1
-    if(e.key=='ArrowLeft')ox=-1
-    if(e.key=='ArrowRight')ox=1
-    const nx=player.x+ox,ny=player.y+oy
-    if(nx>=0&&nx<mapW&&ny>=0&&ny<mapH){
-      player.x=nx;player.y=oy+player.y
-      checkStep();draw()
+
+  if (task === "寻找被困村民" && player.x >= 10 && player.x <= 12 && player.y >= 3 && player.y <= 5) {
+    task = "挑战BOSS";
+    updateUI();
+    talk("村民：谢谢你救了我！BOSS就在祭坛，打碎水晶它就会变弱！");
+  }
+
+  if (task === "挑战BOSS" && player.x >= 2 && player.x <= 4 && player.y >= 2 && player.y <= 4) {
+    task = "拯救完成";
+    updateUI();
+    talk("BOSS：愚蠢的冒险者！受死吧！");
+    battle(true);
+  }
+}
+
+function battle(isBoss) {
+  let dmg = isBoss ? Math.floor(Math.random() * 15 + 10) : Math.floor(Math.random() * 6 + 3);
+  let gainGold = isBoss ? 50 : Math.floor(Math.random() * 6 + 4);
+  player.hp -= Math.max(1, dmg - player.def);
+
+  if (player.hp <= 0) {
+    player.hp = 50;
+    talk("你被击败了，回到村庄恢复了体力...");
+  } else {
+    player.gold += gainGold;
+    if (isBoss) {
+      talk("你击败了暗影之爪！救出了村长的女儿，晨风村获救了！");
+    } else {
+      talk("你击败了魔物！获得金币");
     }
   }
-  updateUI()
-  draw()
-  dialog('欢迎来到冒险！方向键移动，拯救被怪物袭击的村庄。')
+  updateUI();
 }
 </script>
 </body>
