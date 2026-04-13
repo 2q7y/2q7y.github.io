@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>小游戏大厅 - 拯救村庄</title>
 <style>
-*{box-sizing:border-box;font-family:system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box;font-family:system-ui,sans-serif}
 html,body{margin:0;background:#0b1220;color:#e6e9ef}
 .screen{max-width:700px;margin:0 auto;padding:20px}
 .hidden{display:none}
@@ -20,6 +20,8 @@ canvas{display:block;border:2px solid #475569;background:#020614;margin:10px aut
 .dialog{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);background:#111827;padding:16px 20px;border:2px solid #64748b;border-radius:12px;width:90%;max-width:520px}
 .dialog-text{margin-bottom:10px}
 .dialog-btn{padding:8px 16px;background:#3a6fe2;color:white;border:none;border-radius:6px;cursor:pointer}
+.plane-score{position:absolute;top:10px;right:10px;color:#fff;font-size:18px;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:8px}
+.plane-hp{position:absolute;top:45px;right:10px;color:#ff4444;font-size:18px;background:rgba(0,0,0,0.5);padding:6px 10px;border-radius:8px}
 </style>
 </head>
 <body>
@@ -29,7 +31,7 @@ canvas{display:block;border:2px solid #475569;background:#020614;margin:10px aut
   <h1 class="title">🎮 小游戏大厅</h1>
   <div class="menu">
     <button class="menu-btn" onclick="startBrick()">🧱 打砖块</button>
-    <button class="menu-btn" onclick="startPlane()">✈️ 飞机大战</button>
+    <button class="menu-btn" onclick="startPlane()">✈️ 飞机大战（优化版）</button>
     <button class="menu-btn" onclick="startRPG()">🏡 RPG - 拯救晨风村</button>
   </div>
 </div>
@@ -43,8 +45,12 @@ canvas{display:block;border:2px solid #475569;background:#020614;margin:10px aut
 
 <!-- 飞机大战 -->
 <div id="planeView" class="screen hidden">
-  <h2 class="title">✈️ 飞机大战</h2>
-  <canvas id="planeCanvas" width="400" height="600"></canvas>
+  <h2 class="title">✈️ 飞机大战（优化版）</h2>
+  <div style="position:relative;margin:0 auto;width:400px">
+    <canvas id="planeCanvas" width="400" height="600"></canvas>
+    <div class="plane-score">分数：<span id="planeScore">0</span></div>
+    <div class="plane-hp">生命：<span id="planeHp">3</span></div>
+  </div>
   <button class="back-btn" onclick="backHall()">返回大厅</button>
 </div>
 
@@ -149,67 +155,211 @@ function startBrick() {
 }
 
 // ==============================================
-// 飞机大战
+// 飞机大战 完美优化版
 // ==============================================
 function startPlane() {
   show("planeView");
-  const ctx = document.getElementById("planeCanvas").getContext("2d");
+  const canvas = document.getElementById("planeCanvas");
+  const ctx = canvas.getContext("2d");
   const W = 400, H = 600;
-  let p = { x: 170, y: 540, w: 50, h: 40 };
-  let bullets = [], enemies = [], score = 0, gameOver = false;
 
-  function addEnemy() {
-    enemies.push({ x: Math.random() * (W - 40), y: -30, w: 40, h: 30 });
-  }
-
-  setInterval(addEnemy, 900);
-
-  document.onkeydown = e => {
-    if (e.key === "ArrowLeft") p.x = Math.max(0, p.x - 12);
-    if (e.key === "ArrowRight") p.x = Math.min(W - p.w, p.x + 12);
-    if (e.key === " ") bullets.push({ x: p.x + 23, y: p.y - 8 });
+  // 玩家飞机
+  let plane = {
+    x: W/2 - 25,
+    y: H - 80,
+    w: 50,
+    h: 40,
+    speed: 8,
+    hp: 3,
+    shootDelay: 280,
+    lastShoot: 0
   };
 
-  function loop() {
-    if (gameOver) return;
-    ctx.fillStyle = "#000";
-    ctx.fillRect(0, 0, W, H);
-    ctx.fillStyle = "#0f0";
-    ctx.fillRect(p.x, p.y, p.w, p.h);
+  let bullets = [];    // 玩家子弹
+  let enemies = [];    // 敌机
+  let enemyBullets = [];// 敌机子弹
+  let score = 0;
+  let gameOver = false;
 
-    bullets.forEach((b, i) => {
-      b.y -= 9;
-      ctx.fillRect(b.x, b.y, 4, 10);
-      if (b.y < 0) bullets.splice(i, 1);
-    });
+  // 分数&生命显示
+  function updatePlaneUI() {
+    document.getElementById("planeScore").innerText = score;
+    document.getElementById("planeHp").innerText = plane.hp;
+  }
 
-    enemies.forEach((e, i) => {
-      e.y += 4;
-      ctx.fillStyle = "#f33";
-      ctx.fillRect(e.x, e.y, e.w, e.h);
-      if (e.y > H) { gameOver = true; alert("游戏结束 得分：" + score); }
+  // 鼠标控制飞机（超级顺滑）
+  canvas.onmousemove = (e) => {
+    if(gameOver) return;
+    const rect = canvas.getBoundingClientRect();
+    plane.x = e.clientX - rect.left - plane.w/2;
+    plane.y = e.clientY - rect.top - plane.h/2;
 
-      bullets.forEach((b, j) => {
-        if (b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
-          enemies.splice(i, 1);
-          bullets.splice(j, 1);
-          score += 20;
-        }
+    // 限制不出屏幕
+    if(plane.x < 0) plane.x = 0;
+    if(plane.x + plane.w > W) plane.x = W - plane.w;
+    if(plane.y < 0) plane.y = 0;
+    if(plane.y + plane.h > H) plane.y = H - plane.h;
+  };
+
+  // 自动射击
+  function autoShoot() {
+    if(gameOver) return;
+    let now = Date.now();
+    if(now - plane.lastShoot > plane.shootDelay) {
+      bullets.push({
+        x: plane.x + plane.w/2 - 2,
+        y: plane.y - 10,
+        w: 4, h: 10, speed: 10
       });
+      plane.lastShoot = now;
+    }
+  }
 
-      if (e.x + e.w > p.x && e.x < p.x + p.w &&
-          e.y + e.h > p.y && e.y < p.y + p.h) {
-        gameOver = true;
-        alert("被击中！游戏结束");
+  // 生成敌机
+  function spawnEnemy() {
+    if(gameOver) return;
+    let type = Math.random();
+    let w, h, speed, hp;
+
+    if(type < 0.6) {
+      w = 36; h = 28; speed = 2; hp = 1; // 小飞机
+    } else if(type < 0.9) {
+      w = 48; h = 34; speed = 1.5; hp = 2; // 中型机
+    } else {
+      w = 60; h = 40; speed = 1; hp = 4; // 重型机
+    }
+
+    enemies.push({
+      x: Math.random() * (W - w),
+      y: -40, w, h, speed, hp, maxHp: hp,
+      canShoot: hp >= 2,
+      shootTimer: 0
+    });
+  }
+
+  // 敌机射击
+  function enemyShoot() {
+    enemies.forEach(e => {
+      if(!e.canShoot || gameOver) return;
+      e.shootTimer++;
+      if(e.shootTimer > 120) {
+        enemyBullets.push({
+          x: e.x + e.w/2 - 2,
+          y: e.y + e.h,
+          w: 4, h: 10, speed: 5
+        });
+        e.shootTimer = 0;
       }
     });
   }
 
-  setInterval(loop, 16);
+  // 碰撞检测
+  function isCollide(a, b) {
+    return a.x < b.x + b.w &&
+           a.x + a.w > b.x &&
+           a.y < b.y + b.h &&
+           a.y + a.h > b.y;
+  }
+
+  // 主循环
+  function gameLoop() {
+    if(gameOver) {
+      ctx.fillStyle = "#000";
+      ctx.fillRect(0,0,W,H);
+      ctx.fillStyle = "#ff3333";
+      ctx.font = "36px Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("游戏结束", W/2, H/2 - 20);
+      ctx.fillText("得分: "+score, W/2, H/2 + 20);
+      return;
+    }
+
+    // 背景
+    ctx.fillStyle = "#050a18";
+    ctx.fillRect(0,0,W,H);
+
+    autoShoot();
+    enemyShoot();
+
+    // 绘制玩家
+    ctx.fillStyle = "#00ff00";
+    ctx.fillRect(plane.x, plane.y, plane.w, plane.h);
+
+    // 玩家子弹
+    bullets.forEach((b,i) => {
+      b.y -= b.speed;
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      if(b.y < -10) bullets.splice(i,1);
+    });
+
+    // 敌机
+    enemies.forEach((e,i) => {
+      e.y += e.speed;
+
+      // 血条
+      ctx.fillStyle = "#666";
+      ctx.fillRect(e.x, e.y-8, e.w, 4);
+      ctx.fillStyle = "#ff3333";
+      ctx.fillRect(e.x, e.y-8, e.w * (e.hp/e.maxHp), 4);
+
+      // 机身
+      ctx.fillStyle = e.maxHp >= 2 ? "#ff6600" : "#ff2222";
+      ctx.fillRect(e.x, e.y, e.w, e.h);
+
+      // 飞出屏幕
+      if(e.y > H) {
+        enemies.splice(i,1);
+        plane.hp--;
+        updatePlaneUI();
+        if(plane.hp <= 0) gameOver = true;
+      }
+
+      // 被子弹击中
+      bullets.forEach((b,j) => {
+        if(isCollide(b,e)) {
+          bullets.splice(j,1);
+          e.hp--;
+          if(e.hp <= 0) {
+            enemies.splice(i,1);
+            score += e.maxHp * 10;
+            updatePlaneUI();
+          }
+        }
+      });
+
+      // 撞到玩家
+      if(isCollide(plane,e)) {
+        enemies.splice(i,1);
+        plane.hp--;
+        updatePlaneUI();
+        if(plane.hp <= 0) gameOver = true;
+      }
+    });
+
+    // 敌机子弹
+    enemyBullets.forEach((b,i) => {
+      b.y += b.speed;
+      ctx.fillStyle = "#ffaa00";
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+      if(b.y > H) enemyBullets.splice(i,1);
+      if(isCollide(plane,b)) {
+        enemyBullets.splice(i,1);
+        plane.hp--;
+        updatePlaneUI();
+        if(plane.hp <= 0) gameOver = true;
+      }
+    });
+  }
+
+  // 启动
+  updatePlaneUI();
+  setInterval(spawnEnemy, 900);
+  setInterval(gameLoop, 16);
 }
 
 // ==============================================
-// RPG 拯救村庄（完整版多剧情）
+// RPG 拯救村庄
 // ==============================================
 let rpgCtx, player, task, step, dialogOpen;
 let tile = 32, mapW = 15, mapH = 15;
@@ -258,76 +408,59 @@ function startRPG() {
 
 function drawMap() {
   rpgCtx.fillStyle = "#1a2914";
-  rpgCtx.fillRect(0, 0, 480, 480);
-
-  // 房子
+  rpgCtx.fillRect(0,0,480,480);
   rpgCtx.fillStyle = "#865";
-  rpgCtx.fillRect(5 * tile, 4 * tile, tile * 3, tile * 2);
-  // 商店
+  rpgCtx.fillRect(5*tile,4*tile,tile*3,tile*2);
   rpgCtx.fillStyle = "#754";
-  rpgCtx.fillRect(9 * tile, 6 * tile, tile * 2, tile * 2);
-
-  // 玩家
+  rpgCtx.fillRect(9*tile,6*tile,tile*2,tile*2);
   rpgCtx.fillStyle = "#48f";
-  rpgCtx.fillRect(player.x * tile + 4, player.y * tile + 4, tile - 8, tile - 8);
+  rpgCtx.fillRect(player.x*tile+4,player.y*tile+4,tile-8,tile-8);
 }
 
 function onMove() {
   step++;
-  if (task === "寻找村长" && player.x >= 6 && player.x <= 8 && player.y >= 4 && player.y <= 5) {
-    task = "清理外围魔物";
-    updateUI();
-    talk("村长：勇士！黑雾里的魔物抓走了我的女儿，求你救救她！先清理村外魔物，再去黑森林。");
+  if(task==="寻找村长" && player.x>=6&&player.x<=8&&player.y>=4&&player.y<=5){
+    task="清理外围魔物"; updateUI();
+    talk("村长：勇士！黑雾里的魔物抓走了我的女儿，求你救救她！先清理村外魔物！");
   }
-
-  if (task === "清理外围魔物" && step > 30) {
-    if (Math.random() < 0.3) battle(false);
+  if(task==="清理外围魔物" && step>30){
+    if(Math.random()<0.3) battle(false);
   }
-
-  if (task === "清理外围魔物" && step > 60) {
-    task = "前往黑森林";
-    updateUI();
-    talk("村民：谢谢你清理了魔物！黑森林入口在东边，小心里面的暗影狼！");
+  if(task==="清理外围魔物" && step>60){
+    task="前往黑森林"; updateUI();
+    talk("村民：谢谢你！黑森林在东边，小心里面的怪物！");
   }
-
-  if (task === "前往黑森林" && player.x >= 12 && player.y >= 8 && player.y <= 10) {
-    task = "寻找被困村民";
-    updateUI();
-    talk("你进入了黑森林，这里充满危险。前方有村民求救！");
+  if(task==="前往黑森林" && player.x>=12&&player.y>=8&&player.y<=10){
+    task="寻找被困村民"; updateUI();
+    talk("你进入黑森林，前方有求救声！");
   }
-
-  if (task === "寻找被困村民" && step > 100) {
-    if (Math.random() < 0.4) battle(false);
+  if(task==="寻找被困村民" && step>100){
+    if(Math.random()<0.4) battle(false);
   }
-
-  if (task === "寻找被困村民" && player.x >= 10 && player.x <= 12 && player.y >= 3 && player.y <= 5) {
-    task = "挑战BOSS";
-    updateUI();
-    talk("村民：谢谢你救了我！BOSS就在祭坛，打碎水晶它就会变弱！");
+  if(task==="寻找被困村民" && player.x>=10&&player.x<=12&&player.y>=3&&player.y<=5){
+    task="挑战BOSS"; updateUI();
+    talk("村民：BOSS就在祭坛，打碎水晶它就会变弱！");
   }
-
-  if (task === "挑战BOSS" && player.x >= 2 && player.x <= 4 && player.y >= 2 && player.y <= 4) {
-    task = "拯救完成";
-    updateUI();
-    talk("BOSS：愚蠢的冒险者！受死吧！");
+  if(task==="挑战BOSS" && player.x>=2&&player.x<=4&&player.y>=2&&player.y<=4){
+    task="拯救完成"; updateUI();
+    talk("暗影之爪：外来者，受死吧！");
     battle(true);
   }
 }
 
 function battle(isBoss) {
-  let dmg = isBoss ? Math.floor(Math.random() * 15 + 10) : Math.floor(Math.random() * 6 + 3);
-  let gainGold = isBoss ? 50 : Math.floor(Math.random() * 6 + 4);
+  let dmg = isBoss ? Math.floor(Math.random()*15+10) : Math.floor(Math.random()*6+3);
+  let gainGold = isBoss ? 50 : Math.floor(Math.random()*6+4);
   player.hp -= Math.max(1, dmg - player.def);
-
-  if (player.hp <= 0) {
+  if(player.hp <= 0){
     player.hp = 50;
-    talk("你被击败了，回到村庄恢复了体力...");
-  } else {
+    talk("你被击败了，回到村庄恢复体力...");
+  }else{
     player.gold += gainGold;
-    if (isBoss) {
-      talk("你击败了暗影之爪！救出了村长的女儿，晨风村获救了！");
-    } else {
-      talk("你击败了魔物！获得金币");
+    if(isBoss){
+      talk("你击败了暗影之爪！救出了村长女儿，晨风村获救了！");
+    }else{
+      talk("你击败了魔物，获得金币！");
     }
   }
   updateUI();
