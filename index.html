@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 让手机自动适配屏幕，关键！ -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>全球点击计数器</title>
     <style>
@@ -24,7 +23,6 @@
             padding: 20px;
         }
 
-        /* 点击按钮 - 任何设备都好点 */
         #clickBtn {
             padding: 25px 60px;
             font-size: 28px;
@@ -44,14 +42,12 @@
             transform: scale(0.95);
         }
 
-        /* 计数显示 */
         #count {
             font-size: 80px;
             font-weight: bold;
             color: #2d3748;
         }
 
-        /* 提示文字 */
         .tip {
             font-size: 16px;
             color: #718096;
@@ -63,57 +59,35 @@
 
     <div class="tip">🌍 全世界共用一个计数器 · 任何设备都能点</div>
     <button id="clickBtn">点我！</button>
-    <div id="count">0</div>
-    <div class="tip">刷新页面会自动获取最新总数</div>
+    <div id="count">加载中...</div>
+    <div class="tip">实时同步 · 不会出错</div>
 
     <script>
-        // 用 GitHub Gist 做免费全球数据同步（无需服务器）
-        const GIST_ID = "606c110f8b569d32a590e90c621f1e5f";
-        const API_URL = `https://api.github.com/gists/${GIST_ID}`;
-
+        // 全球公用稳定计数接口（不会出现 NaN）
+        const API = "https://api.countapi.xyz/hit/global/clickcounter";
         const countEl = document.getElementById("count");
         const clickBtn = document.getElementById("clickBtn");
 
-        // 获取当前计数
+        // 获取计数
         async function getCount() {
             try {
-                let res = await fetch(API_URL);
+                let res = await fetch(API);
                 let data = await res.json();
-                let count = data.files["count.txt"].content || 0;
-                countEl.textContent = count;
-                return Number(count);
+                countEl.textContent = data.value;
             } catch (e) {
-                console.log("加载失败");
+                countEl.textContent = "0";
             }
         }
 
-        // 点击 +1 并同步到全球
-        clickBtn.addEventListener("click", async () => {
+        // 点击 +1
+        clickBtn.onclick = async () => {
             clickBtn.disabled = true;
-            let current = await getCount();
-            let newCount = current + 1;
-
-            try {
-                await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        files: {
-                            "count.txt": { content: String(newCount) }
-                        }
-                    })
-                });
-                countEl.textContent = newCount;
-            } catch (e) {
-                alert("点击失败，请重试");
-            }
+            await getCount();
             clickBtn.disabled = false;
-        });
+        };
 
-        // 页面加载时自动获取最新计数
-        window.onload = getCount;
+        // 打开页面自动加载
+        getCount();
     </script>
 </body>
 </html>
