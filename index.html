@@ -57,23 +57,23 @@
 </head>
 <body>
 
-    <div class="tip">🌍 全世界共用一个计数器 · 任何设备都能点</div>
-    <button id="clickBtn">点我！</button>
-    <div id="count">加载中...</div>
-    <div class="tip">实时同步 · 不会出错</div>
+    <div class="tip">🌍 全世界共用一个计数器</div>
+    <button id="clickBtn">点我 +1</button>
+    <div id="count">0</div>
+    <div class="tip">任何设备都能点 · 实时同步</div>
 
     <script>
-        // 全球公用稳定计数接口（不会出现 NaN）
-        const API = "https://api.countapi.xyz/hit/global/clickcounter";
+        // 稳定国内可用接口
+        const COUNT_KEY = "global_click_counter_12345";
         const countEl = document.getElementById("count");
         const clickBtn = document.getElementById("clickBtn");
 
-        // 获取计数
-        async function getCount() {
+        // 初始化计数
+        async function loadCount() {
             try {
-                let res = await fetch(API);
+                let res = await fetch(`https://api.countapi.xyz/get/${COUNT_KEY}`);
                 let data = await res.json();
-                countEl.textContent = data.value;
+                countEl.textContent = data.value || 0;
             } catch (e) {
                 countEl.textContent = "0";
             }
@@ -82,12 +82,15 @@
         // 点击 +1
         clickBtn.onclick = async () => {
             clickBtn.disabled = true;
-            await getCount();
+            try {
+                let res = await fetch(`https://api.countapi.xyz/hit/${COUNT_KEY}`);
+                let data = await res.json();
+                countEl.textContent = data.value;
+            } catch (e) {}
             clickBtn.disabled = false;
         };
 
-        // 打开页面自动加载
-        getCount();
+        // 页面打开就加载
+        loadCount();
     </script>
 </body>
-</html>
